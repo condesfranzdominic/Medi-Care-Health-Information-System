@@ -2,12 +2,20 @@
 // Helper functions
 
 function redirect($url) {
-    // If URL starts with /, make it relative to the project root
-    if (strpos($url, '/') === 0) {
-        $scriptName = dirname($_SERVER['SCRIPT_NAME']);
-        $basePath = ($scriptName === '/' || $scriptName === '\\') ? '' : $scriptName;
-        $url = $basePath . $url;
+    // If APP_URL is defined, build an absolute URL from it
+    if (defined('APP_URL')) {
+        if (strpos($url, '/') === 0) {
+            $url = rtrim(APP_URL, '/') . $url; // APP_URL + '/views/...' => full absolute URL
+        } elseif (!preg_match('#^https?://#', $url)) {
+            $url = rtrim(APP_URL, '/') . '/' . ltrim($url, '/');
+        }
+    } else {
+        // Ensure root-relative URLs keep the leading slash so they don't become relative paths
+        if (!preg_match('#^https?://#', $url) && strpos($url, '/') !== 0) {
+            $url = '/' . ltrim($url, '/');
+        }
     }
+
     header("Location: $url");
     exit;
 }
@@ -101,4 +109,38 @@ function csrfToken() {
 
 function verifyCsrfToken($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function formatPhoneNumber($phone) {
+    // Remove all non-digit characters
+    $digits = preg_replace('/\D/', '', $phone);
+
+    // Ensure it has 11 digits (Philippine format)
+    if (strlen($digits) === 11) {
+        return preg_replace('/(\d{4})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
+    }
+
+    // If not 11 digits, just return the cleaned version
+    return $digits;
+}
+
+function validatePhoneNumber($phone) {
+    // Remove all non-digit characters
+    $digits = preg_replace('/\D/', '', $phone);
+
+    // Ensure it has 11 digits (Philippine format)
+    return strlen($digits) === 11;
+}
+
+function getStatusColor($status) {
+    switch(strtolower($status)) {
+        case 'paid':
+            return 'bg-[#108981] text-white';
+        case 'pending':
+            return 'bg-[#F59EOB] text-white';
+        case 'refunded':
+            return 'bg-[#EF4444] text-white';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
 }

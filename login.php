@@ -7,7 +7,18 @@ $auth = new Auth();
 
 // If already logged in, redirect to dashboard
 if ($auth->isLoggedIn()) {
-    redirect('/dashboard.php');
+    if ($auth->isSuperAdmin()) {
+        redirect('/dashboard/superadmin.php');
+    } elseif ($auth->isStaff()) {
+        redirect('/dashboard/staff.php');
+    } elseif ($auth->isDoctor()) {
+        redirect('/dashboard/doctor.php');
+    } elseif ($auth->isPatient()) {
+        redirect('/dashboard/patient.php');
+    } else {
+        // Fallback for unknown roles
+        redirect('/dashboard/index.php');
+    }
 }
 
 $error = '';
@@ -22,7 +33,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter a valid email address.';
     } else {
         if ($auth->login($email, $password)) {
-            redirect('/dashboard.php');
+            if ($auth->isSuperAdmin()) {
+                redirect('/dashboard/superadmin.php');
+            } elseif ($auth->isStaff()) {
+                redirect('/dashboard/staff.php');
+            } elseif ($auth->isDoctor()) {
+                redirect('/dashboard/doctor.php');
+            } elseif ($auth->isPatient()) {
+                redirect('/dashboard/patient.php');
+            } else {
+                redirect('/dashboard/index.php');
+            }
         } else {
             $error = 'Invalid email or password.';
         }
@@ -81,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mt-6 text-center">
             <p class="text-gray-600 text-sm">
                 Don't have an account? 
-                <a href="/patient/register.php" class="text-blue-600 hover:text-blue-800 font-semibold">Register as Patient</a>
+                <a href="/views/patients/register.php" class="text-blue-600 hover:text-blue-800 font-semibold">Register as Patient</a>
             </p>
         </div>
     </div>

@@ -1,29 +1,13 @@
-</main>
-        </div>
+    </div> <!-- End padding div -->
+<?php if (isset($_SESSION['user_id'])): ?>
+</div> <!-- End main-content -->
+<?php endif; ?>
 
-    <script>
-        // Auto-hide flash messages after 5 seconds
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('[role="alert"]');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
+<?php if (isset($_SESSION['user_id'])): ?>
+<footer style="margin-left: 260px; padding: 20px 30px; text-align: center; background: white; border-top: 1px solid #e0e0e0; color: #7f8c8d;">
+    <p style="margin: 0;">&copy; <?= date('Y') ?> Medi-Care Health Information System. All rights reserved.</p>
+</footer>
+<?php endif; ?>
 
-        // Confirmation dialogs for delete actions
-        document.addEventListener('DOMContentLoaded', function() {
-            const deleteButtons = document.querySelectorAll('[data-confirm]');
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    if (!confirm(this.getAttribute('data-confirm'))) {
-                        e.preventDefault();
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>
-<?php ob_end_flush(); ?>

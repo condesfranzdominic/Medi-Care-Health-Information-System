@@ -43,21 +43,22 @@ function generateAppointmentId($db) {
     $month = date('m');
     $prefix = "$year-$month-";
     
-    // Get the last appointment ID for this month
-    $sql = "SELECT appointment_id FROM appointments 
-            WHERE appointment_id LIKE :prefix 
-            ORDER BY appointment_id DESC LIMIT 1";
-    
-    $result = $db->fetchOne($sql, ['prefix' => $prefix . '%']);
-    
-    if ($result) {
-        $lastId = $result['appointment_id'];
-        $number = intval(substr($lastId, -7)) + 1;
-    } else {
-        $number = 1;
+    try {
+        // Get the last appointment ID for this month
+        $stmt = $db->query("SELECT appointment_id FROM appointments WHERE appointment_id LIKE '$prefix%' ORDER BY appointment_id DESC LIMIT 1");
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result) {
+            $lastNum = (int)substr($result['appointment_id'], -7);
+            $newNum = $lastNum + 1;
+        } else {
+            $newNum = 1;
+        }
+        
+        return $prefix . str_pad($newNum, 7, '0', STR_PAD_LEFT);
+    } catch (PDOException $e) {
+        return $prefix . str_pad(rand(1, 9999999), 7, '0', STR_PAD_LEFT);
     }
-    
-    return $prefix . str_pad($number, 7, '0', STR_PAD_LEFT);
 }
 
 function setFlashMessage($type, $message) {

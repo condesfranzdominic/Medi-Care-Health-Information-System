@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/partials/header.php'; ?>
+<?php require_once __DIR__ . '/../partials/header.php'; ?>
 
 <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
     <h1>Manage Specializations</h1>
@@ -114,4 +114,4 @@ function closeEditModal() {
 }
 </script>
 
-<?php require_once __DIR__ . '/partials/footer.php'; ?>
+<?php require_once __DIR__ . '/../partials/footer.php'; ?>

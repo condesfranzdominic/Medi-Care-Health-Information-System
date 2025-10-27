@@ -1,45 +1,50 @@
 <?php
 // Determine user role
 $role = 'guest';
-if (isset($_SESSION['user_is_superadmin']) && $_SESSION['user_is_superadmin']) {
+if (isset($_SESSION['is_superadmin']) && $_SESSION['is_superadmin'] === true) {
     $role = 'superadmin';
-} elseif (isset($_SESSION['staff_id']) && $_SESSION['staff_id']) {
+} elseif (isset($_SESSION['staff_id']) && $_SESSION['staff_id'] !== null) {
     $role = 'staff';
-} elseif (isset($_SESSION['doc_id']) && $_SESSION['doc_id']) {
+} elseif (isset($_SESSION['doc_id']) && $_SESSION['doc_id'] !== null) {
     $role = 'doctor';
-} elseif (isset($_SESSION['pat_id']) && $_SESSION['pat_id']) {
+} elseif (isset($_SESSION['pat_id']) && $_SESSION['pat_id'] !== null) {
     $role = 'patient';
 }
 
-// Define menu items for each role
+// Define menu items for each role based on privileges
 $menus = [
+    // SUPER ADMIN - Full control over all modules and records
     'superadmin' => [
         ['icon' => '📊', 'label' => 'Dashboard', 'url' => '/superadmin/dashboard'],
         ['icon' => '👥', 'label' => 'Users', 'url' => '/superadmin/users'],
         ['icon' => '🏥', 'label' => 'Patients', 'url' => '/superadmin/patients'],
         ['icon' => '👨‍⚕️', 'label' => 'Doctors', 'url' => '/superadmin/doctors'],
         ['icon' => '👔', 'label' => 'Staff', 'url' => '/superadmin/staff'],
+        ['icon' => '🎓', 'label' => 'Specializations', 'url' => '/superadmin/specializations'],
+        ['icon' => '🗓️', 'label' => 'Schedules', 'url' => '/superadmin/schedules'],
+        ['icon' => '📋', 'label' => 'Statuses', 'url' => '/superadmin/statuses'],
         ['icon' => '🔬', 'label' => 'Services', 'url' => '/superadmin/services'],
         ['icon' => '📅', 'label' => 'Appointments', 'url' => '/superadmin/appointments'],
-        ['icon' => '🎓', 'label' => 'Specializations', 'url' => '/superadmin/specializations'],
-        ['icon' => '📋', 'label' => 'Statuses', 'url' => '/superadmin/statuses'],
-        ['icon' => '🗓️', 'label' => 'Schedules', 'url' => '/superadmin/schedules'],
         ['icon' => '📄', 'label' => 'Medical Records', 'url' => '/superadmin/medical-records'],
         ['icon' => '💳', 'label' => 'Payment Methods', 'url' => '/superadmin/payment-methods'],
         ['icon' => '💰', 'label' => 'Payment Statuses', 'url' => '/superadmin/payment-statuses'],
         ['icon' => '💵', 'label' => 'Payments', 'url' => '/superadmin/payments'],
     ],
+    
+    // STAFF - Manages operational data and payments, view-only for medical records, no deletion rights
     'staff' => [
         ['icon' => '📊', 'label' => 'Dashboard', 'url' => '/staff/dashboard'],
-        ['icon' => '👔', 'label' => 'Manage Staff', 'url' => '/staff/staff'],
-        ['icon' => '🔬', 'label' => 'Services', 'url' => '/staff/services'],
+        ['icon' => '👔', 'label' => 'Staff', 'url' => '/staff/staff'],
         ['icon' => '🎓', 'label' => 'Specializations', 'url' => '/staff/specializations'],
         ['icon' => '📋', 'label' => 'Statuses', 'url' => '/staff/statuses'],
+        ['icon' => '🔬', 'label' => 'Services', 'url' => '/staff/services'],
         ['icon' => '💳', 'label' => 'Payment Methods', 'url' => '/staff/payment-methods'],
         ['icon' => '💰', 'label' => 'Payment Statuses', 'url' => '/staff/payment-statuses'],
         ['icon' => '💵', 'label' => 'Payments', 'url' => '/staff/payments'],
-        ['icon' => '📄', 'label' => 'Medical Records', 'url' => '/staff/medical-records'],
+        ['icon' => '📄', 'label' => 'Medical Records (View)', 'url' => '/staff/medical-records'],
     ],
+    
+    // DOCTOR - Manages own appointments, schedules, and medical records; cannot access other doctors' data
     'doctor' => [
         ['icon' => '📊', 'label' => 'Today\'s Appointments', 'url' => '/doctor/appointments/today'],
         ['icon' => '📅', 'label' => 'Previous Appointments', 'url' => '/doctor/appointments/previous'],
@@ -48,6 +53,8 @@ $menus = [
         ['icon' => '📄', 'label' => 'Medical Records', 'url' => '/doctor/medical-records'],
         ['icon' => '👤', 'label' => 'My Profile', 'url' => '/doctor/profile'],
     ],
+    
+    // PATIENT - Manages own profile and appointments only; requires registration before booking
     'patient' => [
         ['icon' => '📊', 'label' => 'My Appointments', 'url' => '/patient/appointments'],
         ['icon' => '➕', 'label' => 'Book Appointment', 'url' => '/patient/appointments/create'],

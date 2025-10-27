@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 $auth = new Auth();
-$auth->requireSuperAdmin();
+$auth->requireDoctor();
 
 $db = Database::getInstance();
 $error = '';
@@ -112,17 +112,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (empty($first_name) || empty($last_name) || empty($email)) {
             $error = 'First name, last name, and email are required';
+        } elseif (!isValidEmail($email)) {
+            $error = 'Invalid email format';
         } else {
             try {
                 $stmt = $db->prepare("
                     UPDATE doctors 
                     SET doc_first_name = :first_name, doc_last_name = :last_name, doc_email = :email, 
-                        doc_phone = :phone, doc_specialization_id = :specialization_id, doc_license_number = :license_number,
-                        doc_experience_years = :experience_years, doc_consultation_fee = :consultation_fee,
-                        doc_qualification = :qualification, doc_bio = :bio, doc_status = :status, updated_at = NOW()
+                        doc_phone = :phone, doc_specialization_id = :specialization_id, 
+                        doc_license_number = :license_number, doc_experience_years = :experience_years,
+                        doc_consultation_fee = :consultation_fee, doc_qualification = :qualification,
+                        doc_bio = :bio, doc_status = :status, updated_at = NOW()
                     WHERE doc_id = :id
                 ");
                 $stmt->execute([
+                    'id' => $id,
                     'first_name' => $first_name,
                     'last_name' => $last_name,
                     'email' => $email,
@@ -133,8 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'consultation_fee' => $consultation_fee,
                     'qualification' => $qualification,
                     'bio' => $bio,
-                    'status' => $status,
-                    'id' => $id
+                    'status' => $status
                 ]);
                 $success = 'Doctor updated successfully';
             } catch (PDOException $e) {
@@ -142,53 +145,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-    
-    if ($action === 'delete') {
-        $id = (int)$_POST['id'];
-        
-        try {
-            $stmt = $db->prepare("DELETE FROM doctors WHERE doc_id = :id");
-            $stmt->execute(['id' => $id]);
-            $success = 'Doctor deleted successfully';
-        } catch (PDOException $e) {
-            $error = 'Database error: ' . $e->getMessage();
-        }
-    }
 }
 
-// Check if filtering by specialization
-$spec_filter = isset($_GET['spec_id']) ? (int)$_GET['spec_id'] : null;
-$spec_name_filter = '';
-
-// Fetch all doctors with specialization names
+// Fetch all doctors with specialization info
 try {
-    if ($spec_filter) {
-        // Get specialization name for display
-        $stmt = $db->prepare("SELECT spec_name FROM specializations WHERE spec_id = :spec_id");
-        $stmt->execute(['spec_id' => $spec_filter]);
-        $spec_data = $stmt->fetch(PDO::FETCH_ASSOC);
-        $spec_name_filter = $spec_data ? $spec_data['spec_name'] : '';
-        
-        // Fetch doctors filtered by specialization
-        $stmt = $db->prepare("
-            SELECT d.*, s.spec_name 
-            FROM doctors d
-            LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
-            WHERE d.doc_specialization_id = :spec_id
-            ORDER BY d.created_at DESC
-        ");
-        $stmt->execute(['spec_id' => $spec_filter]);
-        $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        // Fetch all doctors
-        $stmt = $db->query("
-            SELECT d.*, s.spec_name 
-            FROM doctors d
-            LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
-            ORDER BY d.created_at DESC
-        ");
-        $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    $stmt = $db->query("
+        SELECT d.*, s.spec_name 
+        FROM doctors d
+        LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
+        ORDER BY d.doc_last_name, d.doc_first_name
+    ");
+    $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch doctors: ' . $e->getMessage();
     $doctors = [];
@@ -196,11 +163,10 @@ try {
 
 // Fetch specializations for dropdown
 try {
-    $stmt = $db->query("SELECT spec_id, spec_name FROM specializations ORDER BY spec_name");
-    $specializations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $specializations = $db->query("SELECT * FROM specializations ORDER BY spec_name")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $specializations = [];
 }
 
 // Include the view
-require_once __DIR__ . '/../../views/superadmin/doctors.view.php';
+require_once __DIR__ . '/../../views/doctor/doctors.view.php';

@@ -2,7 +2,11 @@
 
 <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
     <h1>My Schedules</h1>
-    <p><a href="/doctor/appointments/today" class="btn">← Back to Dashboard</a></p>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <a href="/doctor/appointments/today" class="btn">← Back to Dashboard</a>
+        <a href="/doctor/schedules/manage" class="btn btn-primary">📅 Manage All Doctor Schedules</a>
+        <a href="/doctor/doctors" class="btn btn-success">👨‍⚕️ Manage Doctors</a>
+    </div>
     
     <?php if ($error): ?>
         <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">

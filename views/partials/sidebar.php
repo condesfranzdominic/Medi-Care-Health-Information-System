@@ -44,12 +44,27 @@ $menus = [
         ['icon' => '📄', 'label' => 'Medical Records (View)', 'url' => '/staff/medical-records'],
     ],
     
-    // DOCTOR - Manages own appointments, schedules, and medical records; cannot access other doctors' data
+    // DOCTOR - Manages own appointments, schedules, and medical records; can manage all doctors and schedules
     'doctor' => [
-        ['icon' => '📊', 'label' => 'Today\'s Appointments', 'url' => '/doctor/appointments/today'],
-        ['icon' => '📅', 'label' => 'Previous Appointments', 'url' => '/doctor/appointments/previous'],
-        ['icon' => '🗓️', 'label' => 'Future Appointments', 'url' => '/doctor/appointments/future'],
-        ['icon' => '⏰', 'label' => 'My Schedules', 'url' => '/doctor/schedules'],
+        ['icon' => '📊', 'label' => 'Dashboard', 'url' => '/doctor/dashboard'],
+        [
+            'icon' => '📅', 
+            'label' => 'Appointments', 
+            'submenu' => [
+                ['icon' => '📊', 'label' => 'Today\'s Appointments', 'url' => '/doctor/appointments/today'],
+                ['icon' => '📜', 'label' => 'Previous Appointments', 'url' => '/doctor/appointments/previous'],
+                ['icon' => '🗓️', 'label' => 'Future Appointments', 'url' => '/doctor/appointments/future'],
+            ]
+        ],
+        [
+            'icon' => '⏰', 
+            'label' => 'Schedules', 
+            'submenu' => [
+                ['icon' => '👤', 'label' => 'My Schedules', 'url' => '/doctor/schedules'],
+                ['icon' => '🗓️', 'label' => 'All Schedules', 'url' => '/doctor/schedules/manage'],
+            ]
+        ],
+        ['icon' => '👨‍⚕️', 'label' => 'Doctors', 'url' => '/doctor/doctors'],
         ['icon' => '📄', 'label' => 'Medical Records', 'url' => '/doctor/medical-records'],
         ['icon' => '👤', 'label' => 'My Profile', 'url' => '/doctor/profile'],
     ],
@@ -131,6 +146,53 @@ $currentPath = $_SERVER['REQUEST_URI'];
         text-align: center;
     }
     
+    .sidebar-menu-item {
+        position: relative;
+    }
+    
+    .sidebar-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+        cursor: pointer;
+    }
+    
+    .sidebar-menu-toggle:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border-left-color: #3498db;
+    }
+    
+    .sidebar-menu-toggle .toggle-icon {
+        font-size: 12px;
+        transition: transform 0.3s;
+    }
+    
+    .sidebar-menu-toggle.active .toggle-icon {
+        transform: rotate(90deg);
+    }
+    
+    .sidebar-submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: rgba(0,0,0,0.2);
+    }
+    
+    .sidebar-submenu.open {
+        max-height: 500px;
+    }
+    
+    .sidebar-submenu a {
+        padding: 10px 20px 10px 56px;
+        font-size: 14px;
+    }
+    
     .sidebar-footer {
         position: absolute;
         bottom: 0;
@@ -200,15 +262,72 @@ $currentPath = $_SERVER['REQUEST_URI'];
     
     <div class="sidebar-menu">
         <?php foreach ($currentMenu as $item): ?>
-            <?php 
-            $isActive = strpos($currentPath, $item['url']) !== false ? 'active' : '';
-            ?>
-            <a href="<?= $item['url'] ?>" class="<?= $isActive ?>">
-                <span class="icon"><?= $item['icon'] ?></span>
-                <span><?= $item['label'] ?></span>
-            </a>
+            <?php if (isset($item['submenu'])): ?>
+                <!-- Menu item with submenu -->
+                <div class="sidebar-menu-item">
+                    <div class="sidebar-menu-toggle" onclick="toggleSubmenu(this)">
+                        <div style="display: flex; align-items: center;">
+                            <span class="icon"><?= $item['icon'] ?></span>
+                            <span><?= $item['label'] ?></span>
+                        </div>
+                        <span class="toggle-icon">▶</span>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <?php foreach ($item['submenu'] as $subitem): ?>
+                            <?php 
+                            $isActive = strpos($currentPath, $subitem['url']) !== false ? 'active' : '';
+                            ?>
+                            <a href="<?= $subitem['url'] ?>" class="<?= $isActive ?>">
+                                <span class="icon"><?= $subitem['icon'] ?></span>
+                                <span><?= $subitem['label'] ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Regular menu item -->
+                <?php 
+                $isActive = strpos($currentPath, $item['url']) !== false ? 'active' : '';
+                ?>
+                <a href="<?= $item['url'] ?>" class="<?= $isActive ?>">
+                    <span class="icon"><?= $item['icon'] ?></span>
+                    <span><?= $item['label'] ?></span>
+                </a>
+            <?php endif; ?>
         <?php endforeach; ?>
     </div>
+    
+    <script>
+    function toggleSubmenu(element) {
+        const submenu = element.nextElementSibling;
+        const isOpen = submenu.classList.contains('open');
+        
+        // Close all submenus
+        document.querySelectorAll('.sidebar-submenu').forEach(sm => {
+            sm.classList.remove('open');
+        });
+        document.querySelectorAll('.sidebar-menu-toggle').forEach(toggle => {
+            toggle.classList.remove('active');
+        });
+        
+        // Open clicked submenu if it was closed
+        if (!isOpen) {
+            submenu.classList.add('open');
+            element.classList.add('active');
+        }
+    }
+    
+    // Auto-open submenu if current page is in it
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeLink = document.querySelector('.sidebar-submenu a.active');
+        if (activeLink) {
+            const submenu = activeLink.closest('.sidebar-submenu');
+            const toggle = submenu.previousElementSibling;
+            submenu.classList.add('open');
+            toggle.classList.add('active');
+        }
+    });
+    </script>
     
     <div class="sidebar-footer">
         <a href="/logout" class="logout-btn">

@@ -22,27 +22,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hire_date = $_POST['hire_date'] ?? null;
         $salary = !empty($_POST['salary']) ? floatval($_POST['salary']) : null;
         $status = sanitize($_POST['status'] ?? 'active');
+        $password = $_POST['password'] ?? '';
+        $create_user = isset($_POST['create_user']) && $_POST['create_user'] === '1';
         
         if (empty($first_name) || empty($last_name) || empty($email)) {
             $error = 'First name, last name, and email are required';
+        } elseif ($create_user && empty($password)) {
+            $error = 'Password is required when creating user account';
+        } elseif ($create_user && strlen($password) < 6) {
+            $error = 'Password must be at least 6 characters';
         } else {
             try {
-                $stmt = $db->prepare("
-                    INSERT INTO staff (staff_first_name, staff_last_name, staff_email, staff_phone, staff_position,
-                                      staff_hire_date, staff_salary, staff_status, created_at) 
-                    VALUES (:first_name, :last_name, :email, :phone, :position, :hire_date, :salary, :status, NOW())
-                ");
-                $stmt->execute([
-                    'first_name' => $first_name,
-                    'last_name' => $last_name,
-                    'email' => $email,
-                    'phone' => $phone,
-                    'position' => $position,
-                    'hire_date' => $hire_date,
-                    'salary' => $salary,
-                    'status' => $status
-                ]);
-                $success = 'Staff member created successfully';
+                // Check if email already exists in users table
+                if ($create_user) {
+                    $stmt = $db->prepare("SELECT user_id FROM users WHERE user_email = :email");
+                    $stmt->execute(['email' => $email]);
+                    if ($stmt->fetch()) {
+                        $error = 'A user account with this email already exists';
+                    }
+                }
+                
+                if (empty($error)) {
+                    // Insert staff
+                    $stmt = $db->prepare("
+                        INSERT INTO staff (staff_first_name, staff_last_name, staff_email, staff_phone, staff_position,
+                                          staff_hire_date, staff_salary, staff_status, created_at) 
+                        VALUES (:first_name, :last_name, :email, :phone, :position, :hire_date, :salary, :status, NOW())
+                    ");
+                    $stmt->execute([
+                        'first_name' => $first_name,
+                        'last_name' => $last_name,
+                        'email' => $email,
+                        'phone' => $phone,
+                        'position' => $position,
+                        'hire_date' => $hire_date,
+                        'salary' => $salary,
+                        'status' => $status
+                    ]);
+                    
+                    $staff_id = $db->lastInsertId();
+                    
+                    // Create user account if requested
+                    if ($create_user) {
+                        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                        $stmt = $db->prepare("
+                            INSERT INTO users (user_email, user_password, staff_id, user_is_superadmin, created_at) 
+                            VALUES (:email, :password, :staff_id, false, NOW())
+                        ");
+                        $stmt->execute([
+                            'email' => $email,
+                            'password' => $hashedPassword,
+                            'staff_id' => $staff_id
+                        ]);
+                        $success = 'Staff and user account created successfully';
+                    } else {
+                        $success = 'Staff member created successfully (no user account created)';
+                    }
+                }
             } catch (PDOException $e) {
                 $error = 'Database error: ' . $e->getMessage();
             }

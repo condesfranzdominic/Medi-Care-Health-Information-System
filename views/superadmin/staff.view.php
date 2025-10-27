@@ -51,9 +51,47 @@
                     <option value="inactive">Inactive</option>
                 </select>
             </div>
+            
+            <hr style="margin: 20px 0; border: none; border-top: 2px solid #e0e0e0;">
+            
+            <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                <h3 style="margin: 0 0 10px 0; color: #1976d2;">🔐 User Account (Login Credentials)</h3>
+                <p style="margin: 0; font-size: 14px; color: #666;">Check the box below to create a user account for this staff member to login to the system.</p>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" name="create_user" value="1" id="staff_create_user_checkbox" onchange="toggleStaffPasswordField()" style="margin-right: 10px; width: auto;">
+                    <span>Create user account for login</span>
+                </label>
+            </div>
+            
+            <div class="form-group" id="staff_password_field" style="display: none;">
+                <label>Password: <span style="color: red;">*</span></label>
+                <input type="password" name="password" id="staff_password_input" minlength="6" placeholder="Minimum 6 characters">
+                <small style="display: block; margin-top: 5px; color: #666;">The staff member will use their email and this password to login.</small>
+            </div>
+            
             <button type="submit" class="btn btn-success">Add Staff</button>
         </form>
     </div>
+    
+    <script>
+    function toggleStaffPasswordField() {
+        const checkbox = document.getElementById('staff_create_user_checkbox');
+        const passwordField = document.getElementById('staff_password_field');
+        const passwordInput = document.getElementById('staff_password_input');
+        
+        if (checkbox.checked) {
+            passwordField.style.display = 'block';
+            passwordInput.required = true;
+        } else {
+            passwordField.style.display = 'none';
+            passwordInput.required = false;
+            passwordInput.value = '';
+        }
+    }
+    </script>
     
     <div style="background: #fff; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h2>All Staff Members</h2>

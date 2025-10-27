@@ -34,11 +34,14 @@ return [
     'staff/medical-records' => 'controllers/staff/medical-records.php',
     
     // Doctor Routes
+    'doctor/dashboard' => 'controllers/doctor/dashboard.php',
     'doctor/appointments/today' => 'controllers/doctor/appointments-today.php',
     'doctor/appointments/previous' => 'controllers/doctor/appointments-previous.php',
     'doctor/appointments/future' => 'controllers/doctor/appointments-future.php',
     'doctor/profile' => 'controllers/doctor/profile.php',
     'doctor/schedules' => 'controllers/doctor/schedules.php',
+    'doctor/schedules/manage' => 'controllers/doctor/schedules-manage.php',
+    'doctor/doctors' => 'controllers/doctor/doctors.php',
     'doctor/medical-records' => 'controllers/doctor/medical-records.php',
     
     // Patient Routes

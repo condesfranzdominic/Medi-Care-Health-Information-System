@@ -4,6 +4,13 @@
     <h1>Manage Doctors</h1>
     <a href="/superadmin/dashboard" style="color: blue;">← Back to Dashboard</a>
     
+    <?php if ($spec_filter && $spec_name_filter): ?>
+        <div style="background: #e3f2fd; color: #1976d2; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #1976d2;">
+            <strong>📋 Filtered by Specialization:</strong> <?= htmlspecialchars($spec_name_filter) ?>
+            <a href="/superadmin/doctors" style="margin-left: 15px; color: #1976d2; text-decoration: underline;">Clear Filter</a>
+        </div>
+    <?php endif; ?>
+    
     <?php if ($error): ?>
         <div class="alert alert-error" style="margin: 15px 0;"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>

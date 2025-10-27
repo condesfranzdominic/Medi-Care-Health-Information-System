@@ -54,7 +54,7 @@
                 <tbody>
                     <?php foreach ($payment_statuses as $status): ?>
                         <tr>
-                            <td><?= htmlspecialchars($status['status_id']) ?></td>
+                            <td><?= htmlspecialchars($status['payment_status_id']) ?></td>
                             <td><strong><?= htmlspecialchars($status['status_name']) ?></strong></td>
                             <td><?= htmlspecialchars($status['status_description'] ?? 'N/A') ?></td>
                             <td><?= $status['payment_count'] ?> payment(s)</td>
@@ -62,7 +62,7 @@
                                 <button onclick="editStatus(<?= htmlspecialchars(json_encode($status)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">Edit</button>
                                 <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure? This will affect <?= $status['payment_count'] ?> payment(s).');">
                                     <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?= $status['status_id'] ?>">
+                                    <input type="hidden" name="id" value="<?= $status['payment_status_id'] ?>">
                                     <button type="submit" class="btn btn-danger" style="font-size: 12px; padding: 5px 10px;">Delete</button>
                                 </form>
                             </td>
@@ -97,7 +97,7 @@
 
 <script>
 function editStatus(status) {
-    document.getElementById('edit_id').value = status.status_id;
+    document.getElementById('edit_id').value = status.payment_status_id;
     document.getElementById('edit_status_name').value = status.status_name;
     document.getElementById('edit_status_description').value = status.status_description || '';
     document.getElementById('editModal').style.display = 'block';

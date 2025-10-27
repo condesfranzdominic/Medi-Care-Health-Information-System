@@ -57,7 +57,7 @@
                             <td><?= htmlspecialchars($spec['spec_description'] ?? 'N/A') ?></td>
                             <td>
                                 <?php if ($spec['doctor_count'] > 0): ?>
-                                    <a href="/superadmin/specializations/doctors/<?= $spec['spec_id'] ?>" class="btn" style="font-size: 12px; padding: 5px 10px;">
+                                    <a href="/superadmin/doctors?spec_id=<?= $spec['spec_id'] ?>" class="btn" style="font-size: 12px; padding: 5px 10px;">
                                         <?= $spec['doctor_count'] ?> Doctor(s)
                                     </a>
                                 <?php else: ?>

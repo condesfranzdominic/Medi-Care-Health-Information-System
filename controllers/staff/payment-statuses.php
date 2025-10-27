@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $db->prepare("
                     UPDATE payment_statuses 
                     SET status_name = :status_name, status_description = :status_description, updated_at = NOW()
-                    WHERE status_id = :id
+                    WHERE payment_status_id = :id
                 ");
                 $stmt->execute([
                     'status_name' => $status_name,
@@ -69,8 +69,8 @@ try {
     $stmt = $db->query("
         SELECT ps.*, COUNT(p.payment_id) as payment_count
         FROM payment_statuses ps
-        LEFT JOIN payments p ON ps.status_id = p.payment_status_id
-        GROUP BY ps.status_id
+        LEFT JOIN payments p ON ps.payment_status_id = p.payment_status_id
+        GROUP BY ps.payment_status_id
         ORDER BY ps.status_name ASC
     ");
     $payment_statuses = $stmt->fetchAll(PDO::FETCH_ASSOC);

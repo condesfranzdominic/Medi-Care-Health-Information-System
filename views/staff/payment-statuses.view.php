@@ -57,7 +57,7 @@
                 <tbody>
                     <?php foreach ($payment_statuses as $status): ?>
                         <tr>
-                            <td><?= htmlspecialchars($status['status_id']) ?></td>
+                            <td><?= htmlspecialchars($status['payment_status_id']) ?></td>
                             <td><strong><?= htmlspecialchars($status['status_name']) ?></strong></td>
                             <td><?= htmlspecialchars($status['status_description'] ?? 'N/A') ?></td>
                             <td><?= $status['payment_count'] ?> payment(s)</td>
@@ -95,7 +95,7 @@
 
 <script>
 function editStatus(status) {
-    document.getElementById('edit_id').value = status.status_id;
+    document.getElementById('edit_id').value = status.payment_status_id;
     document.getElementById('edit_status_name').value = status.status_name;
     document.getElementById('edit_status_description').value = status.status_description || '';
     document.getElementById('editModal').style.display = 'block';

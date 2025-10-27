@@ -17,93 +17,67 @@
     <link rel="stylesheet" href="public/css/landing.css">
 </head>
 <body>
-    <?php include 'views/partials/header.php'; ?> 
+    <?php include 'views/partials/landing_header.php'; ?>
 
     <div class="hero-section">
-        <div class="hero-content">
-            <h1>YOUR HEALTH</h1>
-            <div class="priority">IS OUR PRIORITY</div>
-            <p>Experience seamless medical care with our modern booking system. Schedule appointments, consult with specialized doctors, and manage your health records—all in one place.</p>
-            <a href="/login" class="btn-appointment">Book an Appointment</a>
+        <div class="hero-content doctify-style-content">
+            <div class="hero-text-panel">
+                <div class="tagline">24/7 Services Available</div>
+                <h1>Your Health, Our Technology, Trusted Doctors at Your Fingertips.</h1>
+                <p>Whether in person or online, Medi-Care connects you with certified, experienced healthcare professionals—quickly, safely, and effortlessly.</p>
+                <div class="hero-actions">
+                    <a href="/login" class="btn-primary">Book Appointment</a>
+                    <a href="#" class="btn-secondary">How It Works</a>
+                </div>
+            </div>
+            <div class="hero-doctor-image-placeholder"></div>
+        </div>
+        <div class="hero-sidebar-panel">
+            <div class="sidebar-item">
+                <h2><span class="material-symbols-outlined">verified_user</span> Certified Medical Experts</h2>
+                <p>Only licensed and well-vetted professionals.</p>
+            </div>
+            <div class="sidebar-item">
+                <h2><span class="material-symbols-outlined">schedule</span> Same-Day Appointments</h2>
+                <p>No long waits. Book and consult instantly.</p>
+            </div>
+            <div class="sidebar-item">
+                <h2><span class="material-symbols-outlined">lock</span> Secure Digital Health Records</h2>
+                <p>Access your patient data anytime and anywhere.</p>
+            </div>
+            <div class="sidebar-item cta-box">
+                <span class="material-symbols-outlined">person</span>
+                <h2>In-Person & Online</h2>
+                <p>Choose what works for you—physical clinics or virtual appointments.</p>
+                <a href="#" class="btn-cta">Explore Our Options</a>
+            </div>
         </div>
     </div>
 
     <div class="content-wrapper">
-        <div class="info-cards">
-            <div class="info-card">
-                <div class="info-card-header">
-                    <span class="material-symbols-outlined info-card-icon">groups</span>
-                    <h2>ABOUT US</h2>
+        <div class="ease-of-care-section">
+            <h2>Getting Care Has Never Been Easier</h2>
+            <p>Our streamlined process makes healthcare accessible in just three simple steps.</p>
+            <div class="ease-of-care-steps">
+                <div class="care-step">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <h3>Book Instantly</h3>
+                    <p>Schedule your appointment online or via our app.</p>
                 </div>
-                <p>We are a dedicated medical facility committed to providing comprehensive healthcare services to our community. Our clinic brings together experienced doctors across multiple specializations, supported by a professional staff team that ensures every patient receives personalized attention and care.</p>
-            </div>
-
-            <div class="info-card">
-                <div class="info-card-header">
-                    <span style="font-size: 32px; flex-shrink: 0;"></span>
-                    <h2>WHAT SETS US APART?</h2>
+                <div class="care-step">
+                    <span class="material-symbols-outlined">chat</span>
+                    <h3>Consult & Follow Up</h3>
+                    <p>Get treatment, advice, and prescriptions—all in one place.</p>
                 </div>
-                <p>Our state-of-the-art booking system makes healthcare accessible and convenient. Patients can easily schedule appointments, view their medical records, and manage their healthcare journey—all through our user-friendly platform. Whether you need a routine consultation, laboratory tests, or specialized medical services, we streamline the process so you can focus on what matters most: your health.</p>
             </div>
+            <a href="/login" class="btn-link">Read More &rarr;</a>
         </div>
 
         <div class="services-section">
-            <div class="services-header">
-                <div class="services-header-left">
-                    <span class="material-symbols-outlined services-header-icon">medical_services</span>
-                    <h2>OUR SERVICES</h2>
-                </div>
-            </div>
-            <div class="services-grid">
-                <div class="service-card">
-                    <h3>General Consultation</h3>
-                    <p>Primary care for initial diagnosis, checkups, and general health inquiries.</p>
-                </div>
-                <div class="service-card">
-                    <h3>Follow-up & Checkups</h3>
-                    <p>Booking for pre-scheduled visits to review treatment or health status.</p>
-                </div>
-                <div class="service-card">
-                    <h3>Specialized Care</h3>
-                    <p>Appointments with doctors based on their specialization.</p>
-                </div>
-                <div class="service-card">
-                    <h3>Digital Record Access</h3>
-                    <p>Secure online viewing of your medical record and prescription history.</p>
-                </div>
             </div>
         </div>
 
-        <div class="process-section">
-            <div class="process-header">
-                <span class="material-symbols-outlined process-header-icon">calendar_clock</span>
-                <h2>APPOINTMENT PROCESS</h2>
-            </div>
-            <div class="process-steps">
-                <div class="process-step">
-                    <div class="step-number">1</div>
-                    <div class="step-label">Login</div>
-                </div>
-                <div class="process-arrow">→</div>
-                <div class="process-step">
-                    <div class="step-number">2</div>
-                    <div class="step-label">Book</div>
-                </div>
-                <div class="process-arrow">→</div>
-                <div class="process-step">
-                    <div class="step-number">3</div>
-                    <div class="step-label">Confirm</div>
-                </div>
-                <div class="process-arrow">→</div>
-                <div class="process-step">
-                    <div class="step-number">4</div>
-                    <div class="step-label">Visit</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <?php include 'views/partials/footer.php'; ?> 
+    <?php include 'views/partials/landing_footer.php'; ?>
 
     <!-- Landing Page JavaScript -->
     <script src="public/js/landing.js"></script>

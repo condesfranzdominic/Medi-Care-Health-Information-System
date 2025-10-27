@@ -53,8 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'update') {
         $id = (int)$_POST['id'];
         $email = sanitize($_POST['email']);
-        $is_superadmin = isset($_POST['is_superadmin']) && $_POST['is_superadmin'] === '1';
         $password = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? 'none';
+        $role_id = isset($_POST['role_id']) ? (int)$_POST['role_id'] : null;
         
         if (empty($email)) {
             $error = 'Email is required';
@@ -62,32 +63,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Invalid email format';
         } else {
             try {
-                if (!empty($password)) {
-                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt = $db->prepare("
-                        UPDATE users 
-                        SET user_email = :email, user_password = :password, user_is_superadmin = :is_superadmin, updated_at = NOW()
-                        WHERE user_id = :id
-                    ");
-                    $stmt->execute([
-                        'email' => $email,
-                        'password' => $hashedPassword,
-                        'is_superadmin' => $is_superadmin,
-                        'id' => $id
-                    ]);
+                // Determine role flags
+                $is_superadmin = ($role === 'superadmin');
+                $pat_id = ($role === 'patient' && $role_id) ? $role_id : null;
+                $staff_id = ($role === 'staff' && $role_id) ? $role_id : null;
+                $doc_id = ($role === 'doctor' && $role_id) ? $role_id : null;
+                
+                // Validate role_id exists if linking to a profile
+                if ($role !== 'superadmin' && $role !== 'none' && !$role_id) {
+                    $error = 'Profile ID is required when assigning Staff, Doctor, or Patient role';
                 } else {
-                    $stmt = $db->prepare("
-                        UPDATE users 
-                        SET user_email = :email, user_is_superadmin = :is_superadmin, updated_at = NOW()
-                        WHERE user_id = :id
-                    ");
-                    $stmt->execute([
-                        'email' => $email,
-                        'is_superadmin' => $is_superadmin,
-                        'id' => $id
-                    ]);
+                    // Verify the profile exists
+                    if ($role === 'staff' && $staff_id) {
+                        $stmt = $db->prepare("SELECT staff_id FROM staff WHERE staff_id = :id");
+                        $stmt->execute(['id' => $staff_id]);
+                        if (!$stmt->fetch()) {
+                            $error = 'Staff ID does not exist';
+                        }
+                    } elseif ($role === 'doctor' && $doc_id) {
+                        $stmt = $db->prepare("SELECT doc_id FROM doctors WHERE doc_id = :id");
+                        $stmt->execute(['id' => $doc_id]);
+                        if (!$stmt->fetch()) {
+                            $error = 'Doctor ID does not exist';
+                        }
+                    } elseif ($role === 'patient' && $pat_id) {
+                        $stmt = $db->prepare("SELECT pat_id FROM patients WHERE pat_id = :id");
+                        $stmt->execute(['id' => $pat_id]);
+                        if (!$stmt->fetch()) {
+                            $error = 'Patient ID does not exist';
+                        }
+                    }
+                    
+                    if (empty($error)) {
+                        // Update user with role information
+                        if (!empty($password)) {
+                            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                            $stmt = $db->prepare("
+                                UPDATE users 
+                                SET user_email = :email, 
+                                    user_password = :password, 
+                                    user_is_superadmin = :is_superadmin,
+                                    pat_id = :pat_id,
+                                    staff_id = :staff_id,
+                                    doc_id = :doc_id,
+                                    updated_at = NOW()
+                                WHERE user_id = :id
+                            ");
+                            $stmt->execute([
+                                'email' => $email,
+                                'password' => $hashedPassword,
+                                'is_superadmin' => $is_superadmin,
+                                'pat_id' => $pat_id,
+                                'staff_id' => $staff_id,
+                                'doc_id' => $doc_id,
+                                'id' => $id
+                            ]);
+                        } else {
+                            $stmt = $db->prepare("
+                                UPDATE users 
+                                SET user_email = :email, 
+                                    user_is_superadmin = :is_superadmin,
+                                    pat_id = :pat_id,
+                                    staff_id = :staff_id,
+                                    doc_id = :doc_id,
+                                    updated_at = NOW()
+                                WHERE user_id = :id
+                            ");
+                            $stmt->execute([
+                                'email' => $email,
+                                'is_superadmin' => $is_superadmin,
+                                'pat_id' => $pat_id,
+                                'staff_id' => $staff_id,
+                                'doc_id' => $doc_id,
+                                'id' => $id
+                            ]);
+                        }
+                        $success = 'User updated successfully';
+                    }
                 }
-                $success = 'User updated successfully';
             } catch (PDOException $e) {
                 $error = 'Database error: ' . $e->getMessage();
             }
@@ -107,9 +160,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all users
+// Fetch all users with role information
 try {
-    $stmt = $db->query("SELECT user_id, user_email, user_is_superadmin, created_at FROM users ORDER BY created_at DESC");
+    $stmt = $db->query("
+        SELECT user_id, user_email, user_is_superadmin, pat_id, staff_id, doc_id, created_at 
+        FROM users 
+        ORDER BY created_at DESC
+    ");
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch users: ' . $e->getMessage();

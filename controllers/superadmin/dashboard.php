@@ -57,4 +57,4 @@ try {
 }
 
 // Include the view
-require_once __DIR__ . '/../views/superadmin.dashboard.view.php';
+require_once __DIR__ . '/../../views/superadmin/dashboard.view.php';

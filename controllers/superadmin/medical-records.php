@@ -41,4 +41,4 @@ try {
     $records = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.medical-records.view.php';
+require_once __DIR__ . '/../../views/superadmin/medical-records.view.php';

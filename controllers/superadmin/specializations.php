@@ -90,4 +90,4 @@ try {
     $specializations = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.specializations.view.php';
+require_once __DIR__ . '/../../views/superadmin/specializations.view.php';

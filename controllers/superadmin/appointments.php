@@ -163,4 +163,4 @@ try {
     $statuses = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.appointments.view.php';
+require_once __DIR__ . '/../../views/superadmin/appointments.view.php';

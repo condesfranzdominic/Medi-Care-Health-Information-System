@@ -17,22 +17,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $status_name = sanitize($_POST['status_name']);
         $status_description = sanitize($_POST['status_description'] ?? '');
-        $status_color = sanitize($_POST['status_color'] ?? '#3B82F6');
         
         if (empty($status_name)) {
-            $error = 'Status name is required';
+            $error = 'Payment status name is required';
         } else {
             try {
                 $stmt = $db->prepare("
-                    INSERT INTO appointment_statuses (status_name, status_description, status_color, created_at) 
-                    VALUES (:status_name, :status_description, :status_color, NOW())
+                    INSERT INTO payment_statuses (status_name, status_description, created_at) 
+                    VALUES (:status_name, :status_description, NOW())
                 ");
                 $stmt->execute([
                     'status_name' => $status_name,
-                    'status_description' => $status_description,
-                    'status_color' => $status_color
+                    'status_description' => $status_description
                 ]);
-                $success = 'Status created successfully';
+                $success = 'Payment status created successfully';
             } catch (PDOException $e) {
                 $error = 'Database error: ' . $e->getMessage();
             }
@@ -43,25 +41,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)$_POST['id'];
         $status_name = sanitize($_POST['status_name']);
         $status_description = sanitize($_POST['status_description'] ?? '');
-        $status_color = sanitize($_POST['status_color'] ?? '#3B82F6');
         
         if (empty($status_name)) {
-            $error = 'Status name is required';
+            $error = 'Payment status name is required';
         } else {
             try {
                 $stmt = $db->prepare("
-                    UPDATE appointment_statuses 
-                    SET status_name = :status_name, status_description = :status_description, 
-                        status_color = :status_color
-                    WHERE status_id = :id
+                    UPDATE payment_statuses 
+                    SET status_name = :status_name, status_description = :status_description, updated_at = NOW()
+                    WHERE payment_status_id = :id
                 ");
                 $stmt->execute([
                     'status_name' => $status_name,
                     'status_description' => $status_description,
-                    'status_color' => $status_color,
                     'id' => $id
                 ]);
-                $success = 'Status updated successfully';
+                $success = 'Payment status updated successfully';
             } catch (PDOException $e) {
                 $error = 'Database error: ' . $e->getMessage();
             }
@@ -71,28 +66,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete') {
         $id = (int)$_POST['id'];
         try {
-            $stmt = $db->prepare("DELETE FROM appointment_statuses WHERE status_id = :id");
+            $stmt = $db->prepare("DELETE FROM payment_statuses WHERE payment_status_id = :id");
             $stmt->execute(['id' => $id]);
-            $success = 'Status deleted successfully';
+            $success = 'Payment status deleted successfully';
         } catch (PDOException $e) {
             $error = 'Database error: ' . $e->getMessage();
         }
     }
 }
 
-// Fetch all statuses with appointment count
+// Fetch all payment statuses
 try {
     $stmt = $db->query("
-        SELECT s.*, COUNT(a.appointment_id) as appointment_count
-        FROM appointment_statuses s
-        LEFT JOIN appointments a ON s.status_id = a.status_id
-        GROUP BY s.status_id
-        ORDER BY s.status_id ASC
+        SELECT ps.*, COUNT(p.payment_id) as payment_count
+        FROM payment_statuses ps
+        LEFT JOIN payments p ON ps.payment_status_id = p.payment_status_id
+        GROUP BY ps.payment_status_id
+        ORDER BY ps.status_name ASC
     ");
-    $statuses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $payment_statuses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $error = 'Failed to fetch statuses: ' . $e->getMessage();
-    $statuses = [];
+    $error = 'Failed to fetch payment statuses: ' . $e->getMessage();
+    $payment_statuses = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.statuses.view.php';
+require_once __DIR__ . '/../../views/superadmin/payment-statuses.view.php';

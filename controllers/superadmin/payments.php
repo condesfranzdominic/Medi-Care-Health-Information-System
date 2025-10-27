@@ -119,4 +119,4 @@ try {
     $payment_statuses = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.payments.view.php';
+require_once __DIR__ . '/../../views/superadmin/payments.view.php';

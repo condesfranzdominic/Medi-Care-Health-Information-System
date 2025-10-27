@@ -95,4 +95,4 @@ try {
     $payment_methods = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.payment-methods.view.php';
+require_once __DIR__ . '/../../views/superadmin/payment-methods.view.php';

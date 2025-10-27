@@ -105,4 +105,4 @@ try {
     $staff = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.staff.view.php';
+require_once __DIR__ . '/../../views/superadmin/staff.view.php';

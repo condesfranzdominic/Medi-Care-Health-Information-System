@@ -62,4 +62,4 @@ try {
     $today_schedules = [];
 }
 
-require_once __DIR__ . '/../views/superadmin.schedules.view.php';
+require_once __DIR__ . '/../../views/superadmin/schedules.view.php';

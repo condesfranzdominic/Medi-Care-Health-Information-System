@@ -90,7 +90,7 @@ try {
         LEFT JOIN appointments a ON p.appointment_id = a.appointment_id
         LEFT JOIN patients pat ON a.pat_id = pat.pat_id
         LEFT JOIN payment_methods pm ON p.payment_method_id = pm.method_id
-        LEFT JOIN payment_statuses ps ON p.payment_status_id = ps.status_id
+        LEFT JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
         ORDER BY p.payment_date DESC, p.created_at DESC
     ");
     $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);

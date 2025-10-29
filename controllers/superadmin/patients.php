@@ -159,11 +159,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)$_POST['id'];
         
         try {
+            // Begin transaction to ensure all deletions happen together
+            $db->beginTransaction();
+            
+            // Step 1: Get all appointment IDs for this patient
+            $stmt = $db->prepare("SELECT appointment_id FROM appointments WHERE pat_id = :id");
+            $stmt->execute(['id' => $id]);
+            $appointments = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Step 2: Delete medical records for this patient (before deleting appointments they reference)
+            $stmt = $db->prepare("DELETE FROM medical_records WHERE pat_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 3: Delete payments for these appointments
+            if (!empty($appointments)) {
+                $placeholders = str_repeat('?,', count($appointments) - 1) . '?';
+                $stmt = $db->prepare("DELETE FROM payments WHERE appointment_id IN ($placeholders)");
+                $stmt->execute($appointments);
+            }
+            
+            // Step 4: Delete appointments for this patient
+            $stmt = $db->prepare("DELETE FROM appointments WHERE pat_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 5: Delete user account linked to this patient
+            $stmt = $db->prepare("DELETE FROM users WHERE pat_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 6: Finally, delete the patient
             $stmt = $db->prepare("DELETE FROM patients WHERE pat_id = :id");
             $stmt->execute(['id' => $id]);
-            $success = 'Patient deleted successfully';
+            
+            // Commit the transaction
+            $db->commit();
+            $success = 'Patient and all associated records deleted successfully';
         } catch (PDOException $e) {
-            $error = 'Database error: ' . $e->getMessage();
+            // Rollback on error
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            $error = 'Failed to delete patient: ' . $e->getMessage();
         }
     }
 }

@@ -32,10 +32,10 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_active" value="1" checked>
-                    Active (available for use)
-                </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap;">
+            <input type="checkbox" name="is_active" id="edit_is_active" value="1">
+            Active (available for use)
+            </label>
             </div>
             <button type="submit" class="btn btn-success">Add Payment Method</button>
         </form>
@@ -102,10 +102,10 @@
                 <input type="text" name="method_description" id="edit_method_description">
             </div>
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_active" id="edit_is_active" value="1">
-                    Active (available for use)
-                </label>
+            <label style=" display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap;">
+            <input type="checkbox" name="is_active" id="edit_is_active" value="1">
+            Active (available for use)
+            </label>
             </div>
             <button type="submit" class="btn btn-success">Update Payment Method</button>
             <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>

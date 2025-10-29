@@ -124,11 +124,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete') {
         $id = (int)$_POST['id'];
         try {
+            // Begin transaction to ensure all deletions happen together
+            $db->beginTransaction();
+            
+            // Step 1: Delete user account linked to this staff member
+            $stmt = $db->prepare("DELETE FROM users WHERE staff_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 2: Finally, delete the staff member
             $stmt = $db->prepare("DELETE FROM staff WHERE staff_id = :id");
             $stmt->execute(['id' => $id]);
-            $success = 'Staff member deleted successfully';
+            
+            // Commit the transaction
+            $db->commit();
+            $success = 'Staff member and associated user account deleted successfully';
         } catch (PDOException $e) {
-            $error = 'Database error: ' . $e->getMessage();
+            // Rollback on error
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            $error = 'Failed to delete staff member: ' . $e->getMessage();
         }
     }
 }

@@ -93,6 +93,8 @@ $currentPath = $_SERVER['REQUEST_URI'];
         overflow-y: auto;
         z-index: 1000;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
     }
     
     .sidebar-header {
@@ -115,6 +117,7 @@ $currentPath = $_SERVER['REQUEST_URI'];
     
     .sidebar-menu {
         padding: 20px 0;
+        flex: 1;
     }
     
     .sidebar-menu a {
@@ -194,12 +197,11 @@ $currentPath = $_SERVER['REQUEST_URI'];
     }
     
     .sidebar-footer {
-        position: absolute;
-        bottom: 0;
         width: 100%;
         padding: 20px;
         background: rgba(0,0,0,0.2);
         border-top: 1px solid rgba(255,255,255,0.1);
+        margin-top: auto;
     }
     
     .logout-btn {

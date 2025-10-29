@@ -147,11 +147,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)$_POST['id'];
         
         try {
+            // Begin transaction to ensure all deletions happen together
+            $db->beginTransaction();
+            
+            // Step 1: Get all appointment IDs for this doctor
+            $stmt = $db->prepare("SELECT appointment_id FROM appointments WHERE doc_id = :id");
+            $stmt->execute(['id' => $id]);
+            $appointments = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Step 2: Delete medical records for this doctor
+            $stmt = $db->prepare("DELETE FROM medical_records WHERE doc_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 3: Delete payments for these appointments
+            if (!empty($appointments)) {
+                $placeholders = str_repeat('?,', count($appointments) - 1) . '?';
+                $stmt = $db->prepare("DELETE FROM payments WHERE appointment_id IN ($placeholders)");
+                $stmt->execute($appointments);
+            }
+            
+            // Step 4: Delete appointments for this doctor
+            $stmt = $db->prepare("DELETE FROM appointments WHERE doc_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 5: Delete schedules for this doctor
+            $stmt = $db->prepare("DELETE FROM schedules WHERE doc_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 6: Delete user account linked to this doctor
+            $stmt = $db->prepare("DELETE FROM users WHERE doc_id = :id");
+            $stmt->execute(['id' => $id]);
+            
+            // Step 7: Finally, delete the doctor
             $stmt = $db->prepare("DELETE FROM doctors WHERE doc_id = :id");
             $stmt->execute(['id' => $id]);
-            $success = 'Doctor deleted successfully';
+            
+            // Commit the transaction
+            $db->commit();
+            $success = 'Doctor and all associated records deleted successfully';
         } catch (PDOException $e) {
-            $error = 'Database error: ' . $e->getMessage();
+            // Rollback on error
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            $error = 'Failed to delete doctor: ' . $e->getMessage();
         }
     }
 }

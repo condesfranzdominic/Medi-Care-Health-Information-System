@@ -204,8 +204,135 @@ window.addEventListener('filtersApplied', function(e) {
     console.log('Applying filters:', filters);
     // Implement filter logic
 });
+
+function applyScheduleFilters() {
+    const filters = {
+        doctor: document.querySelector('input[name="filter_doctor"]:checked')?.value || '',
+        available: document.querySelector('input[name="filter_available"]:checked')?.value || ''
+    };
+    const params = new URLSearchParams();
+    if (filters.doctor) params.append('doctor', filters.doctor);
+    if (filters.available) params.append('available', filters.available);
+    const url = '/superadmin/schedules' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    const doctorSearch = document.getElementById('doctorSearch');
+    if (doctorSearch) doctorSearch.value = '';
+}
 </script>
 
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Doctor Filter -->
+    <?php if (!empty($filter_doctors)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('doctor')">
+            <h4 class="filter-section-title">Doctor</h4>
+            <button type="button" class="filter-section-toggle" id="doctorToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="doctorContent">
+            <input type="text" class="filter-search-input" placeholder="Search Doctor" id="doctorSearch">
+            <div class="filter-radio-group" id="doctorList">
+                <?php foreach ($filter_doctors as $doctor): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_doctor" id="doctor_<?= $doctor['doc_id'] ?>" value="<?= $doctor['doc_id'] ?>">
+                        <label for="doctor_<?= $doctor['doc_id'] ?>">Dr. <?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Availability Filter -->
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('available')">
+            <h4 class="filter-section-title">Availability</h4>
+            <button type="button" class="filter-section-toggle" id="availableToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="availableContent">
+            <div class="filter-radio-group">
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_available" id="available_yes" value="yes">
+                    <label for="available_yes">Available</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_available" id="available_no" value="no">
+                    <label for="available_no">Not Available</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyScheduleFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorSearch = document.getElementById('doctorSearch');
+    if (doctorSearch) {
+        doctorSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const doctorItems = document.querySelectorAll('#doctorList .filter-radio-item');
+            doctorItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

@@ -223,7 +223,7 @@ try {
     }
     
     if (!empty($filter_gender)) {
-        $where_conditions[] = "pat_gender = :gender";
+        $where_conditions[] = "LOWER(TRIM(pat_gender)) = LOWER(TRIM(:gender))";
         $params['gender'] = $filter_gender;
     }
     
@@ -246,9 +246,13 @@ try {
 $filter_genders = [];
 $filter_insurance_providers = [];
 try {
-    // Get unique genders
-    $stmt = $db->query("SELECT DISTINCT pat_gender FROM patients WHERE pat_gender IS NOT NULL AND pat_gender != '' ORDER BY pat_gender");
+    // Get unique genders (normalize to lowercase to avoid duplicates)
+    $stmt = $db->query("SELECT DISTINCT LOWER(TRIM(pat_gender)) as gender FROM patients WHERE pat_gender IS NOT NULL AND pat_gender != '' ORDER BY gender");
     $filter_genders = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    // Remove any empty values and ensure we have valid genders
+    $filter_genders = array_filter($filter_genders, function($g) { return !empty($g); });
+    $filter_genders = array_unique($filter_genders); // Remove duplicates
+    $filter_genders = array_values($filter_genders); // Re-index array
     
     // Get unique insurance providers
     $stmt = $db->query("SELECT DISTINCT pat_insurance_provider FROM patients WHERE pat_insurance_provider IS NOT NULL AND pat_insurance_provider != '' ORDER BY pat_insurance_provider");

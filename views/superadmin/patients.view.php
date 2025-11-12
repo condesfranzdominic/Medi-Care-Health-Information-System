@@ -477,10 +477,17 @@ window.addEventListener('filtersApplied', function(e) {
         <div class="filter-section-content" id="genderContent">
             <div class="filter-radio-group">
                 <?php if (!empty($filter_genders)): ?>
-                    <?php foreach ($filter_genders as $gender): ?>
+                    <?php 
+                    $seen_genders = [];
+                    foreach ($filter_genders as $gender): 
+                        $gender_normalized = strtolower(trim($gender));
+                        // Skip if we've already seen this gender (case-insensitive)
+                        if (in_array($gender_normalized, $seen_genders)) continue;
+                        $seen_genders[] = $gender_normalized;
+                    ?>
                         <div class="filter-radio-item">
-                            <input type="radio" name="filter_gender" id="gender_<?= htmlspecialchars(strtolower($gender)) ?>" value="<?= htmlspecialchars($gender) ?>">
-                            <label for="gender_<?= htmlspecialchars(strtolower($gender)) ?>"><?= htmlspecialchars(ucfirst($gender)) ?></label>
+                            <input type="radio" name="filter_gender" id="gender_<?= htmlspecialchars($gender_normalized) ?>" value="<?= htmlspecialchars($gender_normalized) ?>">
+                            <label for="gender_<?= htmlspecialchars($gender_normalized) ?>"><?= htmlspecialchars(ucfirst($gender_normalized)) ?></label>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>

@@ -48,32 +48,12 @@
     </div>
 </div>
 
-<!-- Create New Payment Status -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Add New Payment Status</h2>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Status Name: <span style="color: var(--status-error);">*</span></label>
-                    <input type="text" name="status_name" required placeholder="e.g., Paid, Pending, Refunded" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Description:</label>
-                    <input type="text" name="status_description" placeholder="Brief description" class="form-control">
-                </div>
-            </div>
-            <div class="action-buttons" style="margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Payment Status</span>
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Add Payment Status Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddPaymentStatusModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Payment Status</span>
+    </button>
 </div>
 
 <!-- Payment Statuses List -->
@@ -148,6 +128,41 @@
     <?php endif; ?>
 </div>
 
+<!-- Add Payment Status Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Payment Status</h2>
+            <button type="button" class="modal-close" onclick="closeAddPaymentStatusModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Status Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="status_name" required placeholder="e.g., Paid, Pending, Refunded" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <input type="text" name="status_description" placeholder="Brief description" class="form-control">
+                </div>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Payment Status</span>
+                </button>
+                <button type="button" onclick="closeAddPaymentStatusModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Edit Payment Status Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
@@ -185,6 +200,15 @@
 </div>
 
 <script>
+function openAddPaymentStatusModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddPaymentStatusModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+}
+
 function editStatus(status) {
     document.getElementById('edit_id').value = status.payment_status_id;
     document.getElementById('edit_status_name').value = status.status_name;
@@ -222,7 +246,5 @@ window.addEventListener('filtersApplied', function(e) {
     // Implement filter logic
 });
 </script>
-
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

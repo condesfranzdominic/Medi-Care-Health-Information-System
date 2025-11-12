@@ -276,8 +276,111 @@ window.addEventListener('filtersApplied', function(e) {
     console.log('Applying filters:', filters);
     // Implement filter logic
 });
+
+function applyServiceFilters() {
+    const filters = {
+        category: document.querySelector('input[name="filter_category"]:checked')?.value || ''
+    };
+    const params = new URLSearchParams();
+    if (filters.category) params.append('category', filters.category);
+    const url = '/superadmin/services' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    const categorySearch = document.getElementById('categorySearch');
+    if (categorySearch) categorySearch.value = '';
+}
 </script>
 
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Category Filter -->
+    <?php if (!empty($filter_categories)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('category')">
+            <h4 class="filter-section-title">Category</h4>
+            <button type="button" class="filter-section-toggle" id="categoryToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="categoryContent">
+            <input type="text" class="filter-search-input" placeholder="Search Category" id="categorySearch">
+            <div class="filter-radio-group" id="categoryList">
+                <?php foreach ($filter_categories as $category): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_category" id="category_<?= htmlspecialchars(strtolower(str_replace(' ', '_', $category))) ?>" value="<?= htmlspecialchars($category) ?>">
+                        <label for="category_<?= htmlspecialchars(strtolower(str_replace(' ', '_', $category))) ?>"><?= htmlspecialchars($category) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyServiceFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+// Search functionality for category filter
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySearch = document.getElementById('categorySearch');
+    if (categorySearch) {
+        categorySearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const categoryItems = document.querySelectorAll('#categoryList .filter-radio-item');
+            categoryItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

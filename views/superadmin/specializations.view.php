@@ -48,30 +48,12 @@
     </div>
 </div>
 
-<!-- Create New Specialization -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Add New Specialization</h2>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-group">
-                <label>Specialization Name: <span style="color: var(--status-error);">*</span></label>
-                <input type="text" name="spec_name" required placeholder="e.g., Family Medicine, Cardiology" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>Description:</label>
-                <textarea name="spec_description" rows="3" placeholder="Brief description of this specialization" class="form-control"></textarea>
-            </div>
-            <div class="action-buttons" style="margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Specialization</span>
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Add Specialization Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddSpecializationModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Specialization</span>
+    </button>
 </div>
 
 <!-- Specializations List -->
@@ -155,6 +137,39 @@
     <?php endif; ?>
 </div>
 
+<!-- Add Specialization Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Specialization</h2>
+            <button type="button" class="modal-close" onclick="closeAddSpecializationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create">
+            <div class="form-group">
+                <label>Specialization Name: <span style="color: var(--status-error);">*</span></label>
+                <input type="text" name="spec_name" required placeholder="e.g., Family Medicine, Cardiology" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea name="spec_description" rows="3" placeholder="Brief description of this specialization" class="form-control"></textarea>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Specialization</span>
+                </button>
+                <button type="button" onclick="closeAddSpecializationModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Edit Specialization Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
@@ -190,6 +205,15 @@
 </div>
 
 <script>
+function openAddSpecializationModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddSpecializationModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+}
+
 function editSpecialization(spec) {
     document.getElementById('edit_id').value = spec.spec_id;
     document.getElementById('edit_spec_name').value = spec.spec_name;
@@ -227,7 +251,5 @@ window.addEventListener('filtersApplied', function(e) {
     // Implement filter logic
 });
 </script>
-
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

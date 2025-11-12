@@ -80,15 +80,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all payment methods
+// Handle filters
+$filter_status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
+
+// Fetch payment methods with filters
 try {
-    $stmt = $db->query("
+    $where_conditions = [];
+    $params = [];
+
+    if ($filter_status === 'active') {
+        $where_conditions[] = "pm.is_active = 1";
+    } elseif ($filter_status === 'inactive') {
+        $where_conditions[] = "pm.is_active = 0";
+    }
+
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+    $stmt = $db->prepare("
         SELECT pm.*, COUNT(p.payment_id) as payment_count
         FROM payment_methods pm
         LEFT JOIN payments p ON pm.method_id = p.payment_method_id
+        $where_clause
         GROUP BY pm.method_id
         ORDER BY pm.method_name ASC
     ");
+    $stmt->execute($params);
     $payment_methods = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch payment methods: ' . $e->getMessage();

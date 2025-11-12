@@ -83,12 +83,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Handle search and filters
+$search_query = '';
+if (isset($_GET['search'])) {
+    $search_query = sanitize($_GET['search']);
+}
+
+$filter_category = isset($_GET['category']) ? sanitize($_GET['category']) : '';
+
+// Fetch services with filters
 try {
-    $stmt = $db->query("SELECT * FROM services ORDER BY created_at DESC");
+    $where_conditions = [];
+    $params = [];
+
+    if (!empty($search_query)) {
+        $where_conditions[] = "service_name LIKE :search";
+        $params['search'] = '%' . $search_query . '%';
+    }
+
+    if (!empty($filter_category)) {
+        $where_conditions[] = "service_category = :category";
+        $params['category'] = $filter_category;
+    }
+
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+    $stmt = $db->prepare("SELECT * FROM services $where_clause ORDER BY created_at DESC");
+    $stmt->execute($params);
     $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch services: ' . $e->getMessage();
     $services = [];
+}
+
+// Fetch filter data from database
+$filter_categories = [];
+try {
+    $stmt = $db->query("SELECT DISTINCT service_category FROM services WHERE service_category IS NOT NULL AND service_category != '' ORDER BY service_category");
+    $filter_categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $filter_categories = [];
 }
 
 require_once __DIR__ . '/../../views/superadmin/services.view.php';

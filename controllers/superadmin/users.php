@@ -160,13 +160,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all users with role information
+// Handle search and filters
+$search_query = '';
+if (isset($_GET['search'])) {
+    $search_query = sanitize($_GET['search']);
+}
+
+$filter_role = isset($_GET['role']) ? sanitize($_GET['role']) : '';
+
+// Fetch users with filters
 try {
-    $stmt = $db->query("
+    $where_conditions = [];
+    $params = [];
+
+    if (!empty($search_query)) {
+        $where_conditions[] = "user_email LIKE :search";
+        $params['search'] = '%' . $search_query . '%';
+    }
+
+    if (!empty($filter_role)) {
+        if ($filter_role === 'superadmin') {
+            $where_conditions[] = "user_is_superadmin = 1";
+        } elseif ($filter_role === 'staff') {
+            $where_conditions[] = "staff_id IS NOT NULL";
+        } elseif ($filter_role === 'doctor') {
+            $where_conditions[] = "doc_id IS NOT NULL";
+        } elseif ($filter_role === 'patient') {
+            $where_conditions[] = "pat_id IS NOT NULL";
+        }
+    }
+
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+    $stmt = $db->prepare("
         SELECT user_id, user_email, user_is_superadmin, pat_id, staff_id, doc_id, created_at 
         FROM users 
+        $where_clause
         ORDER BY created_at DESC
     ");
+    $stmt->execute($params);
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch users: ' . $e->getMessage();

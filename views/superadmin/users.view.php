@@ -396,6 +396,4 @@ window.addEventListener('filtersApplied', function(e) {
 });
 </script>
 
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
-
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

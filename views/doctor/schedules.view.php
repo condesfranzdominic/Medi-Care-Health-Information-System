@@ -1,91 +1,126 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-    <h1>My Schedules</h1>
-    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-        <a href="/doctor/appointments/today" class="btn">← Back to Dashboard</a>
-        <a href="/doctor/schedules/manage" class="btn btn-primary">📅 Manage All Doctor Schedules</a>
-        <a href="/doctor/doctors" class="btn btn-success">👨‍⚕️ Manage Doctors</a>
+<div class="page-header">
+    <h1 class="page-title">My Schedules</h1>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+        <a href="/doctor/appointments/today" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Dashboard</span>
+        </a>
+        <a href="/doctor/schedules/manage" class="btn btn-primary">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Manage All Doctor Schedules</span>
+        </a>
+        <a href="/doctor/doctors" class="btn btn-success">
+            <i class="fas fa-user-md"></i>
+            <span>Manage Doctors</span>
+        </a>
     </div>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
+</div>
+
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
+<!-- Today's Schedules -->
+<?php if (!empty($today_schedules)): ?>
+    <div class="card" style="border-left: 4px solid var(--primary-blue);">
+        <div class="card-header">
+            <h2 class="card-title">Today's Schedule (<?= date('F d, Y') ?>)</h2>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div style="background: #efe; color: #3c3; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($success) ?>
-        </div>
-    <?php endif; ?>
-    
-    <!-- Today's Schedules -->
-    <?php if (!empty($today_schedules)): ?>
-    <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #2196f3;">
-        <h3>Today's Schedule (<?= date('F d, Y') ?>)</h3>
-        <table class="table" style="background: white;">
-            <thead>
-                <tr>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Max Appointments</th>
-                    <th>Available</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($today_schedules as $sched): ?>
+        <div style="overflow-x: auto;">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td><?= htmlspecialchars($sched['start_time']) ?></td>
-                        <td><?= htmlspecialchars($sched['end_time']) ?></td>
-                        <td><?= htmlspecialchars($sched['max_appointments']) ?></td>
-                        <td><?= $sched['is_available'] ? '<span style="color: green;">✓ Yes</span>' : '<span style="color: red;">✗ No</span>' ?></td>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Max Appointments</th>
+                        <th>Available</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($today_schedules as $sched): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($sched['start_time']) ?></td>
+                            <td><?= htmlspecialchars($sched['end_time']) ?></td>
+                            <td><?= htmlspecialchars($sched['max_appointments']) ?></td>
+                            <td>
+                                <span class="status-badge <?= $sched['is_available'] ? 'active' : 'inactive' ?>">
+                                    <?= $sched['is_available'] ? 'Yes' : 'No' ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <?php endif; ?>
-    
-    <!-- Create New Schedule -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Add New Schedule</h2>
+<?php endif; ?>
+
+<!-- Create New Schedule -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Add New Schedule</h2>
+    </div>
+    <div class="card-body">
         <form method="POST">
             <input type="hidden" name="action" value="create">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Date: *</label>
-                    <input type="date" name="schedule_date" required>
+                    <label>Date: <span style="color: var(--status-error);">*</span></label>
+                    <input type="date" name="schedule_date" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Start Time: *</label>
-                    <input type="time" name="start_time" required>
+                    <label>Start Time: <span style="color: var(--status-error);">*</span></label>
+                    <input type="time" name="start_time" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>End Time: *</label>
-                    <input type="time" name="end_time" required>
+                    <label>End Time: <span style="color: var(--status-error);">*</span></label>
+                    <input type="time" name="end_time" required class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Max Appointments:</label>
-                    <input type="number" name="max_appointments" min="1" value="10">
+                    <input type="number" name="max_appointments" min="1" value="10" class="form-control">
                 </div>
             </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_available" value="1" checked>
-                    Available for appointments
+            <div class="form-group" style="margin-top: 1rem;">
+                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="is_available" value="1" checked style="width: auto;">
+                    <span>Available for appointments</span>
                 </label>
             </div>
-            <button type="submit" class="btn btn-success">Add Schedule</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Schedule</span>
+                </button>
+            </div>
         </form>
     </div>
-    
-    <!-- All Schedules -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>All My Schedules</h2>
-        <?php if (empty($schedules)): ?>
-            <p>No schedules found.</p>
-        <?php else: ?>
+</div>
+
+<!-- All Schedules -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All My Schedules</h2>
+    </div>
+    <?php if (empty($schedules)): ?>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
+            <div class="empty-state-text">No schedules found.</div>
+        </div>
+    <?php else: ?>
+        <div style="overflow-x: auto;">
             <table class="table">
                 <thead>
                     <tr>
@@ -100,58 +135,83 @@
                 <tbody>
                     <?php foreach ($schedules as $sched): ?>
                         <tr>
-                            <td><?= htmlspecialchars($sched['schedule_date']) ?></td>
+                            <td><strong><?= htmlspecialchars($sched['schedule_date']) ?></strong></td>
                             <td><?= htmlspecialchars($sched['start_time']) ?></td>
                             <td><?= htmlspecialchars($sched['end_time']) ?></td>
                             <td><?= htmlspecialchars($sched['max_appointments']) ?></td>
-                            <td><?= $sched['is_available'] ? '<span style="color: green;">✓ Yes</span>' : '<span style="color: red;">✗ No</span>' ?></td>
                             <td>
-                                <button onclick="editSchedule(<?= htmlspecialchars(json_encode($sched)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">Edit</button>
-                                <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?= $sched['schedule_id'] ?>">
-                                    <button type="submit" class="btn btn-danger" style="font-size: 12px; padding: 5px 10px;">Delete</button>
-                                </form>
+                                <span class="status-badge <?= $sched['is_available'] ? 'active' : 'inactive' ?>">
+                                    <?= $sched['is_available'] ? 'Yes' : 'No' ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button onclick="editSchedule(<?= htmlspecialchars(json_encode($sched)) ?>)" class="btn btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?= $sched['schedule_id'] ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php endif; ?>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: #fff; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-        <h2>Edit Schedule</h2>
+<!-- Edit Schedule Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Schedule</h2>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" id="edit_id">
-            <div class="form-group">
-                <label>Date: *</label>
-                <input type="date" name="schedule_date" id="edit_schedule_date" required>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Date: <span style="color: var(--status-error);">*</span></label>
+                    <input type="date" name="schedule_date" id="edit_schedule_date" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Start Time: <span style="color: var(--status-error);">*</span></label>
+                    <input type="time" name="start_time" id="edit_start_time" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>End Time: <span style="color: var(--status-error);">*</span></label>
+                    <input type="time" name="end_time" id="edit_end_time" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Max Appointments:</label>
+                    <input type="number" name="max_appointments" id="edit_max_appointments" min="1" class="form-control">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Start Time: *</label>
-                <input type="time" name="start_time" id="edit_start_time" required>
-            </div>
-            <div class="form-group">
-                <label>End Time: *</label>
-                <input type="time" name="end_time" id="edit_end_time" required>
-            </div>
-            <div class="form-group">
-                <label>Max Appointments:</label>
-                <input type="number" name="max_appointments" id="edit_max_appointments" min="1">
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_available" id="edit_is_available" value="1">
-                    Available for appointments
+            <div class="form-group" style="margin-top: 1rem;">
+                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="is_available" id="edit_is_available" value="1" style="width: auto;">
+                    <span>Available for appointments</span>
                 </label>
             </div>
-            <button type="submit" class="btn btn-success">Update Schedule</button>
-            <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    <span>Update Schedule</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -163,12 +223,12 @@ function editSchedule(sched) {
     document.getElementById('edit_start_time').value = sched.start_time;
     document.getElementById('edit_end_time').value = sched.end_time;
     document.getElementById('edit_max_appointments').value = sched.max_appointments;
-    document.getElementById('edit_is_available').checked = sched.is_available == 1;
-    document.getElementById('editModal').style.display = 'block';
+    document.getElementById('edit_is_available').checked = sched.is_available == 1 || sched.is_available === true;
+    document.getElementById('editModal').classList.add('active');
 }
 
 function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editModal').classList.remove('active');
 }
 </script>
 

@@ -148,12 +148,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Handle search and filters
+$search_query = '';
+if (isset($_GET['search'])) {
+    $search_query = sanitize($_GET['search']);
+}
+
+$filter_status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
+$filter_position = isset($_GET['position']) ? sanitize($_GET['position']) : '';
+
+// Fetch staff members with filters
 try {
-    $stmt = $db->query("SELECT * FROM staff ORDER BY created_at DESC");
+    $where_conditions = [];
+    $params = [];
+    
+    if (!empty($search_query)) {
+        $where_conditions[] = "(staff_first_name LIKE :search OR staff_last_name LIKE :search)";
+        $params['search'] = '%' . $search_query . '%';
+    }
+    
+    if (!empty($filter_status)) {
+        $where_conditions[] = "staff_status = :status";
+        $params['status'] = $filter_status;
+    }
+    
+    if (!empty($filter_position)) {
+        $where_conditions[] = "staff_position = :position";
+        $params['position'] = $filter_position;
+    }
+    
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    
+    $stmt = $db->prepare("SELECT * FROM staff $where_clause ORDER BY created_at DESC");
+    $stmt->execute($params);
     $staff = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch staff: ' . $e->getMessage();
     $staff = [];
+}
+
+// Fetch filter data from database
+$filter_positions = [];
+try {
+    $stmt = $db->query("SELECT DISTINCT staff_position FROM staff WHERE staff_position IS NOT NULL AND staff_position != '' ORDER BY staff_position");
+    $filter_positions = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $filter_positions = [];
 }
 
 require_once __DIR__ . '/../../views/superadmin/staff.view.php';

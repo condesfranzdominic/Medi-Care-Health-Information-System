@@ -1,61 +1,109 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-    <h1>Manage Services</h1>
-    <p><a href="/staff/dashboard" class="btn">← Back to Dashboard</a></p>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
+<div class="page-header">
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/staff/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Services</span>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div style="background: #efe; color: #3c3; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($success) ?>
+        <h1 class="page-title">Manage Services</h1>
+    </div>
+</div>
+
+<?php if ($error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if ($success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
+<!-- Search and Filter Bar -->
+<div class="search-filter-bar-modern">
+    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
+        <i class="fas fa-filter"></i>
+        <span>Filter</span>
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" class="search-input-modern" 
+                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
+                   placeholder="Search Service...">
         </div>
-    <?php endif; ?>
-    
-    <!-- Create New Service -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Add New Service</h2>
+    </form>
+    <div class="category-tabs">
+        <button type="button" class="category-tab active" data-category="all">All</button>
+    </div>
+</div>
+
+<!-- Create New Service -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Add New Service</h2>
+    </div>
+    <div class="card-body">
         <form method="POST">
             <input type="hidden" name="action" value="create">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Service Name: *</label>
-                    <input type="text" name="service_name" required placeholder="e.g., Consultation, Laboratory Test">
+                    <label>Service Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="service_name" required placeholder="e.g., Consultation, Laboratory Test" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Category:</label>
-                    <input type="text" name="service_category" placeholder="e.g., Medical, Diagnostic">
+                    <input type="text" name="service_category" placeholder="e.g., Medical, Diagnostic" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Price (₱):</label>
-                    <input type="number" name="service_price" step="0.01" min="0" value="0">
+                    <input type="number" name="service_price" step="0.01" min="0" value="0" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Duration (Minutes):</label>
-                    <input type="number" name="service_duration" min="1" value="30">
+                    <input type="number" name="service_duration" min="1" value="30" class="form-control">
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Description:</label>
-                <textarea name="service_description" rows="3"></textarea>
+                <textarea name="service_description" rows="3" class="form-control"></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Add Service</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Service</span>
+                </button>
+            </div>
         </form>
     </div>
-    
-    <!-- Services List -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>All Services</h2>
-        <p style="background: #fff3cd; padding: 10px; border-radius: 5px; color: #856404; font-size: 14px;">
-            <strong>Note:</strong> Only Super Admin can delete services.
-        </p>
-        <?php if (empty($services)): ?>
-            <p>No services found.</p>
-        <?php else: ?>
+</div>
+
+<!-- Services List -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Services</h2>
+    </div>
+    <div class="info-box" style="margin: 1.5rem;">
+        <i class="fas fa-info-circle"></i>
+        <p><strong>Note:</strong> Only Super Admin can delete services.</p>
+    </div>
+    <?php if (empty($services)): ?>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-flask"></i></div>
+            <div class="empty-state-text">No services found.</div>
+        </div>
+    <?php else: ?>
+        <div style="overflow-x: auto;">
             <table class="table">
                 <thead>
                     <tr>
@@ -78,55 +126,94 @@
                             <td><?= htmlspecialchars($service['service_duration_minutes'] ?? 30) ?> min</td>
                             <td>
                                 <?php if ($service['appointment_count'] > 0): ?>
-                                    <a href="/staff/service-appointments?id=<?= $service['service_id'] ?>" class="btn" style="font-size: 12px; padding: 5px 10px;">
-                                        <?= $service['appointment_count'] ?> Appointment(s)
+                                    <a href="/staff/service-appointments?id=<?= $service['service_id'] ?>" class="btn btn-sm">
+                                        <i class="fas fa-calendar"></i>
+                                        <span><?= $service['appointment_count'] ?> Appointment(s)</span>
                                     </a>
                                 <?php else: ?>
-                                    <span style="color: #999;">0 Appointments</span>
+                                    <span style="color: var(--text-secondary);">0 Appointments</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <button onclick="editService(<?= htmlspecialchars(json_encode($service)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">Edit</button>
+                                <div class="table-actions">
+                                    <button onclick="editService(<?= htmlspecialchars(json_encode($service)) ?>)" class="btn btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="pagination-controls">
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Edit Modal -->
-<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
-    <div style="background: #fff; max-width: 700px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-        <h2>Edit Service</h2>
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Service</h2>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" id="edit_id">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Service Name: *</label>
-                    <input type="text" name="service_name" id="edit_service_name" required>
+                    <label>Service Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="service_name" id="edit_service_name" required class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Category:</label>
-                    <input type="text" name="service_category" id="edit_service_category">
+                    <input type="text" name="service_category" id="edit_service_category" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Price (₱):</label>
-                    <input type="number" name="service_price" id="edit_service_price" step="0.01" min="0">
+                    <input type="number" name="service_price" id="edit_service_price" step="0.01" min="0" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Duration (Minutes):</label>
-                    <input type="number" name="service_duration" id="edit_service_duration" min="1">
+                    <input type="number" name="service_duration" id="edit_service_duration" min="1" class="form-control">
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Description:</label>
-                <textarea name="service_description" id="edit_service_description" rows="3"></textarea>
+                <textarea name="service_description" id="edit_service_description" rows="3" class="form-control"></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Update Service</button>
-            <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    <span>Update Service</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -139,12 +226,40 @@ function editService(service) {
     document.getElementById('edit_service_price').value = service.service_price || 0;
     document.getElementById('edit_service_duration').value = service.service_duration_minutes || 30;
     document.getElementById('edit_service_description').value = service.service_description || '';
-    document.getElementById('editModal').style.display = 'block';
+    document.getElementById('editModal').classList.add('active');
 }
 
 function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editModal').classList.remove('active');
 }
+
+// Category tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const category = this.dataset.category;
+            filterByCategory(category);
+        });
+    });
+});
+
+function filterByCategory(category) {
+    if (category === 'all') {
+        window.location.href = '/staff/services';
+    }
+}
+
+// Listen for filter events
+window.addEventListener('filtersApplied', function(e) {
+    const filters = e.detail;
+    console.log('Applying filters:', filters);
+    // Implement filter logic
+});
 </script>
+
+<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

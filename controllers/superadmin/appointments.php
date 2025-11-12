@@ -103,48 +103,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle search
+// Handle search and filters
 $search_query = '';
 if (isset($_GET['search'])) {
     $search_query = sanitize($_GET['search']);
 }
 
-// Fetch appointments with patient, doctor, service, and status names
+$filter_status = isset($_GET['status']) ? (int)$_GET['status'] : null;
+$filter_doctor = isset($_GET['doctor']) ? (int)$_GET['doctor'] : null;
+$filter_patient = isset($_GET['patient']) ? (int)$_GET['patient'] : null;
+
+// Fetch appointments with filters
 try {
+    $where_conditions = [];
+    $params = [];
+    
     if (!empty($search_query)) {
-        // Search by appointment ID
-        $stmt = $db->prepare("
-            SELECT a.*, 
-                   p.pat_first_name, p.pat_last_name,
-                   d.doc_first_name, d.doc_last_name,
-                   s.service_name,
-                   st.status_name, st.status_color
-            FROM appointments a
-            LEFT JOIN patients p ON a.pat_id = p.pat_id
-            LEFT JOIN doctors d ON a.doc_id = d.doc_id
-            LEFT JOIN services s ON a.service_id = s.service_id
-            LEFT JOIN appointment_statuses st ON a.status_id = st.status_id
-            WHERE a.appointment_id LIKE :search
-            ORDER BY a.appointment_date DESC, a.appointment_time DESC
-        ");
-        $stmt->execute(['search' => '%' . $search_query . '%']);
-        $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        $stmt = $db->query("
-            SELECT a.*, 
-                   p.pat_first_name, p.pat_last_name,
-                   d.doc_first_name, d.doc_last_name,
-                   s.service_name,
-                   st.status_name, st.status_color
-            FROM appointments a
-            LEFT JOIN patients p ON a.pat_id = p.pat_id
-            LEFT JOIN doctors d ON a.doc_id = d.doc_id
-            LEFT JOIN services s ON a.service_id = s.service_id
-            LEFT JOIN appointment_statuses st ON a.status_id = st.status_id
-            ORDER BY a.appointment_date DESC, a.appointment_time DESC
-        ");
-        $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $where_conditions[] = "a.appointment_id LIKE :search";
+        $params['search'] = '%' . $search_query . '%';
     }
+    
+    if ($filter_status) {
+        $where_conditions[] = "a.status_id = :status";
+        $params['status'] = $filter_status;
+    }
+    
+    if ($filter_doctor) {
+        $where_conditions[] = "a.doc_id = :doctor";
+        $params['doctor'] = $filter_doctor;
+    }
+    
+    if ($filter_patient) {
+        $where_conditions[] = "a.pat_id = :patient";
+        $params['patient'] = $filter_patient;
+    }
+    
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    
+    $stmt = $db->prepare("
+        SELECT a.*, 
+               p.pat_first_name, p.pat_last_name,
+               d.doc_first_name, d.doc_last_name,
+               s.service_name,
+               st.status_name, st.status_color
+        FROM appointments a
+        LEFT JOIN patients p ON a.pat_id = p.pat_id
+        LEFT JOIN doctors d ON a.doc_id = d.doc_id
+        LEFT JOIN services s ON a.service_id = s.service_id
+        LEFT JOIN appointment_statuses st ON a.status_id = st.status_id
+        $where_clause
+        ORDER BY a.appointment_date DESC, a.appointment_time DESC
+    ");
+    $stmt->execute($params);
+    $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch appointments: ' . $e->getMessage();
     $appointments = [];
@@ -161,6 +172,22 @@ try {
     $doctors = [];
     $services = [];
     $statuses = [];
+}
+
+// Fetch filter data from database
+$filter_doctors = [];
+$filter_patients = [];
+try {
+    // Get unique doctors from appointments
+    $stmt = $db->query("SELECT DISTINCT d.doc_id, d.doc_first_name, d.doc_last_name FROM appointments a JOIN doctors d ON a.doc_id = d.doc_id ORDER BY d.doc_first_name");
+    $filter_doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get unique patients from appointments
+    $stmt = $db->query("SELECT DISTINCT p.pat_id, p.pat_first_name, p.pat_last_name FROM appointments a JOIN patients p ON a.pat_id = p.pat_id ORDER BY p.pat_first_name");
+    $filter_patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $filter_doctors = [];
+    $filter_patients = [];
 }
 
 require_once __DIR__ . '/../../views/superadmin/appointments.view.php';

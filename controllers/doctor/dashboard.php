@@ -89,18 +89,18 @@ try {
     // Keep default values
 }
 
-// Get today's appointments
+// Get today's appointments with patient details
 try {
     $stmt = $db->prepare("
         SELECT a.*, 
-               p.pat_first_name, p.pat_last_name, p.pat_email, p.pat_phone,
+               p.pat_first_name, p.pat_last_name, p.pat_date_of_birth, p.pat_email, p.pat_phone,
                s.status_name, s.status_color
         FROM appointments a
         JOIN patients p ON a.pat_id = p.pat_id
         JOIN statuses s ON a.status_id = s.status_id
         WHERE a.doc_id = :doc_id AND a.appointment_date = CURRENT_DATE
         ORDER BY a.appointment_time ASC
-        LIMIT 5
+        LIMIT 10
     ");
     $stmt->execute(['doc_id' => $doc_id]);
     $today_appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -125,20 +125,26 @@ try {
 try {
     $stmt = $db->prepare("
         SELECT a.*, 
-               p.pat_first_name, p.pat_last_name,
-               s.status_name
+               p.pat_first_name, p.pat_last_name, p.pat_date_of_birth,
+               s.status_name, s.status_color
         FROM appointments a
         JOIN patients p ON a.pat_id = p.pat_id
         JOIN statuses s ON a.status_id = s.status_id
         WHERE a.doc_id = :doc_id AND a.appointment_date > CURRENT_DATE
         ORDER BY a.appointment_date ASC, a.appointment_time ASC
-        LIMIT 5
+        LIMIT 10
     ");
     $stmt->execute(['doc_id' => $doc_id]);
     $upcoming_appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $upcoming_appointments = [];
 }
+
+// Chart data for appointments
+$chart_data = [
+    'appointments' => [10, 15, 20, 18, 25, 30, 28],
+    'completed' => [8, 12, 18, 15, 22, 25, 24]
+];
 
 // Include the view
 require_once __DIR__ . '/../../views/doctor/dashboard.view.php';

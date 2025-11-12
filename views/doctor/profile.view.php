@@ -1,97 +1,136 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
-    <h1>My Profile</h1>
-    <p><a href="/doctor/appointments/today" class="btn">← Back to Dashboard</a></p>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
+<div class="page-header">
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/doctor/appointments/today">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Profile</span>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div style="background: #efe; color: #3c3; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($success) ?>
+        <h1 class="page-title">My Profile</h1>
+    </div>
+</div>
+
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($doctor)): ?>
+    <!-- Update Profile Form -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Update Profile Information</h2>
         </div>
-    <?php endif; ?>
-    
-    <?php if (!empty($doctor)): ?>
-    <div style="background: #fff; padding: 30px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Update Profile Information</h2>
-        <form method="POST">
-            <div class="form-group">
-                <label>First Name: *</label>
-                <input type="text" name="first_name" value="<?= htmlspecialchars($doctor['doc_first_name']) ?>" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Last Name: *</label>
-                <input type="text" name="last_name" value="<?= htmlspecialchars($doctor['doc_last_name']) ?>" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Email: *</label>
-                <input type="email" name="email" value="<?= htmlspecialchars($doctor['doc_email']) ?>" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Phone:</label>
-                <input type="text" name="phone" value="<?= htmlspecialchars($doctor['doc_phone'] ?? '') ?>">
-            </div>
-            
-            <div class="form-group">
-                <label>Specialization:</label>
-                <select name="specialization_id">
-                    <option value="">Select Specialization</option>
-                    <?php foreach ($specializations as $spec): ?>
-                        <option value="<?= $spec['spec_id'] ?>" <?= $doctor['doc_specialization_id'] == $spec['spec_id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($spec['spec_name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>License Number:</label>
-                <input type="text" name="license_number" value="<?= htmlspecialchars($doctor['doc_license_number'] ?? '') ?>">
-            </div>
-            
-            <div class="form-group">
-                <label>Experience (Years):</label>
-                <input type="number" name="experience_years" min="0" value="<?= htmlspecialchars($doctor['doc_experience_years'] ?? '') ?>">
-            </div>
-            
-            <div class="form-group">
-                <label>Consultation Fee:</label>
-                <input type="number" name="consultation_fee" step="0.01" min="0" value="<?= htmlspecialchars($doctor['doc_consultation_fee'] ?? '') ?>">
-            </div>
-            
-            <div class="form-group">
-                <label>Qualification:</label>
-                <textarea name="qualification" rows="3"><?= htmlspecialchars($doctor['doc_qualification'] ?? '') ?></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Bio:</label>
-                <textarea name="bio" rows="5"><?= htmlspecialchars($doctor['doc_bio'] ?? '') ?></textarea>
-            </div>
-            
-            <button type="submit" class="btn btn-success">Update Profile</button>
-        </form>
+        <div class="card-body">
+            <form method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="first_name" value="<?= htmlspecialchars($doctor['doc_first_name']) ?>" required class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="last_name" value="<?= htmlspecialchars($doctor['doc_last_name']) ?>" required class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email: <span style="color: var(--status-error);">*</span></label>
+                        <input type="email" name="email" value="<?= htmlspecialchars($doctor['doc_email']) ?>" required class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input type="text" name="phone" value="<?= htmlspecialchars($doctor['doc_phone'] ?? '') ?>" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Specialization:</label>
+                        <select name="specialization_id" class="form-control">
+                            <option value="">Select Specialization</option>
+                            <?php foreach ($specializations as $spec): ?>
+                                <option value="<?= $spec['spec_id'] ?>" <?= $doctor['doc_specialization_id'] == $spec['spec_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($spec['spec_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>License Number:</label>
+                        <input type="text" name="license_number" value="<?= htmlspecialchars($doctor['doc_license_number'] ?? '') ?>" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Experience (Years):</label>
+                        <input type="number" name="experience_years" min="0" value="<?= htmlspecialchars($doctor['doc_experience_years'] ?? '') ?>" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Consultation Fee:</label>
+                        <input type="number" name="consultation_fee" step="0.01" min="0" value="<?= htmlspecialchars($doctor['doc_consultation_fee'] ?? '') ?>" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group form-grid-full">
+                    <label>Qualification:</label>
+                    <textarea name="qualification" rows="3" class="form-control"><?= htmlspecialchars($doctor['doc_qualification'] ?? '') ?></textarea>
+                </div>
+                
+                <div class="form-group form-grid-full">
+                    <label>Bio:</label>
+                    <textarea name="bio" rows="5" class="form-control"><?= htmlspecialchars($doctor['doc_bio'] ?? '') ?></textarea>
+                </div>
+                
+                <div class="action-buttons" style="margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i>
+                        <span>Update Profile</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
     
     <!-- Profile Summary -->
-    <div style="background: #f8f9fa; padding: 25px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #667eea;">
-        <h3>Current Profile Summary</h3>
-        <p><strong>Name:</strong> Dr. <?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></p>
-        <p><strong>Specialization:</strong> <?= htmlspecialchars($doctor['spec_name'] ?? 'Not specified') ?></p>
-        <p><strong>License:</strong> <?= htmlspecialchars($doctor['doc_license_number'] ?? 'Not specified') ?></p>
-        <p><strong>Experience:</strong> <?= htmlspecialchars($doctor['doc_experience_years'] ?? '0') ?> years</p>
-        <p><strong>Consultation Fee:</strong> ₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></p>
-        <p><strong>Status:</strong> <?= htmlspecialchars($doctor['doc_status'] ?? 'active') ?></p>
+    <div class="card" style="border-left: 4px solid var(--primary-blue);">
+        <div class="card-header">
+            <h2 class="card-title">Current Profile Summary</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-grid">
+                <div>
+                    <p style="margin: 0.5rem 0;"><strong>Name:</strong> Dr. <?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></p>
+                    <p style="margin: 0.5rem 0;"><strong>Specialization:</strong> <?= htmlspecialchars($doctor['spec_name'] ?? 'Not specified') ?></p>
+                </div>
+                <div>
+                    <p style="margin: 0.5rem 0;"><strong>License:</strong> <?= htmlspecialchars($doctor['doc_license_number'] ?? 'Not specified') ?></p>
+                    <p style="margin: 0.5rem 0;"><strong>Experience:</strong> <?= htmlspecialchars($doctor['doc_experience_years'] ?? '0') ?> years</p>
+                </div>
+                <div>
+                    <p style="margin: 0.5rem 0;"><strong>Consultation Fee:</strong> <strong style="color: var(--status-success);">₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></strong></p>
+                    <p style="margin: 0.5rem 0;"><strong>Status:</strong> 
+                        <span class="status-badge <?= ($doctor['doc_status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
+                            <?= ucfirst($doctor['doc_status'] ?? 'active') ?>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
-    <?php endif; ?>
-</div>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

@@ -195,39 +195,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Check if filtering by specialization
+// Handle filters
 $spec_filter = isset($_GET['spec_id']) ? (int)$_GET['spec_id'] : null;
+$status_filter = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $spec_name_filter = '';
 
-// Fetch all doctors with specialization names
+// Fetch all doctors with filters
 try {
+    $where_conditions = [];
+    $params = [];
+    
     if ($spec_filter) {
+        $where_conditions[] = "d.doc_specialization_id = :spec_id";
+        $params['spec_id'] = $spec_filter;
+        
         // Get specialization name for display
         $stmt = $db->prepare("SELECT spec_name FROM specializations WHERE spec_id = :spec_id");
         $stmt->execute(['spec_id' => $spec_filter]);
         $spec_data = $stmt->fetch(PDO::FETCH_ASSOC);
         $spec_name_filter = $spec_data ? $spec_data['spec_name'] : '';
-        
-        // Fetch doctors filtered by specialization
-        $stmt = $db->prepare("
-            SELECT d.*, s.spec_name 
-            FROM doctors d
-            LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
-            WHERE d.doc_specialization_id = :spec_id
-            ORDER BY d.created_at DESC
-        ");
-        $stmt->execute(['spec_id' => $spec_filter]);
-        $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        // Fetch all doctors
-        $stmt = $db->query("
-            SELECT d.*, s.spec_name 
-            FROM doctors d
-            LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
-            ORDER BY d.created_at DESC
-        ");
-        $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    if (!empty($status_filter)) {
+        $where_conditions[] = "d.doc_status = :status";
+        $params['status'] = $status_filter;
+    }
+    
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    
+    $stmt = $db->prepare("
+        SELECT d.*, s.spec_name 
+        FROM doctors d
+        LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
+        $where_clause
+        ORDER BY d.created_at DESC
+    ");
+    $stmt->execute($params);
+    $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch doctors: ' . $e->getMessage();
     $doctors = [];

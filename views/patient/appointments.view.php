@@ -1,132 +1,275 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
-    <h2 style="margin: 0 0 5px 0;">Welcome, <?= htmlspecialchars($patient['pat_first_name'] ?? 'Patient') ?> <?= htmlspecialchars($patient['pat_last_name'] ?? '') ?>!</h2>
-    <p style="margin: 0; opacity: 0.9;">Manage your appointments and health information</p>
-</div>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
-        </div>
-    <?php endif; ?>
-
-<!-- Quick Action Button -->
-<div style="margin-bottom: 30px;">
-    <a href="/patient/appointments/create" style="display: inline-block; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);">
-        📅 Book New Appointment
-    </a>
+<div class="page-header">
+    <h1 class="page-title">Appointments</h1>
 </div>
 
-<!-- Statistics -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Total Appointments</p>
-                <h2 style="margin: 10px 0 0 0; font-size: 36px;"><?= count($appointments) ?></h2>
-            </div>
-            <div style="font-size: 40px; opacity: 0.3;">📅</div>
-        </div>
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <div class="filter-item">
+        <span class="icon">📅</span>
+        <select>
+            <option>For the entire period</option>
+            <option>This week</option>
+            <option>This month</option>
+            <option>This year</option>
+        </select>
     </div>
-    
-    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Upcoming</p>
-                <h2 style="margin: 10px 0 0 0; font-size: 36px;"><?= count($upcoming_appointments) ?></h2>
-            </div>
-            <div style="font-size: 40px; opacity: 0.3;">⏰</div>
-        </div>
+    <div class="filter-item">
+        <span class="icon">✓</span>
+        <select>
+            <option>All statuses</option>
+            <option>Completed</option>
+            <option>Scheduled</option>
+            <option>Canceled</option>
+        </select>
     </div>
-    
-    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Past</p>
-                <h2 style="margin: 10px 0 0 0; font-size: 36px;"><?= count($past_appointments) ?></h2>
-            </div>
-            <div style="font-size: 40px; opacity: 0.3;">✅</div>
-        </div>
+    <div class="filter-item">
+        <span class="icon">👤</span>
+        <select>
+            <option>Only mine</option>
+            <option>All</option>
+        </select>
     </div>
+    <div class="filter-item">
+        <span class="icon">📋</span>
+        <select>
+            <option>New ones on top</option>
+            <option>Oldest first</option>
+        </select>
+    </div>
+    <button class="btn-reset">
+        <span class="icon">🔄</span>
+        <span>Reset</span>
+    </button>
 </div>
 
-<!-- Upcoming Appointments -->
-<div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
-    <h2 style="margin: 0 0 20px 0; color: #2c3e50;">Upcoming Appointments</h2>
-        <?php if (empty($upcoming_appointments)): ?>
-            <p style="text-align: center; padding: 40px; color: #666;">
-                No upcoming appointments. <a href="/patient/appointments/create">Book one now!</a>
-            </p>
-        <?php else: ?>
-            <div style="display: grid; gap: 15px;">
-                <?php foreach ($upcoming_appointments as $apt): ?>
-                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: #f9f9f9;">
-                        <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: start;">
-                            <div style="text-align: center; min-width: 80px;">
-                                <div style="background: #667eea; color: white; padding: 10px; border-radius: 8px;">
-                                    <div style="font-size: 24px; font-weight: bold;"><?= date('d', strtotime($apt['appointment_date'])) ?></div>
-                                    <div style="font-size: 12px;"><?= date('M Y', strtotime($apt['appointment_date'])) ?></div>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 style="margin: 0 0 10px 0;">Dr. <?= htmlspecialchars($apt['doc_first_name'] . ' ' . $apt['doc_last_name']) ?></h3>
-                                <p style="margin: 5px 0; color: #666;"><strong>Specialization:</strong> <?= htmlspecialchars($apt['spec_name'] ?? 'N/A') ?></p>
-                                <p style="margin: 5px 0; color: #666;"><strong>Service:</strong> <?= htmlspecialchars($apt['service_name'] ?? 'N/A') ?></p>
-                                <p style="margin: 5px 0; color: #666;"><strong>Time:</strong> <?= htmlspecialchars($apt['appointment_time'] ?? 'N/A') ?></p>
-                                <p style="margin: 5px 0; color: #666;"><strong>Duration:</strong> <?= htmlspecialchars($apt['appointment_duration'] ?? 30) ?> minutes</p>
-                                <p style="margin: 5px 0; color: #666;"><strong>Appointment ID:</strong> <?= htmlspecialchars($apt['appointment_id']) ?></p>
-                                <?php if ($apt['appointment_notes']): ?>
-                                    <p style="margin: 5px 0; color: #666;"><strong>Notes:</strong> <?= htmlspecialchars($apt['appointment_notes']) ?></p>
-                                <?php endif; ?>
-                            </div>
-                            <div style="text-align: right;">
-                                <span style="background: <?= $apt['status_color'] ?? '#3B82F6' ?>; color: white; padding: 6px 12px; border-radius: 4px; font-size: 13px; display: inline-block;">
-                                    <?= htmlspecialchars($apt['status_name'] ?? 'N/A') ?>
-                                </span>
+<?php if ($error): ?>
+    <div class="alert alert-error">
+        <span>⚠️</span>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<!-- Appointments List -->
+<?php if (empty($appointments) && empty($upcoming_appointments) && empty($past_appointments)): ?>
+    <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <div class="empty-state-text">No appointments found.</div>
+        <a href="/patient/appointments/create" class="empty-state-link">Book your first appointment now!</a>
+    </div>
+<?php else: ?>
+    <!-- Upcoming Appointments -->
+    <?php if (!empty($upcoming_appointments)): ?>
+        <?php foreach ($upcoming_appointments as $apt): ?>
+            <?php
+            $statusName = strtolower($apt['status_name'] ?? 'scheduled');
+            $isCompleted = $statusName === 'completed';
+            $isCanceled = $statusName === 'canceled' || $statusName === 'cancelled';
+            $statusClass = $isCompleted ? 'badge-success' : ($isCanceled ? 'badge-error' : 'badge-warning');
+            
+            $docInitial = strtoupper(substr($apt['doc_first_name'] ?? 'D', 0, 1));
+            $docName = 'Dr. ' . htmlspecialchars(($apt['doc_first_name'] ?? '') . ' ' . ($apt['doc_last_name'] ?? ''));
+            $specName = htmlspecialchars($apt['spec_name'] ?? 'General Practice');
+            ?>
+            <div class="reception-card">
+                <div class="reception-header">
+                    <div class="reception-doctor">
+                        <div class="doctor-avatar"><?= $docInitial ?></div>
+                        <div class="doctor-info">
+                            <h3><?= $docName ?></h3>
+                            <p><?= $specName ?></p>
+                        </div>
+                    </div>
+                    <button class="btn-register">REGISTER NOW</button>
+                </div>
+                
+                <div class="reception-details">
+                    <div class="detail-item">
+                        <span class="icon">✓</span>
+                        <div>
+                            <div class="label">Status</div>
+                            <div class="value">
+                                <span class="badge <?= $statusClass ?>"><?= htmlspecialchars($apt['status_name'] ?? 'Scheduled') ?></span>
                             </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                    
+                    <div class="detail-item">
+                        <span class="icon">📅</span>
+                        <div>
+                            <div class="label">Date</div>
+                            <div class="value"><?= date('l, M j, Y', strtotime($apt['appointment_date'])) ?></div>
+                        </div>
+                    </div>
+                    
+                    <?php if ($apt['appointment_time']): ?>
+                    <div class="detail-item">
+                        <span class="icon">🕐</span>
+                        <div>
+                            <div class="label">Time</div>
+                            <div class="value"><?= date('g:i A', strtotime($apt['appointment_time'])) ?> — <?= date('g:i A', strtotime($apt['appointment_time'] . ' +' . ($apt['appointment_duration'] ?? 30) . ' minutes')) ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($apt['address']) && $apt['address']): ?>
+                    <div class="detail-item">
+                        <span class="icon">📍</span>
+                        <div>
+                            <div class="label">Address</div>
+                            <div class="value"><?= htmlspecialchars($apt['address']) ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($apt['office']) && $apt['office']): ?>
+                    <div class="detail-item">
+                        <span class="icon">🏢</span>
+                        <div>
+                            <div class="label">Office</div>
+                            <div class="value"><?= htmlspecialchars($apt['office']) ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div class="detail-item">
+                        <span class="icon">📄</span>
+                        <div>
+                            <div class="label">Description</div>
+                            <div class="value">
+                                <?php if ($apt['appointment_notes']): ?>
+                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;">Visit Summary 👁️</a>
+                                <?php else: ?>
+                                    Not found.
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="icon">💊</span>
+                        <div>
+                            <div class="label">Prescription</div>
+                            <div class="value">
+                                <?php if (isset($apt['prescription']) && $apt['prescription']): ?>
+                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;"><?= htmlspecialchars($apt['prescription']) ?></a>
+                                <?php else: ?>
+                                    Not found.
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
-    </div>
-
-<!-- Past Appointments -->
-<div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-    <h2 style="margin: 0 0 20px 0; color: #2c3e50;">Past Appointments</h2>
-        <?php if (empty($past_appointments)): ?>
-            <p style="text-align: center; padding: 40px; color: #666;">No past appointments.</p>
-        <?php else: ?>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Doctor</th>
-                        <th>Service</th>
-                        <th>Status</th>
-                        <th>Appointment ID</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($past_appointments as $apt): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($apt['appointment_date']) ?></td>
-                            <td><?= htmlspecialchars($apt['appointment_time'] ?? 'N/A') ?></td>
-                            <td>Dr. <?= htmlspecialchars($apt['doc_first_name'] . ' ' . $apt['doc_last_name']) ?></td>
-                            <td><?= htmlspecialchars($apt['service_name'] ?? 'N/A') ?></td>
-                            <td>
-                                <span style="background: <?= $apt['status_color'] ?? '#3B82F6' ?>; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px;">
-                                    <?= htmlspecialchars($apt['status_name'] ?? 'N/A') ?>
-                                </span>
-                            </td>
-                            <td><?= htmlspecialchars($apt['appointment_id']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-</div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    
+    <!-- Past Appointments -->
+    <?php if (!empty($past_appointments)): ?>
+        <?php foreach ($past_appointments as $apt): ?>
+            <?php
+            $statusName = strtolower($apt['status_name'] ?? 'completed');
+            $isCompleted = $statusName === 'completed';
+            $isCanceled = $statusName === 'canceled' || $statusName === 'cancelled';
+            $statusClass = $isCompleted ? 'badge-success' : ($isCanceled ? 'badge-error' : 'badge-warning');
+            
+            $docInitial = strtoupper(substr($apt['doc_first_name'] ?? 'D', 0, 1));
+            $docName = 'Dr. ' . htmlspecialchars(($apt['doc_first_name'] ?? '') . ' ' . ($apt['doc_last_name'] ?? ''));
+            $specName = htmlspecialchars($apt['spec_name'] ?? 'General Practice');
+            ?>
+            <div class="reception-card">
+                <div class="reception-header">
+                    <div class="reception-doctor">
+                        <div class="doctor-avatar"><?= $docInitial ?></div>
+                        <div class="doctor-info">
+                            <h3><?= $docName ?></h3>
+                            <p><?= $specName ?></p>
+                        </div>
+                    </div>
+                    <button class="btn-register">REGISTER NOW</button>
+                </div>
+                
+                <div class="reception-details">
+                    <div class="detail-item">
+                        <span class="icon">✓</span>
+                        <div>
+                            <div class="label">Status</div>
+                            <div class="value">
+                                <span class="badge <?= $statusClass ?>"><?= htmlspecialchars($apt['status_name'] ?? 'Completed') ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="icon">📅</span>
+                        <div>
+                            <div class="label">Date</div>
+                            <div class="value"><?= date('l, M j, Y', strtotime($apt['appointment_date'])) ?></div>
+                        </div>
+                    </div>
+                    
+                    <?php if ($apt['appointment_time']): ?>
+                    <div class="detail-item">
+                        <span class="icon">🕐</span>
+                        <div>
+                            <div class="label">Time</div>
+                            <div class="value"><?= date('g:i A', strtotime($apt['appointment_time'])) ?> — <?= date('g:i A', strtotime($apt['appointment_time'] . ' +' . ($apt['appointment_duration'] ?? 30) . ' minutes')) ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($apt['address']) && $apt['address']): ?>
+                    <div class="detail-item">
+                        <span class="icon">📍</span>
+                        <div>
+                            <div class="label">Address</div>
+                            <div class="value"><?= htmlspecialchars($apt['address']) ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($apt['office']) && $apt['office']): ?>
+                    <div class="detail-item">
+                        <span class="icon">🏢</span>
+                        <div>
+                            <div class="label">Office</div>
+                            <div class="value"><?= htmlspecialchars($apt['office']) ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div class="detail-item">
+                        <span class="icon">📄</span>
+                        <div>
+                            <div class="label">Description</div>
+                            <div class="value">
+                                <?php if ($apt['appointment_notes']): ?>
+                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;">Visit Summary 👁️</a>
+                                <?php else: ?>
+                                    Not found.
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="icon">💊</span>
+                        <div>
+                            <div class="label">Prescription</div>
+                            <div class="value">
+                                <?php if (isset($apt['prescription']) && $apt['prescription']): ?>
+                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;"><?= htmlspecialchars($apt['prescription']) ?></a>
+                                <?php else: ?>
+                                    Not found.
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

@@ -1,145 +1,93 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="padding: 20px;">
-    <h1>Manage Doctors</h1>
-    <a href="/superadmin/dashboard" style="color: blue;">← Back to Dashboard</a>
-    
-    <?php if ($spec_filter && $spec_name_filter): ?>
-        <div style="background: #e3f2fd; color: #1976d2; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #1976d2;">
-            <strong>📋 Filtered by Specialization:</strong> <?= htmlspecialchars($spec_name_filter) ?>
-            <a href="/superadmin/doctors" style="margin-left: 15px; color: #1976d2; text-decoration: underline;">Clear Filter</a>
+<div class="page-header">
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/superadmin/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Doctors</span>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($error): ?>
-        <div class="alert alert-error" style="margin: 15px 0;"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div class="alert alert-success" style="margin: 15px 0;"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
-    
-    <!-- Create Doctor Form -->
-    <div style="background: #fff; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Add New Doctor</h2>
-        <form method="POST" action="">
-            <input type="hidden" name="action" value="create">
-            
-            <div class="form-group">
-                <label>First Name:</label>
-                <input type="text" name="first_name" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Last Name:</label>
-                <input type="text" name="last_name" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Phone:</label>
-                <input type="text" name="phone">
-            </div>
-            
-            <div class="form-group">
-                <label>Specialization:</label>
-                <select name="specialization_id">
-                    <option value="">Select Specialization</option>
-                    <?php foreach ($specializations as $spec): ?>
-                        <option value="<?= $spec['spec_id'] ?>"><?= htmlspecialchars($spec['spec_name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>License Number:</label>
-                <input type="text" name="license_number">
-            </div>
-            
-            <div class="form-group">
-                <label>Experience (Years):</label>
-                <input type="number" name="experience_years" min="0">
-            </div>
-            
-            <div class="form-group">
-                <label>Consultation Fee:</label>
-                <input type="number" name="consultation_fee" step="0.01" min="0">
-            </div>
-            
-            <div class="form-group">
-                <label>Qualification:</label>
-                <textarea name="qualification" rows="2"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Bio:</label>
-                <textarea name="bio" rows="3"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Status:</label>
-                <select name="status">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-            
-            <hr style="margin: 20px 0; border: none; border-top: 2px solid #e0e0e0;">
-            
-            <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-                <h3 style="margin: 0 0 10px 0; color: #1976d2;">🔐 User Account (Login Credentials)</h3>
-                <p style="margin: 0; font-size: 14px; color: #666;">Check the box below to create a user account for this doctor to login to the system.</p>
-            </div>
-            
-            <div class="form-group">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="checkbox" name="create_user" value="1" id="create_user_checkbox" onchange="togglePasswordField()" style="margin-right: 10px; width: auto;">
-                    <span>Create user account for login</span>
-                </label>
-            </div>
-            
-            <div class="form-group" id="password_field" style="display: none;">
-                <label>Password: <span style="color: red;">*</span></label>
-                <input type="password" name="password" id="password_input" minlength="6" placeholder="Minimum 6 characters">
-                <small style="display: block; margin-top: 5px; color: #666;">The doctor will use their email and this password to login.</small>
-            </div>
-            
-            <button type="submit" class="btn btn-success">Add Doctor</button>
-        </form>
+        <h1 class="page-title">Manage Doctors</h1>
     </div>
-    
-    <script>
-    function togglePasswordField() {
-        const checkbox = document.getElementById('create_user_checkbox');
-        const passwordField = document.getElementById('password_field');
-        const passwordInput = document.getElementById('password_input');
-        
-        if (checkbox.checked) {
-            passwordField.style.display = 'block';
-            passwordInput.required = true;
-        } else {
-            passwordField.style.display = 'none';
-            passwordInput.required = false;
-            passwordInput.value = '';
-        }
-    }
-    </script>
-    
-    <!-- Doctors List -->
-    <div style="background: #fff; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>All Doctors</h2>
-        
-        <?php if (empty($doctors)): ?>
-            <p>No doctors found.</p>
-        <?php else: ?>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="search-filter-bar-modern">
+    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
+        <i class="fas fa-filter"></i>
+        <span>Filter</span>
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" class="search-input-modern" 
+                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
+                   placeholder="Search Doctor...">
+        </div>
+    </form>
+    <div class="category-tabs">
+        <button type="button" class="category-tab active" data-category="all">All</button>
+        <?php if (isset($specializations)): ?>
+            <?php foreach (array_slice($specializations, 0, 5) as $spec): ?>
+                <button type="button" class="category-tab" data-category="<?= $spec['spec_id'] ?>">
+                    <?= htmlspecialchars($spec['spec_name']) ?>
+                </button>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php if (isset($spec_filter) && $spec_filter && isset($spec_name_filter) && $spec_name_filter): ?>
+    <div class="info-box">
+        <i class="fas fa-filter"></i>
+        <p>
+            <strong>Filtered by Specialization:</strong> <?= htmlspecialchars($spec_name_filter) ?>
+            <a href="/superadmin/doctors" style="margin-left: 15px; color: var(--primary-blue); text-decoration: underline;">Clear Filter</a>
+        </p>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
+<!-- Add Doctor Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddDoctorModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Doctor</span>
+    </button>
+</div>
+
+<!-- Doctors List -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Doctors</h2>
+    </div>
+    <?php if (empty($doctors)): ?>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-user-md"></i></div>
+            <div class="empty-state-text">No doctors found.</div>
+        </div>
+    <?php else: ?>
+        <div style="overflow-x: auto;">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -153,108 +101,306 @@
                 <tbody>
                     <?php foreach ($doctors as $doctor): ?>
                         <tr>
-                            <td><?= htmlspecialchars($doctor['doc_id']) ?></td>
-                            <td><?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></td>
+                            <td><strong><?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></strong></td>
                             <td><?= htmlspecialchars($doctor['doc_email']) ?></td>
                             <td><?= htmlspecialchars($doctor['doc_phone'] ?? 'N/A') ?></td>
                             <td><?= htmlspecialchars($doctor['spec_name'] ?? 'N/A') ?></td>
                             <td><?= htmlspecialchars($doctor['doc_license_number'] ?? 'N/A') ?></td>
                             <td>₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></td>
-                            <td><?= htmlspecialchars($doctor['doc_status'] ?? 'active') ?></td>
                             <td>
-                                <button onclick="editDoctor(<?= htmlspecialchars(json_encode($doctor)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">Edit</button>
-                                <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?= $doctor['doc_id'] ?>">
-                                    <button type="submit" class="btn btn-danger" style="font-size: 12px; padding: 5px 10px;">Delete</button>
-                                </form>
+                                <span class="status-badge <?= ($doctor['doc_status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
+                                    <?= htmlspecialchars($doctor['doc_status'] ?? 'active') ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button onclick="editDoctor(<?= htmlspecialchars(json_encode($doctor)) ?>)" class="btn btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="viewDoctorDetails(<?= htmlspecialchars(json_encode($doctor)) ?>)" class="btn btn-sm" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?= $doctor['doc_id'] ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="pagination-controls">
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
-<!-- Edit Doctor Modal -->
-<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: #fff; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-        <h2>Edit Doctor</h2>
+<!-- Add Doctor Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Doctor</h2>
+            <button type="button" class="modal-close" onclick="closeAddDoctorModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form method="POST" action="">
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="id" id="edit_id">
+            <input type="hidden" name="action" value="create">
             
-            <div class="form-group">
-                <label>First Name:</label>
-                <input type="text" name="first_name" id="edit_first_name" required>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="first_name" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="last_name" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email: <span style="color: var(--status-error);">*</span></label>
+                    <input type="email" name="email" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="text" name="phone" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Specialization:</label>
+                    <select name="specialization_id" class="form-control">
+                        <option value="">Select Specialization</option>
+                        <?php foreach ($specializations as $spec): ?>
+                            <option value="<?= $spec['spec_id'] ?>"><?= htmlspecialchars($spec['spec_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>License Number:</label>
+                    <input type="text" name="license_number" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Experience (Years):</label>
+                    <input type="number" name="experience_years" min="0" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Consultation Fee:</label>
+                    <input type="number" name="consultation_fee" step="0.01" min="0" class="form-control">
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Last Name:</label>
-                <input type="text" name="last_name" id="edit_last_name" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" id="edit_email" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Phone:</label>
-                <input type="text" name="phone" id="edit_phone">
-            </div>
-            
-            <div class="form-group">
-                <label>Specialization:</label>
-                <select name="specialization_id" id="edit_specialization_id">
-                    <option value="">Select Specialization</option>
-                    <?php foreach ($specializations as $spec): ?>
-                        <option value="<?= $spec['spec_id'] ?>"><?= htmlspecialchars($spec['spec_name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>License Number:</label>
-                <input type="text" name="license_number" id="edit_license_number">
-            </div>
-            
-            <div class="form-group">
-                <label>Experience (Years):</label>
-                <input type="number" name="experience_years" id="edit_experience_years" min="0">
-            </div>
-            
-            <div class="form-group">
-                <label>Consultation Fee:</label>
-                <input type="number" name="consultation_fee" id="edit_consultation_fee" step="0.01" min="0">
-            </div>
-            
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Qualification:</label>
-                <textarea name="qualification" id="edit_qualification" rows="2"></textarea>
+                <textarea name="qualification" rows="2" class="form-control"></textarea>
             </div>
             
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Bio:</label>
-                <textarea name="bio" id="edit_bio" rows="3"></textarea>
+                <textarea name="bio" rows="3" class="form-control"></textarea>
             </div>
             
             <div class="form-group">
                 <label>Status:</label>
-                <select name="status" id="edit_status">
+                <select name="status" class="form-control">
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                 </select>
             </div>
             
-            <button type="submit" class="btn btn-success">Update Doctor</button>
-            <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
+            <div class="info-box" style="margin-top: 1.5rem;">
+                <i class="fas fa-lock"></i>
+                <p><strong>User Account (Login Credentials):</strong> Check the box below to create a user account for this doctor to login to the system.</p>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" name="create_user" value="1" id="add_create_user_checkbox" onchange="toggleAddPasswordField()" style="margin-right: 10px; width: auto;">
+                    <span>Create user account for login</span>
+                </label>
+            </div>
+            
+            <div class="form-group" id="add_password_field" style="display: none;">
+                <label>Password: <span style="color: var(--status-error);">*</span></label>
+                <input type="password" name="password" id="add_password_input" minlength="6" placeholder="Minimum 6 characters" class="form-control">
+                <small style="display: block; margin-top: 0.5rem; color: var(--text-secondary);">The doctor will use their email and this password to login.</small>
+            </div>
+            
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Doctor</span>
+                </button>
+                <button type="button" onclick="closeAddDoctorModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Doctor Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Doctor</h2>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST" action="">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="id" id="edit_id">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="first_name" id="edit_first_name" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="last_name" id="edit_last_name" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email: <span style="color: var(--status-error);">*</span></label>
+                    <input type="email" name="email" id="edit_email" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="text" name="phone" id="edit_phone" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Specialization:</label>
+                    <select name="specialization_id" id="edit_specialization_id" class="form-control">
+                        <option value="">Select Specialization</option>
+                        <?php foreach ($specializations as $spec): ?>
+                            <option value="<?= $spec['spec_id'] ?>"><?= htmlspecialchars($spec['spec_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>License Number:</label>
+                    <input type="text" name="license_number" id="edit_license_number" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Experience (Years):</label>
+                    <input type="number" name="experience_years" id="edit_experience_years" min="0" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Consultation Fee:</label>
+                    <input type="number" name="consultation_fee" id="edit_consultation_fee" step="0.01" min="0" class="form-control">
+                </div>
+            </div>
+            
+            <div class="form-group form-grid-full">
+                <label>Qualification:</label>
+                <textarea name="qualification" id="edit_qualification" rows="2" class="form-control"></textarea>
+            </div>
+            
+            <div class="form-group form-grid-full">
+                <label>Bio:</label>
+                <textarea name="bio" id="edit_bio" rows="3" class="form-control"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Status:</label>
+                <select name="status" id="edit_status" class="form-control">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    <span>Update Doctor</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
 
 <script>
+function openAddDoctorModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddDoctorModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+    document.getElementById('add_password_field').style.display = 'none';
+    document.getElementById('add_password_input').required = false;
+}
+
+function toggleAddPasswordField() {
+    const checkbox = document.getElementById('add_create_user_checkbox');
+    const passwordField = document.getElementById('add_password_field');
+    const passwordInput = document.getElementById('add_password_input');
+    
+    if (checkbox.checked) {
+        passwordField.style.display = 'block';
+        passwordInput.required = true;
+    } else {
+        passwordField.style.display = 'none';
+        passwordInput.required = false;
+        passwordInput.value = '';
+    }
+}
+
+function togglePasswordField() {
+    const checkbox = document.getElementById('create_user_checkbox');
+    const passwordField = document.getElementById('password_field');
+    const passwordInput = document.getElementById('password_input');
+    
+    if (checkbox.checked) {
+        passwordField.style.display = 'block';
+        passwordInput.required = true;
+    } else {
+        passwordField.style.display = 'none';
+        passwordInput.required = false;
+        passwordInput.value = '';
+    }
+}
+
 function editDoctor(doctor) {
     document.getElementById('edit_id').value = doctor.doc_id;
     document.getElementById('edit_first_name').value = doctor.doc_first_name;
@@ -268,12 +414,177 @@ function editDoctor(doctor) {
     document.getElementById('edit_qualification').value = doctor.doc_qualification || '';
     document.getElementById('edit_bio').value = doctor.doc_bio || '';
     document.getElementById('edit_status').value = doctor.doc_status || 'active';
-    document.getElementById('editModal').style.display = 'block';
+    document.getElementById('editModal').classList.add('active');
 }
 
 function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editModal').classList.remove('active');
 }
+
+function viewDoctorDetails(doctor) {
+    window.location.href = '/superadmin/doctors?view=' + doctor.doc_id;
+}
+
+// Category tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const category = this.dataset.category;
+            filterByCategory(category);
+        });
+    });
+});
+
+function filterByCategory(category) {
+    if (category === 'all') {
+        window.location.href = '/superadmin/doctors';
+    } else {
+        window.location.href = '/superadmin/doctors?spec_id=' + category;
+    }
+}
+
+// Listen for filter events
+window.addEventListener('filtersApplied', function(e) {
+    const filters = e.detail;
+    console.log('Applying filters:', filters);
+    // Implement filter logic
+});
+</script>
+
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3 class="filter-sidebar-title">Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Specialization Filter -->
+    <?php if (!empty($specializations)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('specialization')">
+            <h4 class="filter-section-title">Specialization</h4>
+            <button type="button" class="filter-section-toggle" id="specializationToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="specializationContent">
+            <input type="text" class="filter-search-input" placeholder="Search Specialization" id="specializationSearch">
+            <div class="filter-radio-group" id="specializationList">
+                <?php foreach ($specializations as $spec): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_specialization" id="spec_<?= $spec['spec_id'] ?>" value="<?= $spec['spec_id'] ?>">
+                        <label for="spec_<?= $spec['spec_id'] ?>"><?= htmlspecialchars($spec['spec_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Status Filter -->
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('status')">
+            <h4 class="filter-section-title">Status</h4>
+            <button type="button" class="filter-section-toggle" id="statusToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="statusContent">
+            <div class="filter-radio-group">
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_status" id="status_active" value="active">
+                    <label for="status_active">Active</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_status" id="status_inactive" value="inactive">
+                    <label for="status_inactive">Inactive</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyDoctorFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    const specializationSearch = document.getElementById('specializationSearch');
+    if (specializationSearch) {
+        specializationSearch.value = '';
+    }
+}
+
+function applyDoctorFilters() {
+    const filters = {
+        specialization: document.querySelector('input[name="filter_specialization"]:checked')?.value || '',
+        status: document.querySelector('input[name="filter_status"]:checked')?.value || ''
+    };
+    
+    const params = new URLSearchParams();
+    if (filters.specialization) params.append('spec_id', filters.specialization);
+    if (filters.status) params.append('status', filters.status);
+    
+    const url = '/superadmin/doctors' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+// Specialization search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const specializationSearch = document.getElementById('specializationSearch');
+    if (specializationSearch) {
+        specializationSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const specializationItems = document.querySelectorAll('#specializationList .filter-radio-item');
+            specializationItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+});
 </script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

@@ -1,33 +1,56 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="max-width: 900px; margin: 0 auto; padding: 20px;">
-    <h1>Book New Appointment</h1>
-    <p><a href="/patient/appointments" class="btn">← Back to My Appointments</a></p>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
+<div class="page-header">
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/patient/appointments">
+                <i class="fas fa-calendar"></i>
+                <span>My Appointments</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Book Appointment</span>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div style="background: #efe; color: #3c3; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
-            <?= $success ?>
-            <div style="margin-top: 15px;">
-                <a href="/patient/appointments" class="btn btn-success">View My Appointments</a>
-                <a href="/patient/appointments/create" class="btn">Book Another</a>
+        <h1 class="page-title">Book New Appointment</h1>
+    </div>
+</div>
+
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <p style="margin-bottom: 1rem;"><?= $success ?></p>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <a href="/patient/appointments" class="btn btn-success">
+                    <i class="fas fa-calendar"></i>
+                    <span>View My Appointments</span>
+                </a>
+                <a href="/patient/appointments/create" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    <span>Book Another</span>
+                </a>
             </div>
         </div>
-    <?php endif; ?>
-    
-    <div style="background: #fff; padding: 30px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Appointment Details</h2>
-        <p style="color: #666; margin-bottom: 20px;">Please fill in the details below to book your appointment. You will receive an appointment ID for your reference.</p>
+    </div>
+<?php endif; ?>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Appointment Details</h2>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Please fill in the details below to book your appointment. You will receive an appointment ID for your reference.</p>
         
         <form method="POST">
             <div class="form-group">
-                <label>Select Doctor: *</label>
-                <select name="doctor_id" id="doctor_id" required onchange="showDoctorInfo()">
+                <label>Select Doctor: <span style="color: var(--status-error);">*</span></label>
+                <select name="doctor_id" id="doctor_id" required onchange="showDoctorInfo()" class="form-control">
                     <option value="">Choose a doctor...</option>
                     <?php foreach ($doctors as $doctor): ?>
                         <option value="<?= $doctor['doc_id'] ?>" 
@@ -41,16 +64,22 @@
                 </select>
             </div>
             
-            <div id="doctorInfo" style="display: none; background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                <h4 style="margin: 0 0 10px 0;">Doctor Information</h4>
-                <p style="margin: 5px 0;"><strong>Specialization:</strong> <span id="docSpec"></span></p>
-                <p style="margin: 5px 0;"><strong>Consultation Fee:</strong> ₱<span id="docFee"></span></p>
-                <p style="margin: 5px 0;" id="docBioContainer"><strong>About:</strong> <span id="docBio"></span></p>
+            <div id="doctorInfo" style="display: none; background: var(--primary-blue-bg); padding: 1rem; border-radius: var(--radius-md); margin: 1rem 0; border-left: 4px solid var(--primary-blue);">
+                <h4 style="margin: 0 0 0.75rem 0; color: var(--text-primary);">Doctor Information</h4>
+                <p style="margin: 0.5rem 0; color: var(--text-primary);">
+                    <strong>Specialization:</strong> <span id="docSpec"></span>
+                </p>
+                <p style="margin: 0.5rem 0; color: var(--text-primary);">
+                    <strong>Consultation Fee:</strong> ₱<span id="docFee"></span>
+                </p>
+                <p style="margin: 0.5rem 0; color: var(--text-primary);" id="docBioContainer">
+                    <strong>About:</strong> <span id="docBio"></span>
+                </p>
             </div>
             
             <div class="form-group">
                 <label>Service (Optional):</label>
-                <select name="service_id">
+                <select name="service_id" class="form-control">
                     <option value="">Select a service...</option>
                     <?php foreach ($services as $service): ?>
                         <option value="<?= $service['service_id'] ?>">
@@ -62,32 +91,34 @@
                 </select>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Appointment Date: *</label>
-                    <input type="date" name="appointment_date" min="<?= date('Y-m-d') ?>" required>
+                    <label>Appointment Date: <span style="color: var(--status-error);">*</span></label>
+                    <input type="date" name="appointment_date" min="<?= date('Y-m-d') ?>" required class="form-control">
                 </div>
                 
                 <div class="form-group">
-                    <label>Preferred Time: *</label>
-                    <input type="time" name="appointment_time" required>
+                    <label>Preferred Time: <span style="color: var(--status-error);">*</span></label>
+                    <input type="time" name="appointment_time" required class="form-control">
                 </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Notes/Reason for Visit:</label>
-                <textarea name="notes" rows="4" placeholder="Please describe your symptoms or reason for visit..."></textarea>
+                <textarea name="notes" rows="4" placeholder="Please describe your symptoms or reason for visit..." class="form-control"></textarea>
             </div>
             
-            <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <p style="margin: 0; color: #856404; font-size: 14px;">
-                    <strong>Note:</strong> Your appointment request will be reviewed. You will receive an appointment ID immediately after submission. Please keep this ID for your reference.
-                </p>
+            <div class="info-box" style="margin-top: 1.5rem;">
+                <i class="fas fa-info-circle"></i>
+                <p><strong>Note:</strong> Your appointment request will be reviewed. You will receive an appointment ID immediately after submission. Please keep this ID for your reference.</p>
             </div>
             
-            <button type="submit" class="btn btn-success" style="font-size: 16px; padding: 12px 30px;">
-                📅 Book Appointment
-            </button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success" style="font-size: 1rem; padding: 0.75rem 2rem;">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Book Appointment</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>

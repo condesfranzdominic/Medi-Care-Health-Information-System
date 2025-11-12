@@ -203,30 +203,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle search
+// Handle search and filters
 $search_query = '';
 if (isset($_GET['search'])) {
     $search_query = sanitize($_GET['search']);
 }
 
-// Fetch all patients
+$filter_gender = isset($_GET['gender']) ? sanitize($_GET['gender']) : '';
+$filter_insurance = isset($_GET['insurance']) ? sanitize($_GET['insurance']) : '';
+
+// Fetch all patients with filters
 try {
+    $where_conditions = [];
+    $params = [];
+    
     if (!empty($search_query)) {
-        // Search by first name or last name
-        $stmt = $db->prepare("
-            SELECT * FROM patients 
-            WHERE pat_first_name LIKE :search OR pat_last_name LIKE :search
-            ORDER BY pat_first_name, pat_last_name
-        ");
-        $stmt->execute(['search' => '%' . $search_query . '%']);
-        $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        $stmt = $db->query("SELECT * FROM patients ORDER BY created_at DESC");
-        $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $where_conditions[] = "(pat_first_name LIKE :search OR pat_last_name LIKE :search)";
+        $params['search'] = '%' . $search_query . '%';
     }
+    
+    if (!empty($filter_gender)) {
+        $where_conditions[] = "pat_gender = :gender";
+        $params['gender'] = $filter_gender;
+    }
+    
+    if (!empty($filter_insurance)) {
+        $where_conditions[] = "pat_insurance_provider = :insurance";
+        $params['insurance'] = $filter_insurance;
+    }
+    
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    
+    $stmt = $db->prepare("SELECT * FROM patients $where_clause ORDER BY created_at DESC");
+    $stmt->execute($params);
+    $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch patients: ' . $e->getMessage();
     $patients = [];
+}
+
+// Fetch filter data from database
+$filter_genders = [];
+$filter_insurance_providers = [];
+try {
+    // Get unique genders
+    $stmt = $db->query("SELECT DISTINCT pat_gender FROM patients WHERE pat_gender IS NOT NULL AND pat_gender != '' ORDER BY pat_gender");
+    $filter_genders = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Get unique insurance providers
+    $stmt = $db->query("SELECT DISTINCT pat_insurance_provider FROM patients WHERE pat_insurance_provider IS NOT NULL AND pat_insurance_provider != '' ORDER BY pat_insurance_provider");
+    $filter_insurance_providers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    // If error, use empty arrays
+    $filter_genders = [];
+    $filter_insurance_providers = [];
 }
 
 // Include the view

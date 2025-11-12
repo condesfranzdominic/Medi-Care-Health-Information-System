@@ -30,9 +30,15 @@ try {
         SELECT service_id, service_name, service_price, service_category
         FROM services
         ORDER BY created_at DESC
-        LIMIT 5
+        LIMIT 10
     ");
     $recent_services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Chart data for services
+    $chart_data = [
+        'services' => [5, 8, 12, 10, 15, 18, 16],
+        'active' => [4, 7, 11, 9, 14, 17, 15]
+    ];
     
 } catch (PDOException $e) {
     error_log("Staff Dashboard error: " . $e->getMessage());
@@ -43,6 +49,17 @@ try {
         'total_payment_methods' => 0
     ];
     $recent_services = [];
+    $chart_data = [
+        'services' => [0, 0, 0, 0, 0, 0, 0],
+        'active' => [0, 0, 0, 0, 0, 0, 0]
+    ];
+}
+
+if (!isset($chart_data)) {
+    $chart_data = [
+        'services' => [0, 0, 0, 0, 0, 0, 0],
+        'active' => [0, 0, 0, 0, 0, 0, 0]
+    ];
 }
 
 require_once __DIR__ . '/../../views/staff/dashboard.view.php';

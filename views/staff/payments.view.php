@@ -1,42 +1,84 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="max-width: 1400px; margin: 0 auto; padding: 20px;">
-    <h1>Manage Payments</h1>
-    <p><a href="/staff/dashboard" class="btn">← Back to Dashboard</a></p>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
+<div class="page-header">
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/staff/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Payments</span>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div style="background: #efe; color: #3c3; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($success) ?>
+        <h1 class="page-title">Manage Payments</h1>
+    </div>
+</div>
+
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
+<!-- Search and Filter Bar -->
+<div class="search-filter-bar-modern">
+    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
+        <i class="fas fa-filter"></i>
+        <span>Filter</span>
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" class="search-input-modern" 
+                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
+                   placeholder="Search Payment...">
         </div>
-    <?php endif; ?>
-    
-    <!-- Create New Payment -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Add New Payment Record</h2>
+    </form>
+    <div class="category-tabs">
+        <button type="button" class="category-tab active" data-category="all">All</button>
+        <?php if (isset($payment_statuses)): ?>
+            <?php foreach (array_slice($payment_statuses, 0, 4) as $status): ?>
+                <button type="button" class="category-tab" data-category="<?= $status['payment_status_id'] ?>">
+                    <?= htmlspecialchars($status['status_name']) ?>
+                </button>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Create New Payment -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Add New Payment Record</h2>
+    </div>
+    <div class="card-body">
         <form method="POST">
             <input type="hidden" name="action" value="create">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Appointment ID: *</label>
-                    <input type="text" name="appointment_id" required placeholder="e.g., 2025-10-0000001">
+                    <label>Appointment ID: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="appointment_id" required placeholder="e.g., 2025-10-0000001" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Amount (₱): *</label>
-                    <input type="number" name="amount" step="0.01" min="0" required>
+                    <label>Amount (₱): <span style="color: var(--status-error);">*</span></label>
+                    <input type="number" name="amount" step="0.01" min="0" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Payment Date: *</label>
-                    <input type="date" name="payment_date" value="<?= date('Y-m-d') ?>" required>
+                    <label>Payment Date: <span style="color: var(--status-error);">*</span></label>
+                    <input type="date" name="payment_date" value="<?= date('Y-m-d') ?>" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Payment Method: *</label>
-                    <select name="payment_method_id" required>
+                    <label>Payment Method: <span style="color: var(--status-error);">*</span></label>
+                    <select name="payment_method_id" required class="form-control">
                         <option value="">Select Method</option>
                         <?php foreach ($payment_methods as $method): ?>
                             <option value="<?= $method['method_id'] ?>"><?= htmlspecialchars($method['method_name']) ?></option>
@@ -44,32 +86,45 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Payment Status: *</label>
-                    <select name="payment_status_id" required>
+                    <label>Payment Status: <span style="color: var(--status-error);">*</span></label>
+                    <select name="payment_status_id" required class="form-control">
                         <option value="">Select Status</option>
                         <?php foreach ($payment_statuses as $status): ?>
-                            <option value="<?= $status['status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
+                            <option value="<?= $status['payment_status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Notes:</label>
-                <textarea name="notes" rows="2"></textarea>
+                <textarea name="notes" rows="2" class="form-control"></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Add Payment Record</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Payment Record</span>
+                </button>
+            </div>
         </form>
     </div>
-    
-    <!-- Payments List -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>All Payment Records</h2>
-        <p style="background: #fff3cd; padding: 10px; border-radius: 5px; color: #856404; font-size: 14px;">
-            <strong>Note:</strong> Only Super Admin can delete payment records.
-        </p>
-        <?php if (empty($payments)): ?>
-            <p>No payment records found.</p>
-        <?php else: ?>
+</div>
+
+<!-- Payments List -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Payment Records</h2>
+    </div>
+    <div class="info-box" style="margin: 1.5rem;">
+        <i class="fas fa-info-circle"></i>
+        <p><strong>Note:</strong> Only Super Admin can delete payment records.</p>
+    </div>
+    <?php if (empty($payments)): ?>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="empty-state-text">No payment records found.</div>
+        </div>
+    <?php else: ?>
+        <div style="overflow-x: auto;">
             <table class="table">
                 <thead>
                     <tr>
@@ -86,73 +141,129 @@
                 <tbody>
                     <?php foreach ($payments as $payment): ?>
                         <tr>
-                            <td><?= htmlspecialchars($payment['payment_id']) ?></td>
+                            <td><strong><?= htmlspecialchars($payment['payment_id']) ?></strong></td>
                             <td><?= htmlspecialchars($payment['payment_date']) ?></td>
                             <td><?= htmlspecialchars($payment['appointment_id']) ?></td>
                             <td><?= htmlspecialchars(($payment['pat_first_name'] ?? '') . ' ' . ($payment['pat_last_name'] ?? '')) ?></td>
-                            <td><strong>₱<?= number_format($payment['amount'], 2) ?></strong></td>
+                            <td><strong style="color: var(--status-success);">₱<?= number_format($payment['amount'], 2) ?></strong></td>
                             <td><?= htmlspecialchars($payment['method_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($payment['status_name'] ?? 'N/A') ?></td>
                             <td>
-                                <button onclick="viewPayment(<?= htmlspecialchars(json_encode($payment)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">View</button>
-                                <button onclick="editPayment(<?= htmlspecialchars(json_encode($payment)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">Edit</button>
+                                <span class="badge" style="background: var(--primary-blue);">
+                                    <?= htmlspecialchars($payment['status_name'] ?? 'N/A') ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button onclick="viewPayment(<?= htmlspecialchars(json_encode($payment)) ?>)" class="btn btn-sm" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="editPayment(<?= htmlspecialchars(json_encode($payment)) ?>)" class="btn btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="pagination-controls">
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
-<!-- View Modal -->
-<div id="viewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: #fff; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-        <h2>Payment Details</h2>
+<!-- View Payment Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Payment Details</h2>
+            <button type="button" class="modal-close" onclick="closeViewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <div id="viewContent"></div>
-        <button type="button" onclick="closeViewModal()" class="btn">Close</button>
+        <div class="action-buttons" style="margin-top: 1.5rem;">
+            <button type="button" onclick="closeViewModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
-    <div style="background: #fff; max-width: 700px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-        <h2>Edit Payment Record</h2>
+<!-- Edit Payment Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Payment Record</h2>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" id="edit_id">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Amount (₱): *</label>
-                    <input type="number" name="amount" id="edit_amount" step="0.01" min="0" required>
+                    <label>Amount (₱): <span style="color: var(--status-error);">*</span></label>
+                    <input type="number" name="amount" id="edit_amount" step="0.01" min="0" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Payment Date: *</label>
-                    <input type="date" name="payment_date" id="edit_payment_date" required>
+                    <label>Payment Date: <span style="color: var(--status-error);">*</span></label>
+                    <input type="date" name="payment_date" id="edit_payment_date" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Payment Method: *</label>
-                    <select name="payment_method_id" id="edit_payment_method_id" required>
+                    <label>Payment Method: <span style="color: var(--status-error);">*</span></label>
+                    <select name="payment_method_id" id="edit_payment_method_id" required class="form-control">
+                        <option value="">Select Method</option>
                         <?php foreach ($payment_methods as $method): ?>
                             <option value="<?= $method['method_id'] ?>"><?= htmlspecialchars($method['method_name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Payment Status: *</label>
-                    <select name="payment_status_id" id="edit_payment_status_id" required>
+                    <label>Payment Status: <span style="color: var(--status-error);">*</span></label>
+                    <select name="payment_status_id" id="edit_payment_status_id" required class="form-control">
+                        <option value="">Select Status</option>
                         <?php foreach ($payment_statuses as $status): ?>
-                            <option value="<?= $status['status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
+                            <option value="<?= $status['payment_status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group form-grid-full">
                 <label>Notes:</label>
-                <textarea name="notes" id="edit_notes" rows="2"></textarea>
+                <textarea name="notes" id="edit_notes" rows="2" class="form-control"></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Update Payment</button>
-            <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    <span>Update Payment</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -160,21 +271,37 @@
 <script>
 function viewPayment(payment) {
     const content = `
-        <p><strong>Payment ID:</strong> ${payment.payment_id}</p>
-        <p><strong>Appointment ID:</strong> ${payment.appointment_id}</p>
-        <p><strong>Patient:</strong> ${payment.pat_first_name || ''} ${payment.pat_last_name || ''}</p>
-        <p><strong>Amount:</strong> ₱${parseFloat(payment.amount).toFixed(2)}</p>
-        <p><strong>Payment Date:</strong> ${payment.payment_date}</p>
-        <p><strong>Payment Method:</strong> ${payment.method_name || 'N/A'}</p>
-        <p><strong>Payment Status:</strong> ${payment.status_name || 'N/A'}</p>
-        <p><strong>Notes:</strong> ${payment.notes || 'None'}</p>
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-body">
+                <div class="form-grid">
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Payment ID:</strong> ${payment.payment_id}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Appointment ID:</strong> ${payment.appointment_id}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Patient:</strong> ${payment.pat_first_name || ''} ${payment.pat_last_name || ''}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Amount:</strong> <strong style="color: var(--status-success);">₱${parseFloat(payment.amount).toFixed(2)}</strong></p>
+                    </div>
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Payment Date:</strong> ${payment.payment_date}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Payment Method:</strong> ${payment.method_name || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Payment Status:</strong> 
+                            <span class="badge" style="background: var(--primary-blue);">${payment.status_name || 'N/A'}</span>
+                        </p>
+                    </div>
+                </div>
+                ${payment.notes ? `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);"><p style="margin: 0;"><strong>Notes:</strong> ${payment.notes}</p></div>` : ''}
+            </div>
+        </div>
     `;
     document.getElementById('viewContent').innerHTML = content;
-    document.getElementById('viewModal').style.display = 'block';
+    document.getElementById('viewModal').classList.add('active');
 }
 
 function closeViewModal() {
-    document.getElementById('viewModal').style.display = 'none';
+    document.getElementById('viewModal').classList.remove('active');
 }
 
 function editPayment(payment) {
@@ -184,12 +311,42 @@ function editPayment(payment) {
     document.getElementById('edit_payment_method_id').value = payment.payment_method_id;
     document.getElementById('edit_payment_status_id').value = payment.payment_status_id;
     document.getElementById('edit_notes').value = payment.notes || '';
-    document.getElementById('editModal').style.display = 'block';
+    document.getElementById('editModal').classList.add('active');
 }
 
 function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editModal').classList.remove('active');
 }
+
+// Category tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const category = this.dataset.category;
+            filterByCategory(category);
+        });
+    });
+});
+
+function filterByCategory(category) {
+    if (category === 'all') {
+        window.location.href = '/staff/payments';
+    } else {
+        window.location.href = '/staff/payments?status=' + category;
+    }
+}
+
+// Listen for filter events
+window.addEventListener('filtersApplied', function(e) {
+    const filters = e.detail;
+    console.log('Applying filters:', filters);
+    // Implement filter logic
+});
 </script>
+
+<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

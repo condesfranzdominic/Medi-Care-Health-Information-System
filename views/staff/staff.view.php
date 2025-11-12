@@ -1,93 +1,139 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-    <h1>Manage Staff</h1>
-    <p><a href="/staff/dashboard" class="btn">← Back to Dashboard</a></p>
-    
-    <?php if ($error): ?>
-        <div style="background: #fee; color: #c33; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($error) ?>
+<div class="page-header">
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/staff/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Staff</span>
         </div>
-    <?php endif; ?>
-    
-    <?php if ($success): ?>
-        <div style="background: #efe; color: #3c3; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <?= htmlspecialchars($success) ?>
-        </div>
-    <?php endif; ?>
-    
-    <!-- Search Bar -->
-    <div style="background: #fff; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3>Search Staff</h3>
-        <form method="GET" style="display: flex; gap: 10px;">
-            <input type="text" name="search" value="<?= htmlspecialchars($search_query) ?>" 
-                   placeholder="Search by first name or last name..." 
-                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <button type="submit" class="btn">Search</button>
-            <?php if ($search_query): ?>
-                <a href="/staff/staff" class="btn">Clear</a>
-            <?php endif; ?>
-        </form>
+        <h1 class="page-title">Manage Staff</h1>
     </div>
-    
-    <!-- Create New Staff -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2>Add New Staff Member</h2>
+</div>
+
+<?php if (isset($error) && $error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><?= htmlspecialchars($error) ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($success) && $success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
+<!-- Search and Filter Bar -->
+<div class="search-filter-bar-modern">
+    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
+        <i class="fas fa-filter"></i>
+        <span>Filter</span>
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" class="search-input-modern" 
+                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
+                   placeholder="Search Staff...">
+        </div>
+        <?php if (!empty($search_query)): ?>
+            <a href="/staff/staff" class="btn btn-sm btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Clear</span>
+            </a>
+        <?php endif; ?>
+    </form>
+    <div class="category-tabs">
+        <button type="button" class="category-tab active" data-category="all">All</button>
+        <button type="button" class="category-tab" data-category="active">Active</button>
+        <button type="button" class="category-tab" data-category="inactive">Inactive</button>
+    </div>
+</div>
+
+<?php if (!empty($search_query)): ?>
+    <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <p>Found <?= count($staff_members) ?> result(s) for "<?= htmlspecialchars($search_query) ?>"</p>
+    </div>
+<?php endif; ?>
+
+<!-- Create New Staff -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Add New Staff Member</h2>
+    </div>
+    <div class="card-body">
         <form method="POST">
             <input type="hidden" name="action" value="create">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>First Name: *</label>
-                    <input type="text" name="first_name" required>
+                    <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="first_name" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Last Name: *</label>
-                    <input type="text" name="last_name" required>
+                    <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="last_name" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Email: *</label>
-                    <input type="email" name="email" required>
+                    <label>Email: <span style="color: var(--status-error);">*</span></label>
+                    <input type="email" name="email" required class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Phone:</label>
-                    <input type="text" name="phone">
+                    <input type="text" name="phone" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Position:</label>
-                    <input type="text" name="position" placeholder="e.g., Receptionist, Nurse">
+                    <input type="text" name="position" placeholder="e.g., Receptionist, Nurse" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Hire Date:</label>
-                    <input type="date" name="hire_date">
+                    <input type="date" name="hire_date" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Salary:</label>
-                    <input type="number" name="salary" step="0.01" min="0">
+                    <input type="number" name="salary" step="0.01" min="0" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Status:</label>
-                    <select name="status">
+                    <select name="status" class="form-control">
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-success">Add Staff Member</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Staff Member</span>
+                </button>
+            </div>
         </form>
     </div>
-    
-    <!-- Staff List -->
-    <div style="background: #fff; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2><?= $search_query ? 'Search Results' : 'All Staff Members' ?></h2>
-        <p style="background: #fff3cd; padding: 10px; border-radius: 5px; color: #856404; font-size: 14px;">
-            <strong>Note:</strong> Only Super Admin can delete staff members.
-        </p>
-        <?php if (empty($staff_members)): ?>
-            <p><?= $search_query ? 'No staff members found matching your search.' : 'No staff members found.' ?></p>
-        <?php else: ?>
-            <?php if ($search_query): ?>
-                <p style="margin-bottom: 15px; color: #666;">Found <?= count($staff_members) ?> result(s) for "<?= htmlspecialchars($search_query) ?>"</p>
-            <?php endif; ?>
+</div>
+
+<!-- Staff List -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title"><?= !empty($search_query) ? 'Search Results' : 'All Staff Members' ?></h2>
+    </div>
+    <div class="info-box" style="margin: 1.5rem;">
+        <i class="fas fa-info-circle"></i>
+        <p><strong>Note:</strong> Only Super Admin can delete staff members.</p>
+    </div>
+    <?php if (empty($staff_members)): ?>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-user-tie"></i></div>
+            <div class="empty-state-text"><?= !empty($search_query) ? 'No staff members found matching your search.' : 'No staff members found.' ?></div>
+        </div>
+    <?php else: ?>
+        <div style="overflow-x: auto;">
             <table class="table">
                 <thead>
                     <tr>
@@ -113,67 +159,105 @@
                             <td><?= htmlspecialchars($staff['staff_hire_date'] ?? 'N/A') ?></td>
                             <td>₱<?= number_format($staff['staff_salary'] ?? 0, 2) ?></td>
                             <td>
-                                <span style="color: <?= $staff['staff_status'] === 'active' ? 'green' : 'red' ?>;">
+                                <span class="status-badge <?= ($staff['staff_status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
                                     <?= ucfirst($staff['staff_status'] ?? 'active') ?>
                                 </span>
                             </td>
                             <td>
-                                <button onclick="editStaff(<?= htmlspecialchars(json_encode($staff)) ?>)" class="btn" style="font-size: 12px; padding: 5px 10px;">Edit</button>
+                                <div class="table-actions">
+                                    <button onclick="editStaff(<?= htmlspecialchars(json_encode($staff)) ?>)" class="btn btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="pagination-controls">
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="pagination-btn">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
-    <div style="background: #fff; max-width: 700px; margin: 50px auto; padding: 30px; border-radius: 8px;">
-        <h2>Edit Staff Member</h2>
+<!-- Edit Staff Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Staff Member</h2>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" id="edit_id">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>First Name: *</label>
-                    <input type="text" name="first_name" id="edit_first_name" required>
+                    <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="first_name" id="edit_first_name" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Last Name: *</label>
-                    <input type="text" name="last_name" id="edit_last_name" required>
+                    <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="last_name" id="edit_last_name" required class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Email: *</label>
-                    <input type="email" name="email" id="edit_email" required>
+                    <label>Email: <span style="color: var(--status-error);">*</span></label>
+                    <input type="email" name="email" id="edit_email" required class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Phone:</label>
-                    <input type="text" name="phone" id="edit_phone">
+                    <input type="text" name="phone" id="edit_phone" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Position:</label>
-                    <input type="text" name="position" id="edit_position">
+                    <input type="text" name="position" id="edit_position" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Hire Date:</label>
-                    <input type="date" name="hire_date" id="edit_hire_date">
+                    <input type="date" name="hire_date" id="edit_hire_date" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Salary:</label>
-                    <input type="number" name="salary" id="edit_salary" step="0.01" min="0">
+                    <input type="number" name="salary" id="edit_salary" step="0.01" min="0" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Status:</label>
-                    <select name="status" id="edit_status">
+                    <select name="status" id="edit_status" class="form-control">
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-success">Update Staff Member</button>
-            <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    <span>Update Staff Member</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -189,12 +273,42 @@ function editStaff(staff) {
     document.getElementById('edit_hire_date').value = staff.staff_hire_date || '';
     document.getElementById('edit_salary').value = staff.staff_salary || '';
     document.getElementById('edit_status').value = staff.staff_status || 'active';
-    document.getElementById('editModal').style.display = 'block';
+    document.getElementById('editModal').classList.add('active');
 }
 
 function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editModal').classList.remove('active');
 }
+
+// Category tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const category = this.dataset.category;
+            filterByCategory(category);
+        });
+    });
+});
+
+function filterByCategory(category) {
+    if (category === 'all') {
+        window.location.href = '/staff/staff';
+    } else {
+        window.location.href = '/staff/staff?status=' + category;
+    }
+}
+
+// Listen for filter events
+window.addEventListener('filtersApplied', function(e) {
+    const filters = e.detail;
+    console.log('Applying filters:', filters);
+    // Implement filter logic
+});
 </script>
+
+<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

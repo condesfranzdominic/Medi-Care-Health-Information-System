@@ -11,6 +11,31 @@ if (isset($_SESSION['is_superadmin']) && $_SESSION['is_superadmin'] === true) {
     $role = 'patient';
 }
 
+// Icon mapping function
+function getIcon($emoji) {
+    $iconMap = [
+        '📊' => 'fas fa-chart-line',
+        '👥' => 'fas fa-users',
+        '🏥' => 'fas fa-hospital',
+        '👨‍⚕️' => 'fas fa-user-md',
+        '👔' => 'fas fa-user-tie',
+        '🎓' => 'fas fa-graduation-cap',
+        '🗓️' => 'fas fa-calendar-alt',
+        '📋' => 'fas fa-clipboard-list',
+        '🔬' => 'fas fa-flask',
+        '📅' => 'fas fa-calendar-check',
+        '📄' => 'fas fa-file-medical',
+        '💳' => 'fas fa-credit-card',
+        '💰' => 'fas fa-coins',
+        '💵' => 'fas fa-money-bill-wave',
+        '⏰' => 'fas fa-clock',
+        '👤' => 'fas fa-user',
+        '📜' => 'fas fa-scroll',
+        '➕' => 'fas fa-plus-circle',
+    ];
+    return $iconMap[$emoji] ?? 'fas fa-circle';
+}
+
 // Define menu items for each role based on privileges
 $menus = [
     // SUPER ADMIN - Full control over all modules and records
@@ -81,260 +106,84 @@ $currentMenu = $menus[$role] ?? [];
 $currentPath = $_SERVER['REQUEST_URI'];
 ?>
 
-<style>
-    .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 260px;
-        height: 100vh;
-        background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        overflow-y: auto;
-        z-index: 1000;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .sidebar-header {
-        padding: 25px 20px;
-        background: rgba(0,0,0,0.2);
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .sidebar-header h2 {
-        margin: 0 0 5px 0;
-        font-size: 20px;
-        font-weight: 600;
-    }
-    
-    .sidebar-header p {
-        margin: 0;
-        font-size: 13px;
-        opacity: 0.8;
-    }
-    
-    .sidebar-menu {
-        padding: 20px 0;
-        flex: 1;
-    }
-    
-    .sidebar-menu a {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
-        color: rgba(255,255,255,0.8);
-        text-decoration: none;
-        transition: all 0.3s;
-        border-left: 3px solid transparent;
-    }
-    
-    .sidebar-menu a:hover {
-        background: rgba(255,255,255,0.1);
-        color: white;
-        border-left-color: #3498db;
-    }
-    
-    .sidebar-menu a.active {
-        background: rgba(52, 152, 219, 0.2);
-        color: white;
-        border-left-color: #3498db;
-    }
-    
-    .sidebar-menu a .icon {
-        font-size: 20px;
-        margin-right: 12px;
-        width: 24px;
-        text-align: center;
-    }
-    
-    .sidebar-menu-item {
-        position: relative;
-    }
-    
-    .sidebar-menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 20px;
-        color: rgba(255,255,255,0.8);
-        text-decoration: none;
-        transition: all 0.3s;
-        border-left: 3px solid transparent;
-        cursor: pointer;
-    }
-    
-    .sidebar-menu-toggle:hover {
-        background: rgba(255,255,255,0.1);
-        color: white;
-        border-left-color: #3498db;
-    }
-    
-    .sidebar-menu-toggle .toggle-icon {
-        font-size: 12px;
-        transition: transform 0.3s;
-    }
-    
-    .sidebar-menu-toggle.active .toggle-icon {
-        transform: rotate(90deg);
-    }
-    
-    .sidebar-submenu {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        background: rgba(0,0,0,0.2);
-    }
-    
-    .sidebar-submenu.open {
-        max-height: 500px;
-    }
-    
-    .sidebar-submenu a {
-        padding: 10px 20px 10px 56px;
-        font-size: 14px;
-    }
-    
-    .sidebar-footer {
-        width: 100%;
-        padding: 20px;
-        background: rgba(0,0,0,0.2);
-        border-top: 1px solid rgba(255,255,255,0.1);
-        margin-top: auto;
-    }
-    
-    .logout-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: 12px;
-        background: #e74c3c;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background 0.3s;
-        font-weight: 500;
-    }
-    
-    .logout-btn:hover {
-        background: #c0392b;
-    }
-    
-    .main-content {
-        margin-left: 260px;
-        min-height: 100vh;
-        background: #f5f6fa;
-    }
-    
-    .top-bar {
-        background: white;
-        padding: 20px 30px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-    }
-</style>
-
 <div class="sidebar">
-    <div class="sidebar-header">
-        <h2>🏥 Medi-Care</h2>
-        <p><?= ucfirst($role) ?> Portal</p>
+    <div class="sidebar-profile">
+        <div class="profile-avatar"><?= $userInitial ?></div>
+        <div class="profile-name"><?= htmlspecialchars($userName) ?></div>
     </div>
     
     <div class="sidebar-menu">
         <?php foreach ($currentMenu as $item): ?>
             <?php if (isset($item['submenu'])): ?>
                 <!-- Menu item with submenu -->
-                <div class="sidebar-menu-item">
-                    <div class="sidebar-menu-toggle" onclick="toggleSubmenu(this)">
-                        <div style="display: flex; align-items: center;">
-                            <span class="icon"><?= $item['icon'] ?></span>
-                            <span><?= $item['label'] ?></span>
-                        </div>
-                        <span class="toggle-icon">▶</span>
-                    </div>
-                    <div class="sidebar-submenu">
-                        <?php foreach ($item['submenu'] as $subitem): ?>
-                            <?php 
-                            $isActive = strpos($currentPath, $subitem['url']) !== false ? 'active' : '';
-                            ?>
-                            <a href="<?= $subitem['url'] ?>" class="<?= $isActive ?>">
-                                <span class="icon"><?= $subitem['icon'] ?></span>
-                                <span><?= $subitem['label'] ?></span>
-                            </a>
-                        <?php endforeach; ?>
-                    </div>
+                <?php 
+                $hasActiveSubmenu = false;
+                foreach ($item['submenu'] as $subitem) {
+                    if (strpos($currentPath, $subitem['url']) !== false) {
+                        $hasActiveSubmenu = true;
+                        break;
+                    }
+                }
+                ?>
+                <div class="menu-item <?= $hasActiveSubmenu ? 'active' : '' ?>" onclick="toggleSubmenu(this)">
+                    <span class="icon"><i class="<?= getIcon($item['icon']) ?>"></i></span>
+                    <span><?= $item['label'] ?></span>
+                    <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="sidebar-submenu" style="display: <?= $hasActiveSubmenu ? 'block' : 'none' ?>;">
+                    <?php foreach ($item['submenu'] as $subitem): ?>
+                        <?php 
+                        $isActive = strpos($currentPath, $subitem['url']) !== false ? 'active' : '';
+                        ?>
+                        <a href="<?= $subitem['url'] ?>" class="menu-item <?= $isActive ?>" style="padding-left: 3.5rem;">
+                            <span class="icon"><i class="<?= getIcon($subitem['icon']) ?>"></i></span>
+                            <span><?= $subitem['label'] ?></span>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             <?php else: ?>
                 <!-- Regular menu item -->
                 <?php 
                 $isActive = strpos($currentPath, $item['url']) !== false ? 'active' : '';
                 ?>
-                <a href="<?= $item['url'] ?>" class="<?= $isActive ?>">
-                    <span class="icon"><?= $item['icon'] ?></span>
+                <a href="<?= $item['url'] ?>" class="menu-item <?= $isActive ?>">
+                    <span class="icon"><i class="<?= getIcon($item['icon']) ?>"></i></span>
                     <span><?= $item['label'] ?></span>
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
     </div>
     
-    <script>
-    function toggleSubmenu(element) {
-        const submenu = element.nextElementSibling;
-        const isOpen = submenu.classList.contains('open');
-        
-        // Close all submenus
-        document.querySelectorAll('.sidebar-submenu').forEach(sm => {
-            sm.classList.remove('open');
-        });
-        document.querySelectorAll('.sidebar-menu-toggle').forEach(toggle => {
-            toggle.classList.remove('active');
-        });
-        
-        // Open clicked submenu if it was closed
-        if (!isOpen) {
-            submenu.classList.add('open');
-            element.classList.add('active');
-        }
-    }
-    
-    // Auto-open submenu if current page is in it
-    document.addEventListener('DOMContentLoaded', function() {
-        const activeLink = document.querySelector('.sidebar-submenu a.active');
-        if (activeLink) {
-            const submenu = activeLink.closest('.sidebar-submenu');
-            const toggle = submenu.previousElementSibling;
-            submenu.classList.add('open');
-            toggle.classList.add('active');
-        }
-    });
-    </script>
-    
-    <div class="sidebar-footer">
-        <a href="/logout" class="logout-btn">
-            <span style="margin-right: 8px;">🚪</span>
-            Logout
+    <div style="padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb; margin-top: auto;">
+        <a href="/logout" class="btn btn-danger" style="width: 100%; justify-content: center;">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
         </a>
     </div>
 </div>
+
+<script>
+function toggleSubmenu(element) {
+    const submenu = element.nextElementSibling;
+    if (submenu && submenu.classList.contains('sidebar-submenu')) {
+        const isOpen = submenu.style.display === 'block';
+        submenu.style.display = isOpen ? 'none' : 'block';
+        element.classList.toggle('active', !isOpen);
+    }
+}
+
+// Auto-open submenu if current page is in it
+document.addEventListener('DOMContentLoaded', function() {
+    const activeSubmenuLinks = document.querySelectorAll('.sidebar-submenu a.active');
+    activeSubmenuLinks.forEach(link => {
+        const submenu = link.closest('.sidebar-submenu');
+        if (submenu) {
+            submenu.style.display = 'block';
+            const toggle = submenu.previousElementSibling;
+            if (toggle) {
+                toggle.classList.add('active');
+            }
+        }
+    });
+});
+</script>

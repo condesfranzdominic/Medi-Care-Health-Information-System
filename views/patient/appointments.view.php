@@ -1,52 +1,44 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
 <div class="page-header">
-    <h1 class="page-title">Appointments</h1>
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/patient/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Appointments</span>
+        </div>
+        <h1 class="page-title">My Appointments</h1>
+    </div>
 </div>
 
-<!-- Filter Bar -->
-<div class="filter-bar">
-    <div class="filter-item">
-        <span class="icon">📅</span>
-        <select>
-            <option>For the entire period</option>
-            <option>This week</option>
-            <option>This month</option>
-            <option>This year</option>
-        </select>
-    </div>
-    <div class="filter-item">
-        <span class="icon">✓</span>
-        <select>
-            <option>All statuses</option>
-            <option>Completed</option>
-            <option>Scheduled</option>
-            <option>Canceled</option>
-        </select>
-    </div>
-    <div class="filter-item">
-        <span class="icon">👤</span>
-        <select>
-            <option>Only mine</option>
-            <option>All</option>
-        </select>
-    </div>
-    <div class="filter-item">
-        <span class="icon">📋</span>
-        <select>
-            <option>New ones on top</option>
-            <option>Oldest first</option>
-        </select>
-    </div>
-    <button class="btn-reset">
-        <span class="icon">🔄</span>
-        <span>Reset</span>
+<!-- Search and Filter Bar -->
+<div class="search-filter-bar-modern">
+    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
+        <i class="fas fa-filter"></i>
+        <span>Filter</span>
+        <i class="fas fa-chevron-down"></i>
     </button>
+    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" class="search-input-modern" 
+                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
+                   placeholder="Search Appointments...">
+        </div>
+    </form>
+    <div class="category-tabs">
+        <button type="button" class="category-tab active" data-category="all">All</button>
+        <button type="button" class="category-tab" data-category="upcoming">Upcoming</button>
+        <button type="button" class="category-tab" data-category="past">Past</button>
+    </div>
 </div>
 
 <?php if ($error): ?>
     <div class="alert alert-error">
-        <span>⚠️</span>
+        <i class="fas fa-exclamation-triangle"></i>
         <span><?= htmlspecialchars($error) ?></span>
     </div>
 <?php endif; ?>
@@ -54,7 +46,7 @@
 <!-- Appointments List -->
 <?php if (empty($appointments) && empty($upcoming_appointments) && empty($past_appointments)): ?>
     <div class="empty-state">
-        <div class="empty-state-icon">📅</div>
+        <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
         <div class="empty-state-text">No appointments found.</div>
         <a href="/patient/appointments/create" class="empty-state-link">Book your first appointment now!</a>
     </div>
@@ -86,7 +78,7 @@
                 
                 <div class="reception-details">
                     <div class="detail-item">
-                        <span class="icon">✓</span>
+                        <span class="icon"><i class="fas fa-check-circle"></i></span>
                         <div>
                             <div class="label">Status</div>
                             <div class="value">
@@ -96,7 +88,7 @@
                     </div>
                     
                     <div class="detail-item">
-                        <span class="icon">📅</span>
+                        <span class="icon"><i class="fas fa-calendar"></i></span>
                         <div>
                             <div class="label">Date</div>
                             <div class="value"><?= date('l, M j, Y', strtotime($apt['appointment_date'])) ?></div>
@@ -105,7 +97,7 @@
                     
                     <?php if ($apt['appointment_time']): ?>
                     <div class="detail-item">
-                        <span class="icon">🕐</span>
+                        <span class="icon"><i class="fas fa-clock"></i></span>
                         <div>
                             <div class="label">Time</div>
                             <div class="value"><?= date('g:i A', strtotime($apt['appointment_time'])) ?> — <?= date('g:i A', strtotime($apt['appointment_time'] . ' +' . ($apt['appointment_duration'] ?? 30) . ' minutes')) ?></div>
@@ -115,7 +107,7 @@
                     
                     <?php if (isset($apt['address']) && $apt['address']): ?>
                     <div class="detail-item">
-                        <span class="icon">📍</span>
+                        <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
                         <div>
                             <div class="label">Address</div>
                             <div class="value"><?= htmlspecialchars($apt['address']) ?></div>
@@ -125,7 +117,7 @@
                     
                     <?php if (isset($apt['office']) && $apt['office']): ?>
                     <div class="detail-item">
-                        <span class="icon">🏢</span>
+                        <span class="icon"><i class="fas fa-building"></i></span>
                         <div>
                             <div class="label">Office</div>
                             <div class="value"><?= htmlspecialchars($apt['office']) ?></div>
@@ -134,12 +126,12 @@
                     <?php endif; ?>
                     
                     <div class="detail-item">
-                        <span class="icon">📄</span>
+                        <span class="icon"><i class="fas fa-file-alt"></i></span>
                         <div>
                             <div class="label">Description</div>
                             <div class="value">
                                 <?php if ($apt['appointment_notes']): ?>
-                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;">Visit Summary 👁️</a>
+                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;">Visit Summary <i class="fas fa-eye"></i></a>
                                 <?php else: ?>
                                     Not found.
                                 <?php endif; ?>
@@ -148,7 +140,7 @@
                     </div>
                     
                     <div class="detail-item">
-                        <span class="icon">💊</span>
+                        <span class="icon"><i class="fas fa-pills"></i></span>
                         <div>
                             <div class="label">Prescription</div>
                             <div class="value">
@@ -192,7 +184,7 @@
                 
                 <div class="reception-details">
                     <div class="detail-item">
-                        <span class="icon">✓</span>
+                        <span class="icon"><i class="fas fa-check-circle"></i></span>
                         <div>
                             <div class="label">Status</div>
                             <div class="value">
@@ -202,7 +194,7 @@
                     </div>
                     
                     <div class="detail-item">
-                        <span class="icon">📅</span>
+                        <span class="icon"><i class="fas fa-calendar"></i></span>
                         <div>
                             <div class="label">Date</div>
                             <div class="value"><?= date('l, M j, Y', strtotime($apt['appointment_date'])) ?></div>
@@ -211,7 +203,7 @@
                     
                     <?php if ($apt['appointment_time']): ?>
                     <div class="detail-item">
-                        <span class="icon">🕐</span>
+                        <span class="icon"><i class="fas fa-clock"></i></span>
                         <div>
                             <div class="label">Time</div>
                             <div class="value"><?= date('g:i A', strtotime($apt['appointment_time'])) ?> — <?= date('g:i A', strtotime($apt['appointment_time'] . ' +' . ($apt['appointment_duration'] ?? 30) . ' minutes')) ?></div>
@@ -221,7 +213,7 @@
                     
                     <?php if (isset($apt['address']) && $apt['address']): ?>
                     <div class="detail-item">
-                        <span class="icon">📍</span>
+                        <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
                         <div>
                             <div class="label">Address</div>
                             <div class="value"><?= htmlspecialchars($apt['address']) ?></div>
@@ -231,7 +223,7 @@
                     
                     <?php if (isset($apt['office']) && $apt['office']): ?>
                     <div class="detail-item">
-                        <span class="icon">🏢</span>
+                        <span class="icon"><i class="fas fa-building"></i></span>
                         <div>
                             <div class="label">Office</div>
                             <div class="value"><?= htmlspecialchars($apt['office']) ?></div>
@@ -240,12 +232,12 @@
                     <?php endif; ?>
                     
                     <div class="detail-item">
-                        <span class="icon">📄</span>
+                        <span class="icon"><i class="fas fa-file-alt"></i></span>
                         <div>
                             <div class="label">Description</div>
                             <div class="value">
                                 <?php if ($apt['appointment_notes']): ?>
-                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;">Visit Summary 👁️</a>
+                                    <a href="#" style="color: var(--primary-blue); text-decoration: none;">Visit Summary <i class="fas fa-eye"></i></a>
                                 <?php else: ?>
                                     Not found.
                                 <?php endif; ?>
@@ -254,7 +246,7 @@
                     </div>
                     
                     <div class="detail-item">
-                        <span class="icon">💊</span>
+                        <span class="icon"><i class="fas fa-pills"></i></span>
                         <div>
                             <div class="label">Prescription</div>
                             <div class="value">
@@ -271,5 +263,118 @@
         <?php endforeach; ?>
     <?php endif; ?>
 <?php endif; ?>
+
+<script>
+// Category tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const category = this.dataset.category;
+            filterByCategory(category);
+        });
+    });
+});
+
+function filterByCategory(category) {
+    const params = new URLSearchParams(window.location.search);
+    if (category === 'all') {
+        params.delete('category');
+    } else {
+        params.set('category', category);
+    }
+    window.location.href = '/patient/appointments' + (params.toString() ? '?' + params.toString() : '');
+}
+
+function applyAppointmentFilters() {
+    const filters = {
+        status: document.querySelector('input[name="filter_status"]:checked')?.value || ''
+    };
+    const params = new URLSearchParams(window.location.search);
+    if (filters.status) {
+        params.set('status', filters.status);
+    } else {
+        params.delete('status');
+    }
+    const url = '/patient/appointments' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+}
+</script>
+
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Status Filter -->
+    <?php if (!empty($filter_statuses)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('status')">
+            <h4 class="filter-section-title">Status</h4>
+            <button type="button" class="filter-section-toggle" id="statusToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="statusContent">
+            <div class="filter-radio-group">
+                <?php foreach ($filter_statuses as $status): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_status" id="status_<?= $status['status_id'] ?>" value="<?= $status['status_id'] ?>">
+                        <label for="status_<?= $status['status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyAppointmentFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

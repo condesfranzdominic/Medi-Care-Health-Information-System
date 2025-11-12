@@ -72,27 +72,6 @@
 </div>
 
 <!-- Staff List -->
-                    <input type="number" name="salary" step="0.01" min="0" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Status:</label>
-                    <select name="status" class="form-control">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
-            </div>
-            <div class="action-buttons" style="margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Staff Member</span>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Staff List -->
 <div class="card">
     <div class="card-header">
         <h2 class="card-title"><?= !empty($search_query) ? 'Search Results' : 'All Staff Members' ?></h2>
@@ -111,7 +90,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -125,7 +103,6 @@
                 <tbody>
                     <?php foreach ($staff_members as $staff): ?>
                         <tr>
-                            <td><?= htmlspecialchars($staff['staff_id']) ?></td>
                             <td><strong><?= htmlspecialchars($staff['staff_first_name'] . ' ' . $staff['staff_last_name']) ?></strong></td>
                             <td><?= htmlspecialchars($staff['staff_email']) ?></td>
                             <td><?= htmlspecialchars($staff['staff_phone'] ?? 'N/A') ?></td>
@@ -171,6 +148,68 @@
             </div>
         </div>
     <?php endif; ?>
+</div>
+
+<!-- Add Staff Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Staff Member</h2>
+            <button type="button" class="modal-close" onclick="closeAddStaffModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="first_name" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="last_name" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Email: <span style="color: var(--status-error);">*</span></label>
+                    <input type="email" name="email" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="text" name="phone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Position:</label>
+                    <input type="text" name="position" placeholder="e.g., Receptionist, Nurse" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Hire Date:</label>
+                    <input type="date" name="hire_date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Salary:</label>
+                    <input type="number" name="salary" step="0.01" min="0" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select name="status" class="form-control">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Staff Member</span>
+                </button>
+                <button type="button" onclick="closeAddStaffModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Edit Staff Modal -->
@@ -237,6 +276,15 @@
 </div>
 
 <script>
+function openAddStaffModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddStaffModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+}
+
 function editStaff(staff) {
     document.getElementById('edit_id').value = staff.staff_id;
     document.getElementById('edit_first_name').value = staff.staff_first_name;
@@ -281,8 +329,135 @@ window.addEventListener('filtersApplied', function(e) {
     console.log('Applying filters:', filters);
     // Implement filter logic
 });
+
+function applyStaffFilters() {
+    const filters = {
+        status: document.querySelector('input[name="filter_status"]:checked')?.value || '',
+        position: document.querySelector('input[name="filter_position"]:checked')?.value || ''
+    };
+    const params = new URLSearchParams();
+    if (filters.status) params.append('status', filters.status);
+    if (filters.position) params.append('position', filters.position);
+    const url = '/staff/staff' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    const positionSearch = document.getElementById('positionSearch');
+    if (positionSearch) positionSearch.value = '';
+}
 </script>
 
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Status Filter -->
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('status')">
+            <h4 class="filter-section-title">Status</h4>
+            <button type="button" class="filter-section-toggle" id="statusToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="statusContent">
+            <div class="filter-radio-group">
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_status" id="status_active" value="active">
+                    <label for="status_active">Active</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_status" id="status_inactive" value="inactive">
+                    <label for="status_inactive">Inactive</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Position Filter -->
+    <?php if (!empty($filter_positions)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('position')">
+            <h4 class="filter-section-title">Position</h4>
+            <button type="button" class="filter-section-toggle" id="positionToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="positionContent">
+            <input type="text" class="filter-search-input" placeholder="Search Position" id="positionSearch">
+            <div class="filter-radio-group" id="positionList">
+                <?php foreach ($filter_positions as $position): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_position" id="position_<?= htmlspecialchars(strtolower(str_replace(' ', '_', $position))) ?>" value="<?= htmlspecialchars($position) ?>">
+                        <label for="position_<?= htmlspecialchars(strtolower(str_replace(' ', '_', $position))) ?>"><?= htmlspecialchars($position) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyStaffFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const positionSearch = document.getElementById('positionSearch');
+    if (positionSearch) {
+        positionSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const positionItems = document.querySelectorAll('#positionList .filter-radio-item');
+            positionItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

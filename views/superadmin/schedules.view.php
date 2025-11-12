@@ -110,7 +110,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Date</th>
                         <th>Doctor</th>
                         <th>Specialization</th>
@@ -124,7 +123,6 @@
                 <tbody>
                     <?php foreach ($schedules as $sched): ?>
                         <tr>
-                            <td><?= htmlspecialchars($sched['schedule_id']) ?></td>
                             <td><strong><?= htmlspecialchars($sched['schedule_date']) ?></strong></td>
                             <td>Dr. <?= htmlspecialchars($sched['doc_first_name'] . ' ' . $sched['doc_last_name']) ?></td>
                             <td><?= htmlspecialchars($sched['spec_name'] ?? 'N/A') ?></td>

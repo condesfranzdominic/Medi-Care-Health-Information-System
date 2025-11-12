@@ -30,12 +30,12 @@
             <div class="stat-card-content">
                 <div class="stat-label">
                     <i class="fas fa-users"></i>
-                    <span>Overall Visitors</span>
+                    <span>Overall Users</span>
                 </div>
                 <div class="stat-value"><?= $stats['total_users'] ?></div>
                 <div class="stat-trend">
                     <i class="fas fa-arrow-up"></i>
-                    <span><?= $stats['total_users'] > 0 ? round($stats['total_users'] * 0.15) : 0 ?> visitors</span>
+                    <span><?= $stats['total_users'] > 0 ? round($stats['total_users'] * 0.15) : 0 ?> users</span>
                 </div>
             </div>
             <div class="stat-icon">

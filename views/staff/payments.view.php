@@ -82,7 +82,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Date</th>
                         <th>Appointment ID</th>
                         <th>Patient</th>
@@ -95,7 +94,6 @@
                 <tbody>
                     <?php foreach ($payments as $payment): ?>
                         <tr>
-                            <td><strong><?= htmlspecialchars($payment['payment_id']) ?></strong></td>
                             <td><?= htmlspecialchars($payment['payment_date']) ?></td>
                             <td><?= htmlspecialchars($payment['appointment_id']) ?></td>
                             <td><?= htmlspecialchars(($payment['pat_first_name'] ?? '') . ' ' . ($payment['pat_last_name'] ?? '')) ?></td>

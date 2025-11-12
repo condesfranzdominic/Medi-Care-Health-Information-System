@@ -89,9 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Pagination
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$items_per_page = 10;
+$offset = ($page - 1) * $items_per_page;
+
 // Fetch all payments with related data
 try {
-    $stmt = $db->query("
+    // Get total count for pagination
+    $count_stmt = $db->query("SELECT COUNT(*) FROM payments p");
+    $total_items = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_items / $items_per_page);
+    
+    // Fetch paginated results
+    $stmt = $db->prepare("
         SELECT p.*, 
                a.appointment_id, a.appointment_date,
                pat.pat_first_name, pat.pat_last_name,
@@ -103,11 +114,17 @@ try {
         LEFT JOIN payment_methods pm ON p.payment_method_id = pm.method_id
         LEFT JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
         ORDER BY p.payment_date DESC, p.created_at DESC
+        LIMIT :limit OFFSET :offset
     ");
+    $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch payments: ' . $e->getMessage();
     $payments = [];
+    $total_items = 0;
+    $total_pages = 0;
 }
 
 // Fetch payment methods and statuses for dropdowns

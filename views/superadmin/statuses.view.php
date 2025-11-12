@@ -71,7 +71,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Status Name</th>
                         <th>Description</th>
                         <th>Preview</th>
@@ -82,7 +81,6 @@
                 <tbody>
                     <?php foreach ($statuses as $status): ?>
                         <tr>
-                            <td><?= htmlspecialchars($status['status_id']) ?></td>
                             <td><strong><?= htmlspecialchars($status['status_name']) ?></strong></td>
                             <td><?= htmlspecialchars($status['status_description'] ?? 'N/A') ?></td>
                             <td>

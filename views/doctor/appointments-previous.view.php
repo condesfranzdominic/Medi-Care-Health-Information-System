@@ -1,7 +1,17 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
 <div class="page-header">
-    <h1 class="page-title">Previous Appointments</h1>
+    <div class="page-header-top">
+        <div class="breadcrumbs">
+            <a href="/doctor/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Previous Appointments</span>
+        </div>
+        <h1 class="page-title">Previous Appointments</h1>
+    </div>
     <div style="display: flex; gap: 1rem; margin-top: 1rem;">
         <a href="/doctor/appointments/today" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i>
@@ -60,7 +70,9 @@
                     <th>Contact</th>
                     <th>Duration</th>
                     <th>Status</th>
-                    <th>Notes</th>
+                    <th style="width: 50px;">
+                        <i class="fas fa-sticky-note notes-header-icon" title="Notes - Hover over rows to view"></i>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -74,6 +86,7 @@
                     $statusClass = $isCompleted ? 'badge-success' : ($isCanceled ? 'badge-error' : 'badge-warning');
                     $appointmentDate = isset($apt['appointment_date']) ? date('M d, Y', strtotime($apt['appointment_date'])) : 'N/A';
                     $appointmentTime = isset($apt['appointment_time']) ? date('g:i A', strtotime($apt['appointment_time'])) : 'N/A';
+                    $notes = !empty($apt['appointment_notes']) ? htmlspecialchars($apt['appointment_notes']) : 'No notes available';
                     ?>
                     <tr class="patient-row">
                         <td>
@@ -103,10 +116,12 @@
                                 <?= htmlspecialchars($apt['status_name'] ?? 'N/A') ?>
                             </span>
                         </td>
-                        <td>
-                            <span style="color: var(--text-secondary);">
-                                <?= !empty($apt['appointment_notes']) ? htmlspecialchars($apt['appointment_notes']) : '-' ?>
-                            </span>
+                        <td class="notes-cell" data-notes="<?= htmlspecialchars($notes) ?>">
+                            <?php if (!empty($apt['appointment_notes'])): ?>
+                                <i class="fas fa-sticky-note" style="color: var(--primary-blue); cursor: help;"></i>
+                            <?php else: ?>
+                                <span style="color: var(--text-secondary);">-</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

@@ -71,7 +71,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Service Name</th>
                         <th>Description</th>
                         <th>Price</th>
@@ -83,7 +82,6 @@
                 <tbody>
                     <?php foreach ($services as $service): ?>
                         <tr>
-                            <td><?= htmlspecialchars($service['service_id']) ?></td>
                             <td><strong><?= htmlspecialchars($service['service_name']) ?></strong></td>
                             <td><?= htmlspecialchars($service['service_description'] ?? 'N/A') ?></td>
                             <td>₱<?= number_format($service['service_price'] ?? 0, 2) ?></td>
@@ -110,25 +108,36 @@
         </div>
         
         <!-- Pagination -->
+        <?php if (isset($total_pages) && $total_pages > 1): ?>
         <div class="pagination">
             <div class="pagination-controls">
-                <button class="pagination-btn" disabled>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
                     <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button class="pagination-btn" disabled>
+                </a>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
                     <i class="fas fa-angle-left"></i>
-                </button>
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-                <button class="pagination-btn">
+                </a>
+                <?php
+                $start_page = max(1, $page - 2);
+                $end_page = min($total_pages, $page + 2);
+                for ($i = $start_page; $i <= $end_page; $i++):
+                ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="pagination-btn <?= $i == $page ? 'active' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
                     <i class="fas fa-angle-right"></i>
-                </button>
-                <button class="pagination-btn">
+                </a>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
                     <i class="fas fa-angle-double-right"></i>
-                </button>
+                </a>
+            </div>
+            <div class="pagination-info" style="margin-top: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> services
             </div>
         </div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 

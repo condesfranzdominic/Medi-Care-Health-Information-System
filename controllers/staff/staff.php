@@ -96,27 +96,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle search
+// Handle search and filters
+$search_query = '';
 if (isset($_GET['search'])) {
     $search_query = sanitize($_GET['search']);
 }
 
-// Fetch staff members with optional search
+$filter_status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
+$filter_position = isset($_GET['position']) ? sanitize($_GET['position']) : '';
+
+// Fetch staff members with filters
 try {
+    $where_conditions = [];
+    $params = [];
+
     if (!empty($search_query)) {
-        $stmt = $db->prepare("
-            SELECT * FROM staff 
-            WHERE staff_first_name LIKE :search OR staff_last_name LIKE :search
-            ORDER BY staff_first_name, staff_last_name
-        ");
-        $stmt->execute(['search' => '%' . $search_query . '%']);
-    } else {
-        $stmt = $db->query("SELECT * FROM staff ORDER BY staff_first_name, staff_last_name");
+        $where_conditions[] = "(staff_first_name LIKE :search OR staff_last_name LIKE :search)";
+        $params['search'] = '%' . $search_query . '%';
     }
+
+    if (!empty($filter_status)) {
+        $where_conditions[] = "staff_status = :status";
+        $params['status'] = $filter_status;
+    }
+
+    if (!empty($filter_position)) {
+        $where_conditions[] = "staff_position = :position";
+        $params['position'] = $filter_position;
+    }
+
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+    $stmt = $db->prepare("SELECT * FROM staff $where_clause ORDER BY staff_first_name, staff_last_name");
+    $stmt->execute($params);
     $staff_members = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch staff: ' . $e->getMessage();
     $staff_members = [];
+}
+
+// Fetch filter data from database
+$filter_positions = [];
+try {
+    $stmt = $db->query("SELECT DISTINCT staff_position FROM staff WHERE staff_position IS NOT NULL AND staff_position != '' ORDER BY staff_position");
+    $filter_positions = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $filter_positions = [];
 }
 
 require_once __DIR__ . '/../../views/staff/staff.view.php';

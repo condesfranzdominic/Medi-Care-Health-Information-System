@@ -50,38 +50,12 @@
     </div>
 </div>
 
-<!-- Create New Payment Method -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Add New Payment Method</h2>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Method Name: <span style="color: var(--status-error);">*</span></label>
-                    <input type="text" name="method_name" required placeholder="e.g., Cash, Credit Card, Mobile Payment" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Description:</label>
-                    <input type="text" name="method_description" placeholder="Brief description" class="form-control">
-                </div>
-            </div>
-            <div class="form-group" style="margin-top: 1rem;">
-                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" name="is_active" value="1" checked style="width: auto;">
-                    <span>Active (available for use)</span>
-                </label>
-            </div>
-            <div class="action-buttons" style="margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Payment Method</span>
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Add Payment Method Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddPaymentMethodModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Payment Method</span>
+    </button>
 </div>
 
 <!-- Payment Methods List -->
@@ -103,7 +77,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Method Name</th>
                         <th>Description</th>
                         <th>Status</th>
@@ -114,7 +87,6 @@
                 <tbody>
                     <?php foreach ($payment_methods as $method): ?>
                         <tr>
-                            <td><?= htmlspecialchars($method['method_id']) ?></td>
                             <td><strong><?= htmlspecialchars($method['method_name']) ?></strong></td>
                             <td><?= htmlspecialchars($method['method_description'] ?? 'N/A') ?></td>
                             <td>
@@ -157,6 +129,47 @@
             </div>
         </div>
     <?php endif; ?>
+</div>
+
+<!-- Add Payment Method Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Payment Method</h2>
+            <button type="button" class="modal-close" onclick="closeAddPaymentMethodModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Method Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="method_name" required placeholder="e.g., Cash, Credit Card, Mobile Payment" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <input type="text" name="method_description" placeholder="Brief description" class="form-control">
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="is_active" value="1" checked style="width: auto;">
+                    <span>Active (available for use)</span>
+                </label>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Payment Method</span>
+                </button>
+                <button type="button" onclick="closeAddPaymentMethodModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Edit Payment Method Modal -->
@@ -202,6 +215,16 @@
 </div>
 
 <script>
+function openAddPaymentMethodModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddPaymentMethodModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+    document.querySelector('#addModal input[name="is_active"]').checked = true;
+}
+
 function editMethod(method) {
     document.getElementById('edit_id').value = method.method_id;
     document.getElementById('edit_method_name').value = method.method_name;
@@ -242,7 +265,5 @@ window.addEventListener('filtersApplied', function(e) {
     // Implement filter logic
 });
 </script>
-
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

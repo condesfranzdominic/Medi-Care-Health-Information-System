@@ -73,7 +73,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Method Name</th>
                         <th>Description</th>
                         <th>Status</th>
@@ -84,7 +83,6 @@
                 <tbody>
                     <?php foreach ($payment_methods as $method): ?>
                         <tr>
-                            <td><?= htmlspecialchars($method['method_id']) ?></td>
                             <td><strong><?= htmlspecialchars($method['method_name']) ?></strong></td>
                             <td><?= htmlspecialchars($method['method_description'] ?? 'N/A') ?></td>
                             <td>

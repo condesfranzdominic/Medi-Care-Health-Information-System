@@ -49,4 +49,22 @@ return [
     'patient/appointments/create' => 'controllers/patient/create-appointment.php',
     'patient/create-appointment' => 'controllers/patient/create-appointment.php',
     'patient/profile' => 'controllers/patient/profile.php',
+    'patient/account' => 'controllers/patient/account.php',
+    'patient/settings' => 'controllers/patient/settings.php',
+    'patient/privacy' => 'controllers/patient/privacy.php',
+    
+    // Doctor Routes - Additional
+    'doctor/account' => 'controllers/doctor/account.php',
+    'doctor/settings' => 'controllers/doctor/settings.php',
+    'doctor/privacy' => 'controllers/doctor/privacy.php',
+    
+    // Staff Routes - Additional
+    'staff/account' => 'controllers/staff/account.php',
+    'staff/settings' => 'controllers/staff/settings.php',
+    'staff/privacy' => 'controllers/staff/privacy.php',
+    
+    // Super Admin Routes - Additional
+    'superadmin/account' => 'controllers/superadmin/account.php',
+    'superadmin/settings' => 'controllers/superadmin/settings.php',
+    'superadmin/privacy' => 'controllers/superadmin/privacy.php',
 ];

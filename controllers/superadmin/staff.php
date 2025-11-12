@@ -157,6 +157,11 @@ if (isset($_GET['search'])) {
 $filter_status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $filter_position = isset($_GET['position']) ? sanitize($_GET['position']) : '';
 
+// Pagination
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$items_per_page = 10;
+$offset = ($page - 1) * $items_per_page;
+
 // Fetch staff members with filters
 try {
     $where_conditions = [];
@@ -179,12 +184,26 @@ try {
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
     
-    $stmt = $db->prepare("SELECT * FROM staff $where_clause ORDER BY created_at DESC");
-    $stmt->execute($params);
+    // Get total count for pagination
+    $count_stmt = $db->prepare("SELECT COUNT(*) FROM staff $where_clause");
+    $count_stmt->execute($params);
+    $total_items = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_items / $items_per_page);
+    
+    // Fetch paginated results
+    $stmt = $db->prepare("SELECT * FROM staff $where_clause ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
+    foreach ($params as $key => $value) {
+        $stmt->bindValue(':' . $key, $value);
+    }
+    $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $staff = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch staff: ' . $e->getMessage();
     $staff = [];
+    $total_items = 0;
+    $total_pages = 0;
 }
 
 // Fetch filter data from database

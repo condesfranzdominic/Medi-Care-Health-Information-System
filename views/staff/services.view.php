@@ -75,7 +75,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Service Name</th>
                         <th>Category</th>
                         <th>Price</th>
@@ -87,7 +86,6 @@
                 <tbody>
                     <?php foreach ($services as $service): ?>
                         <tr>
-                            <td><?= htmlspecialchars($service['service_id']) ?></td>
                             <td><strong><?= htmlspecialchars($service['service_name']) ?></strong></td>
                             <td><?= htmlspecialchars($service['service_category'] ?? 'N/A') ?></td>
                             <td>₱<?= number_format($service['service_price'] ?? 0, 2) ?></td>

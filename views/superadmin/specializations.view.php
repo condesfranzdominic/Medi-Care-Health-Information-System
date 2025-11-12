@@ -71,7 +71,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Specialization Name</th>
                         <th>Description</th>
                         <th>Doctors</th>
@@ -81,7 +80,6 @@
                 <tbody>
                     <?php foreach ($specializations as $spec): ?>
                         <tr>
-                            <td><?= htmlspecialchars($spec['spec_id']) ?></td>
                             <td><strong><?= htmlspecialchars($spec['spec_name']) ?></strong></td>
                             <td><?= htmlspecialchars($spec['spec_description'] ?? 'N/A') ?></td>
                             <td>

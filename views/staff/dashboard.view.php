@@ -137,7 +137,6 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Service Name</th>
                     <th>Category</th>
                     <th>Price</th>
@@ -146,7 +145,6 @@
             <tbody>
                 <?php foreach ($recent_services as $service): ?>
                     <tr>
-                        <td>#<?= htmlspecialchars($service['service_id']) ?></td>
                         <td><?= htmlspecialchars($service['service_name']) ?></td>
                         <td><?= htmlspecialchars($service['service_category'] ?? 'N/A') ?></td>
                         <td>₱<?= number_format($service['service_price'] ?? 0, 2) ?></td>

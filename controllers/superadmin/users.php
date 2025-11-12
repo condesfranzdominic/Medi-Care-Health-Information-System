@@ -168,6 +168,11 @@ if (isset($_GET['search'])) {
 
 $filter_role = isset($_GET['role']) ? sanitize($_GET['role']) : '';
 
+// Pagination
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$items_per_page = 10;
+$offset = ($page - 1) * $items_per_page;
+
 // Fetch users with filters
 try {
     $where_conditions = [];
@@ -192,17 +197,32 @@ try {
 
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
+    // Get total count for pagination
+    $count_stmt = $db->prepare("SELECT COUNT(*) FROM users $where_clause");
+    $count_stmt->execute($params);
+    $total_items = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_items / $items_per_page);
+
+    // Fetch paginated results
     $stmt = $db->prepare("
         SELECT user_id, user_email, user_is_superadmin, pat_id, staff_id, doc_id, created_at 
         FROM users 
         $where_clause
         ORDER BY created_at DESC
+        LIMIT :limit OFFSET :offset
     ");
-    $stmt->execute($params);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue(':' . $key, $value);
+    }
+    $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch users: ' . $e->getMessage();
     $users = [];
+    $total_items = 0;
+    $total_pages = 0;
 }
 
 // Include the view

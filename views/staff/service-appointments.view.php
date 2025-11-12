@@ -101,11 +101,16 @@
                         <th>Doctor</th>
                         <th>Duration</th>
                         <th>Status</th>
-                        <th>Notes</th>
+                        <th style="width: 50px;">
+                            <i class="fas fa-sticky-note notes-header-icon" title="Notes - Hover over rows to view"></i>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($appointments as $apt): ?>
+                        <?php
+                        $notes = !empty($apt['appointment_notes']) ? htmlspecialchars($apt['appointment_notes']) : 'No notes available';
+                        ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($apt['appointment_id']) ?></strong></td>
                             <td><?= isset($apt['appointment_date']) ? date('M j, Y', strtotime($apt['appointment_date'])) : 'N/A' ?></td>
@@ -127,7 +132,13 @@
                                     <?= htmlspecialchars($apt['status_name'] ?? 'N/A') ?>
                                 </span>
                             </td>
-                            <td><?= htmlspecialchars($apt['appointment_notes'] ?? '-') ?></td>
+                            <td class="notes-cell" data-notes="<?= htmlspecialchars($notes) ?>">
+                                <?php if (!empty($apt['appointment_notes'])): ?>
+                                    <i class="fas fa-sticky-note" style="color: var(--primary-blue); cursor: help;"></i>
+                                <?php else: ?>
+                                    <span style="color: var(--text-secondary);">-</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

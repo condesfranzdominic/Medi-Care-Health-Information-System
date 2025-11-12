@@ -48,36 +48,12 @@
     </div>
 </div>
 
-<!-- Create New Status -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Add New Status</h2>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Status Name: <span style="color: var(--status-error);">*</span></label>
-                    <input type="text" name="status_name" required placeholder="e.g., Scheduled, Completed, Cancelled" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Description:</label>
-                    <input type="text" name="status_description" placeholder="Brief description" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Color:</label>
-                    <input type="color" name="status_color" value="#3B82F6" style="width: 100%; height: 42px; cursor: pointer; border: 1px solid var(--border-medium); border-radius: var(--radius-md);">
-                </div>
-            </div>
-            <div class="action-buttons" style="margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Status</span>
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Add Status Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddStatusModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Status</span>
+    </button>
 </div>
 
 <!-- Statuses List -->
@@ -99,7 +75,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Status Name</th>
                         <th>Description</th>
                         <th>Preview</th>
@@ -110,7 +85,6 @@
                 <tbody>
                     <?php foreach ($statuses as $status): ?>
                         <tr>
-                            <td><?= htmlspecialchars($status['status_id']) ?></td>
                             <td><strong><?= htmlspecialchars($status['status_name']) ?></strong></td>
                             <td><?= htmlspecialchars($status['status_description'] ?? 'N/A') ?></td>
                             <td>
@@ -155,6 +129,45 @@
     <?php endif; ?>
 </div>
 
+<!-- Add Status Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Status</h2>
+            <button type="button" class="modal-close" onclick="closeAddStatusModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Status Name: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="status_name" required placeholder="e.g., Scheduled, Completed, Cancelled" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <input type="text" name="status_description" placeholder="Brief description" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Color:</label>
+                    <input type="color" name="status_color" value="#3B82F6" style="width: 100%; height: 42px; cursor: pointer; border: 1px solid var(--border-medium); border-radius: var(--radius-md);">
+                </div>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Status</span>
+                </button>
+                <button type="button" onclick="closeAddStatusModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Edit Status Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
@@ -196,6 +209,15 @@
 </div>
 
 <script>
+function openAddStatusModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddStatusModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+}
+
 function editStatus(status) {
     document.getElementById('edit_id').value = status.status_id;
     document.getElementById('edit_status_name').value = status.status_name;
@@ -234,7 +256,5 @@ window.addEventListener('filtersApplied', function(e) {
     // Implement filter logic
 });
 </script>
-
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

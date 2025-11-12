@@ -71,7 +71,6 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Status Name</th>
                         <th>Description</th>
                         <th>Payments</th>
@@ -81,7 +80,6 @@
                 <tbody>
                     <?php foreach ($payment_statuses as $status): ?>
                         <tr>
-                            <td><?= htmlspecialchars($status['payment_status_id']) ?></td>
                             <td><strong><?= htmlspecialchars($status['status_name']) ?></strong></td>
                             <td><?= htmlspecialchars($status['status_description'] ?? 'N/A') ?></td>
                             <td><?= isset($status['payment_count']) ? $status['payment_count'] : 0 ?> payment(s)</td>

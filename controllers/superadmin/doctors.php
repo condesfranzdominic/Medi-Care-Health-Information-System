@@ -200,6 +200,11 @@ $spec_filter = isset($_GET['spec_id']) ? (int)$_GET['spec_id'] : null;
 $status_filter = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $spec_name_filter = '';
 
+// Pagination
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$items_per_page = 10;
+$offset = ($page - 1) * $items_per_page;
+
 // Fetch all doctors with filters
 try {
     $where_conditions = [];
@@ -223,18 +228,33 @@ try {
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
     
+    // Get total count for pagination
+    $count_stmt = $db->prepare("SELECT COUNT(*) FROM doctors d $where_clause");
+    $count_stmt->execute($params);
+    $total_items = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_items / $items_per_page);
+    
+    // Fetch paginated results
     $stmt = $db->prepare("
         SELECT d.*, s.spec_name 
         FROM doctors d
         LEFT JOIN specializations s ON d.doc_specialization_id = s.spec_id
         $where_clause
         ORDER BY d.created_at DESC
+        LIMIT :limit OFFSET :offset
     ");
-    $stmt->execute($params);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue(':' . $key, $value);
+    }
+    $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch doctors: ' . $e->getMessage();
     $doctors = [];
+    $total_items = 0;
+    $total_pages = 0;
 }
 
 // Fetch specializations for dropdown

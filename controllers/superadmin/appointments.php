@@ -113,6 +113,11 @@ $filter_status = isset($_GET['status']) ? (int)$_GET['status'] : null;
 $filter_doctor = isset($_GET['doctor']) ? (int)$_GET['doctor'] : null;
 $filter_patient = isset($_GET['patient']) ? (int)$_GET['patient'] : null;
 
+// Pagination
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$items_per_page = 10;
+$offset = ($page - 1) * $items_per_page;
+
 // Fetch appointments with filters
 try {
     $where_conditions = [];
@@ -140,6 +145,19 @@ try {
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
     
+    // Get total count for pagination
+    $count_stmt = $db->prepare("
+        SELECT COUNT(*) 
+        FROM appointments a
+        LEFT JOIN patients p ON a.pat_id = p.pat_id
+        LEFT JOIN doctors d ON a.doc_id = d.doc_id
+        $where_clause
+    ");
+    $count_stmt->execute($params);
+    $total_items = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_items / $items_per_page);
+    
+    // Fetch paginated results
     $stmt = $db->prepare("
         SELECT a.*, 
                p.pat_first_name, p.pat_last_name,
@@ -153,12 +171,20 @@ try {
         LEFT JOIN appointment_statuses st ON a.status_id = st.status_id
         $where_clause
         ORDER BY a.appointment_date DESC, a.appointment_time DESC
+        LIMIT :limit OFFSET :offset
     ");
-    $stmt->execute($params);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue(':' . $key, $value);
+    }
+    $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch appointments: ' . $e->getMessage();
     $appointments = [];
+    $total_items = 0;
+    $total_pages = 0;
 }
 
 // Fetch patients, doctors, services, and statuses for dropdowns

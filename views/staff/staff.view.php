@@ -63,41 +63,15 @@
     </div>
 <?php endif; ?>
 
-<!-- Create New Staff -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Add New Staff Member</h2>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>First Name: <span style="color: var(--status-error);">*</span></label>
-                    <input type="text" name="first_name" required class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Last Name: <span style="color: var(--status-error);">*</span></label>
-                    <input type="text" name="last_name" required class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Email: <span style="color: var(--status-error);">*</span></label>
-                    <input type="email" name="email" required class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Phone:</label>
-                    <input type="text" name="phone" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Position:</label>
-                    <input type="text" name="position" placeholder="e.g., Receptionist, Nurse" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Hire Date:</label>
-                    <input type="date" name="hire_date" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Salary:</label>
+<!-- Add Staff Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddStaffModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Staff Member</span>
+    </button>
+</div>
+
+<!-- Staff List -->
                     <input type="number" name="salary" step="0.01" min="0" class="form-control">
                 </div>
                 <div class="form-group">

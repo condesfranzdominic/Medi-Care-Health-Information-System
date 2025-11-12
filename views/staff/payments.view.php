@@ -55,58 +55,12 @@
     </div>
 </div>
 
-<!-- Create New Payment -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">Add New Payment Record</h2>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Appointment ID: <span style="color: var(--status-error);">*</span></label>
-                    <input type="text" name="appointment_id" required placeholder="e.g., 2025-10-0000001" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Amount (₱): <span style="color: var(--status-error);">*</span></label>
-                    <input type="number" name="amount" step="0.01" min="0" required class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Payment Date: <span style="color: var(--status-error);">*</span></label>
-                    <input type="date" name="payment_date" value="<?= date('Y-m-d') ?>" required class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Payment Method: <span style="color: var(--status-error);">*</span></label>
-                    <select name="payment_method_id" required class="form-control">
-                        <option value="">Select Method</option>
-                        <?php foreach ($payment_methods as $method): ?>
-                            <option value="<?= $method['method_id'] ?>"><?= htmlspecialchars($method['method_name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Payment Status: <span style="color: var(--status-error);">*</span></label>
-                    <select name="payment_status_id" required class="form-control">
-                        <option value="">Select Status</option>
-                        <?php foreach ($payment_statuses as $status): ?>
-                            <option value="<?= $status['payment_status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group form-grid-full">
-                <label>Notes:</label>
-                <textarea name="notes" rows="2" class="form-control"></textarea>
-            </div>
-            <div class="action-buttons" style="margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Payment Record</span>
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Add Payment Button -->
+<div class="page-actions">
+    <button type="button" class="btn btn-success" onclick="openAddPaymentModal()">
+        <i class="fas fa-plus"></i>
+        <span>Add New Payment Record</span>
+    </button>
 </div>
 
 <!-- Payments List -->
@@ -191,6 +145,67 @@
     <?php endif; ?>
 </div>
 
+<!-- Add Payment Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Payment Record</h2>
+            <button type="button" class="modal-close" onclick="closeAddPaymentModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Appointment ID: <span style="color: var(--status-error);">*</span></label>
+                    <input type="text" name="appointment_id" required placeholder="e.g., 2025-10-0000001" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Amount (₱): <span style="color: var(--status-error);">*</span></label>
+                    <input type="number" name="amount" step="0.01" min="0" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Payment Date: <span style="color: var(--status-error);">*</span></label>
+                    <input type="date" name="payment_date" value="<?= date('Y-m-d') ?>" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method: <span style="color: var(--status-error);">*</span></label>
+                    <select name="payment_method_id" required class="form-control">
+                        <option value="">Select Method</option>
+                        <?php foreach ($payment_methods as $method): ?>
+                            <option value="<?= $method['method_id'] ?>"><?= htmlspecialchars($method['method_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Status: <span style="color: var(--status-error);">*</span></label>
+                    <select name="payment_status_id" required class="form-control">
+                        <option value="">Select Status</option>
+                        <?php foreach ($payment_statuses as $status): ?>
+                            <option value="<?= $status['payment_status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group form-grid-full">
+                <label>Notes:</label>
+                <textarea name="notes" rows="2" class="form-control"></textarea>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Payment Record</span>
+                </button>
+                <button type="button" onclick="closeAddPaymentModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- View Payment Modal -->
 <div id="viewModal" class="modal">
     <div class="modal-content">
@@ -269,6 +284,15 @@
 </div>
 
 <script>
+function openAddPaymentModal() {
+    document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddPaymentModal() {
+    document.getElementById('addModal').classList.remove('active');
+    document.querySelector('#addModal form').reset();
+}
+
 function viewPayment(payment) {
     const content = `
         <div class="card" style="margin-bottom: 1.5rem;">
@@ -345,8 +369,135 @@ window.addEventListener('filtersApplied', function(e) {
     console.log('Applying filters:', filters);
     // Implement filter logic
 });
+
+function applyPaymentFilters() {
+    const filters = {
+        status: document.querySelector('input[name="filter_status"]:checked')?.value || '',
+        method: document.querySelector('input[name="filter_method"]:checked')?.value || ''
+    };
+    const params = new URLSearchParams();
+    if (filters.status) params.append('status', filters.status);
+    if (filters.method) params.append('method', filters.method);
+    const url = '/staff/payments' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    const methodSearch = document.getElementById('methodSearch');
+    if (methodSearch) methodSearch.value = '';
+}
 </script>
 
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Payment Status Filter -->
+    <?php if (!empty($payment_statuses)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('status')">
+            <h4 class="filter-section-title">Payment Status</h4>
+            <button type="button" class="filter-section-toggle" id="statusToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="statusContent">
+            <div class="filter-radio-group">
+                <?php foreach ($payment_statuses as $status): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_status" id="status_<?= $status['payment_status_id'] ?>" value="<?= $status['payment_status_id'] ?>">
+                        <label for="status_<?= $status['payment_status_id'] ?>"><?= htmlspecialchars($status['status_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Payment Method Filter -->
+    <?php if (!empty($filter_methods)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('method')">
+            <h4 class="filter-section-title">Payment Method</h4>
+            <button type="button" class="filter-section-toggle" id="methodToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="methodContent">
+            <input type="text" class="filter-search-input" placeholder="Search Method" id="methodSearch">
+            <div class="filter-radio-group" id="methodList">
+                <?php foreach ($filter_methods as $method): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_method" id="method_<?= $method['method_id'] ?>" value="<?= $method['method_id'] ?>">
+                        <label for="method_<?= $method['method_id'] ?>"><?= htmlspecialchars($method['method_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyPaymentFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const methodSearch = document.getElementById('methodSearch');
+    if (methodSearch) {
+        methodSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const methodItems = document.querySelectorAll('#methodList .filter-radio-item');
+            methodItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

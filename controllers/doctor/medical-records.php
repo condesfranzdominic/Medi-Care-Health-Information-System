@@ -85,8 +85,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all medical records created by this doctor
+// Handle search and filters
+$search_query = '';
+if (isset($_GET['search'])) {
+    $search_query = sanitize($_GET['search']);
+}
+
+$filter_patient = isset($_GET['patient']) ? (int)$_GET['patient'] : null;
+
+// Fetch medical records with filters
 try {
+    $where_conditions = ['mr.doc_id = :doctor_id'];
+    $params = ['doctor_id' => $doctor_id];
+
+    if (!empty($search_query)) {
+        $where_conditions[] = "(p.pat_first_name LIKE :search OR p.pat_last_name LIKE :search OR mr.diagnosis LIKE :search)";
+        $params['search'] = '%' . $search_query . '%';
+    }
+
+    if ($filter_patient) {
+        $where_conditions[] = "mr.pat_id = :patient";
+        $params['patient'] = $filter_patient;
+    }
+
+    $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
+
     $stmt = $db->prepare("
         SELECT mr.*, 
                p.pat_first_name, p.pat_last_name,
@@ -94,14 +117,25 @@ try {
         FROM medical_records mr
         LEFT JOIN patients p ON mr.pat_id = p.pat_id
         LEFT JOIN appointments a ON mr.appointment_id = a.appointment_id
-        WHERE mr.doc_id = :doctor_id
+        $where_clause
         ORDER BY mr.record_date DESC
     ");
-    $stmt->execute(['doctor_id' => $doctor_id]);
+    $stmt->execute($params);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch medical records: ' . $e->getMessage();
     $records = [];
+}
+
+// Fetch filter data from database
+$filter_patients = [];
+try {
+    // Get unique patients from this doctor's medical records
+    $stmt = $db->prepare("SELECT DISTINCT p.pat_id, p.pat_first_name, p.pat_last_name FROM medical_records mr JOIN patients p ON mr.pat_id = p.pat_id WHERE mr.doc_id = :doctor_id ORDER BY p.pat_first_name");
+    $stmt->execute(['doctor_id' => $doctor_id]);
+    $filter_patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $filter_patients = [];
 }
 
 // Fetch patients for dropdown (from doctor's appointments)

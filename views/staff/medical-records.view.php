@@ -240,8 +240,153 @@ window.addEventListener('filtersApplied', function(e) {
     console.log('Applying filters:', filters);
     // Implement filter logic
 });
+
+function applyMedicalRecordFilters() {
+    const filters = {
+        doctor: document.querySelector('input[name="filter_doctor"]:checked')?.value || '',
+        patient: document.querySelector('input[name="filter_patient"]:checked')?.value || ''
+    };
+    const params = new URLSearchParams();
+    if (filters.doctor) params.append('doctor', filters.doctor);
+    if (filters.patient) params.append('patient', filters.patient);
+    const url = '/staff/medical-records' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    const doctorSearch = document.getElementById('doctorSearch');
+    const patientSearch = document.getElementById('patientSearch');
+    if (doctorSearch) doctorSearch.value = '';
+    if (patientSearch) patientSearch.value = '';
+}
 </script>
 
-<?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Doctor Filter -->
+    <?php if (!empty($filter_doctors)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('doctor')">
+            <h4 class="filter-section-title">Doctor</h4>
+            <button type="button" class="filter-section-toggle" id="doctorToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="doctorContent">
+            <input type="text" class="filter-search-input" placeholder="Search Doctor" id="doctorSearch">
+            <div class="filter-radio-group" id="doctorList">
+                <?php foreach ($filter_doctors as $doctor): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_doctor" id="doctor_<?= $doctor['doc_id'] ?>" value="<?= $doctor['doc_id'] ?>">
+                        <label for="doctor_<?= $doctor['doc_id'] ?>">Dr. <?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Patient Filter -->
+    <?php if (!empty($filter_patients)): ?>
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('patient')">
+            <h4 class="filter-section-title">Patient</h4>
+            <button type="button" class="filter-section-toggle" id="patientToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="patientContent">
+            <input type="text" class="filter-search-input" placeholder="Search Patient" id="patientSearch">
+            <div class="filter-radio-group" id="patientList">
+                <?php foreach ($filter_patients as $patient): ?>
+                    <div class="filter-radio-item">
+                        <input type="radio" name="filter_patient" id="patient_<?= $patient['pat_id'] ?>" value="<?= $patient['pat_id'] ?>">
+                        <label for="patient_<?= $patient['pat_id'] ?>"><?= htmlspecialchars($patient['pat_first_name'] . ' ' . $patient['pat_last_name']) ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyMedicalRecordFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorSearch = document.getElementById('doctorSearch');
+    if (doctorSearch) {
+        doctorSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const doctorItems = document.querySelectorAll('#doctorList .filter-radio-item');
+            doctorItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+    
+    const patientSearch = document.getElementById('patientSearch');
+    if (patientSearch) {
+        patientSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const patientItems = document.querySelectorAll('#patientList .filter-radio-item');
+            patientItems.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

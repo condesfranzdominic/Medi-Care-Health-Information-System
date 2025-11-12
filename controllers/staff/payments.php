@@ -78,9 +78,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all payments with related data
+// Handle search and filters
+$search_query = '';
+if (isset($_GET['search'])) {
+    $search_query = sanitize($_GET['search']);
+}
+
+$filter_status = isset($_GET['status']) ? (int)$_GET['status'] : null;
+$filter_method = isset($_GET['method']) ? (int)$_GET['method'] : null;
+
+// Fetch payments with filters
 try {
-    $stmt = $db->query("
+    $where_conditions = [];
+    $params = [];
+
+    if (!empty($search_query)) {
+        $where_conditions[] = "(p.payment_id LIKE :search OR a.appointment_id LIKE :search OR pat.pat_first_name LIKE :search OR pat.pat_last_name LIKE :search)";
+        $params['search'] = '%' . $search_query . '%';
+    }
+
+    if ($filter_status) {
+        $where_conditions[] = "p.payment_status_id = :status";
+        $params['status'] = $filter_status;
+    }
+
+    if ($filter_method) {
+        $where_conditions[] = "p.payment_method_id = :method";
+        $params['method'] = $filter_method;
+    }
+
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+    $stmt = $db->prepare("
         SELECT p.*, 
                a.appointment_id, a.appointment_date,
                pat.pat_first_name, pat.pat_last_name,
@@ -91,12 +120,24 @@ try {
         LEFT JOIN patients pat ON a.pat_id = pat.pat_id
         LEFT JOIN payment_methods pm ON p.payment_method_id = pm.method_id
         LEFT JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
+        $where_clause
         ORDER BY p.payment_date DESC, p.created_at DESC
     ");
+    $stmt->execute($params);
     $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = 'Failed to fetch payments: ' . $e->getMessage();
     $payments = [];
+}
+
+// Fetch filter data from database
+$filter_methods = [];
+try {
+    // Get unique payment methods from payments
+    $stmt = $db->query("SELECT DISTINCT pm.method_id, pm.method_name FROM payments p JOIN payment_methods pm ON p.payment_method_id = pm.method_id ORDER BY pm.method_name");
+    $filter_methods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $filter_methods = [];
 }
 
 // Fetch payment methods and statuses for dropdowns

@@ -20,6 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = sanitize($_POST['last_name'] ?? '');
         $email = sanitize($_POST['email'] ?? '');
         $phone = sanitize($_POST['phone'] ?? '');
+        if (!empty($phone)) {
+            $phone = formatPhoneNumber($phone);
+        }
         $specialization_id = isset($_POST['specialization_id']) ? (int)$_POST['specialization_id'] : null;
         
         try {

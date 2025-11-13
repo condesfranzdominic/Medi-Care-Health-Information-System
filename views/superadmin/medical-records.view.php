@@ -96,7 +96,7 @@
                                     <button onclick="viewRecord(<?= htmlspecialchars(json_encode($record)) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this medical record? This action cannot be undone.');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this medical record? This action cannot be undone.');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $record['record_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

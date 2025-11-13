@@ -108,11 +108,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = sanitize($_POST['last_name']);
         $email = sanitize($_POST['email']);
         $phone = sanitize($_POST['phone']);
+        if (!empty($phone)) {
+            $phone = formatPhoneNumber($phone);
+        }
         $date_of_birth = $_POST['date_of_birth'];
         $gender = sanitize($_POST['gender']);
         $address = sanitize($_POST['address']);
         $emergency_contact = sanitize($_POST['emergency_contact'] ?? '');
         $emergency_phone = sanitize($_POST['emergency_phone'] ?? '');
+        if (!empty($emergency_phone)) {
+            $emergency_phone = formatPhoneNumber($emergency_phone);
+        }
         $medical_history = sanitize($_POST['medical_history'] ?? '');
         $allergies = sanitize($_POST['allergies'] ?? '');
         $insurance_provider = sanitize($_POST['insurance_provider'] ?? '');

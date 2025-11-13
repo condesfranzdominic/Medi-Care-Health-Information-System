@@ -9,6 +9,74 @@ $auth->requirePatient();
 $db = Database::getInstance();
 $patient_id = $auth->getPatientId();
 $error = '';
+$success = '';
+
+// Check for success message from redirect
+if (isset($_GET['success'])) {
+    if ($_GET['success'] === 'cancelled') {
+        $success = 'Appointment cancelled successfully';
+    } elseif ($_GET['success'] === 'rescheduled') {
+        $appointment_id = isset($_GET['id']) ? sanitize($_GET['id']) : '';
+        $success = "Appointment rescheduled successfully! Your appointment ID is: <strong>$appointment_id</strong>.";
+    }
+}
+
+// Handle appointment cancellation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'cancel') {
+    $appointment_id = sanitize($_POST['appointment_id'] ?? '');
+    
+    if (empty($appointment_id)) {
+        $error = 'Invalid appointment ID';
+    } else {
+        try {
+            // Verify the appointment belongs to this patient
+            $stmt = $db->prepare("SELECT pat_id, appointment_date, status_id FROM appointments WHERE appointment_id = :appointment_id");
+            $stmt->execute(['appointment_id' => $appointment_id]);
+            $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$appointment) {
+                $error = 'Appointment not found';
+            } elseif ($appointment['pat_id'] != $patient_id) {
+                $error = 'You do not have permission to cancel this appointment';
+            } else {
+                // Check if appointment is already cancelled or completed
+                $stmt = $db->prepare("SELECT status_name FROM appointment_statuses WHERE status_id = :status_id");
+                $stmt->execute(['status_id' => $appointment['status_id']]);
+                $status = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($status && (strtolower($status['status_name']) === 'cancelled' || strtolower($status['status_name']) === 'completed')) {
+                    $error = 'This appointment cannot be cancelled';
+                } else {
+                    // Get cancelled status ID
+                    $stmt = $db->prepare("SELECT status_id FROM appointment_statuses WHERE LOWER(status_name) = 'cancelled' LIMIT 1");
+                    $stmt->execute();
+                    $cancelled_status = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($cancelled_status) {
+                        // Update appointment status to cancelled
+                        $stmt = $db->prepare("
+                            UPDATE appointments 
+                            SET status_id = :status_id, updated_at = NOW() 
+                            WHERE appointment_id = :appointment_id
+                        ");
+                        $stmt->execute([
+                            'status_id' => $cancelled_status['status_id'],
+                            'appointment_id' => $appointment_id
+                        ]);
+                        $success = 'Appointment cancelled successfully';
+                        // Redirect to prevent form resubmission
+                        header('Location: /patient/appointments?success=cancelled');
+                        exit;
+                    } else {
+                        $error = 'Cancelled status not found in system';
+                    }
+                }
+            }
+        } catch (PDOException $e) {
+            $error = 'Failed to cancel appointment: ' . $e->getMessage();
+        }
+    }
+}
 
 // Get patient info
 try {

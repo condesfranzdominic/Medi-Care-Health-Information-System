@@ -92,7 +92,7 @@
                                     <button onclick="editService(<?= htmlspecialchars(json_encode($service)) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this service?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $service['service_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

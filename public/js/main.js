@@ -115,9 +115,17 @@ function showAlert(message, type = 'info') {
 }
 
 function confirmAction(message, callback) {
-    if (confirm(message)) {
-        callback();
-    }
+    showConfirm(
+        message,
+        'Confirm Action',
+        'Confirm',
+        'Cancel',
+        'warning'
+    ).then(confirmed => {
+        if (confirmed && callback) {
+            callback();
+        }
+    });
 }
 
 // AJAX helper function

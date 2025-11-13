@@ -94,7 +94,7 @@
                                     <button onclick="editStatus(<?= htmlspecialchars(json_encode($status)) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure? This will affect <?= isset($status['appointment_count']) ? $status['appointment_count'] : 0 ?> appointment(s).');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure? This will affect <?= isset($status['appointment_count']) ? $status['appointment_count'] : 0 ?> appointment(s).');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $status['status_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

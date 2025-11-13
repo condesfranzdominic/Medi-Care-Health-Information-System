@@ -5,21 +5,7 @@
 </div> <!-- End app-container -->
 
 <script>
-// User Menu Dropdown
-function toggleUserMenu(event) {
-    event.stopPropagation();
-    const dropdown = document.getElementById('userMenuDropdown');
-    dropdown.classList.toggle('active');
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('userMenuDropdown');
-    const userMenu = document.querySelector('.user-menu');
-    if (dropdown && !userMenu.contains(event.target)) {
-        dropdown.classList.remove('active');
-    }
-});
+// User Menu Dropdown - Moved to sidebar
 
 // Dark Mode Toggle
 function toggleDarkMode(event) {
@@ -60,6 +46,8 @@ function openNotifications() {
     alert('Notifications panel coming soon!');
 }
 </script>
+
+<script src="/public/js/confirm-modal.js"></script>
 
 </body>
 </html>

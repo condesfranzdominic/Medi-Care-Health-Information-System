@@ -136,7 +136,7 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this schedule?');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this schedule?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $sched['schedule_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

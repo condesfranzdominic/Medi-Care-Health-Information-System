@@ -96,7 +96,7 @@
                                     <button onclick="editMethod(<?= htmlspecialchars(json_encode($method)) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure? This will affect <?= isset($method['payment_count']) ? $method['payment_count'] : 0 ?> payment(s).');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure? This will affect <?= isset($method['payment_count']) ? $method['payment_count'] : 0 ?> payment(s).');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $method['method_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

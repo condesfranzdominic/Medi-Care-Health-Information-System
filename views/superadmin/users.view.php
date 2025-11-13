@@ -44,11 +44,11 @@
         </div>
     </form>
     <div class="category-tabs">
-        <button type="button" class="category-tab active" data-category="all">All</button>
-        <button type="button" class="category-tab" data-category="superadmin">Super Admin</button>
-        <button type="button" class="category-tab" data-category="staff">Staff</button>
-        <button type="button" class="category-tab" data-category="doctor">Doctor</button>
-        <button type="button" class="category-tab" data-category="patient">Patient</button>
+        <button type="button" class="category-tab <?= empty($filter_role) ? 'active' : '' ?>" data-category="all">All</button>
+        <button type="button" class="category-tab <?= $filter_role === 'superadmin' ? 'active' : '' ?>" data-category="superadmin">Super Admin</button>
+        <button type="button" class="category-tab <?= $filter_role === 'staff' ? 'active' : '' ?>" data-category="staff">Staff</button>
+        <button type="button" class="category-tab <?= $filter_role === 'doctor' ? 'active' : '' ?>" data-category="doctor">Doctor</button>
+        <button type="button" class="category-tab <?= $filter_role === 'patient' ? 'active' : '' ?>" data-category="patient">Patient</button>
     </div>
 </div>
 
@@ -75,10 +75,11 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th>Full Name</th>
                         <th>Email</th>
-                        <th>Role</th>
-                        <th>Linked Profile</th>
-                        <th>Created At</th>
+                        <th>Phone Number</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -88,7 +89,6 @@
                             // Determine role
                             $role = 'None';
                             $roleColor = '#999';
-                            $linkedProfile = 'N/A';
                             
                             if ($user['user_is_superadmin']) {
                                 $role = 'Super Admin';
@@ -96,32 +96,40 @@
                             } elseif ($user['staff_id']) {
                                 $role = 'Staff';
                                 $roleColor = '#3498db';
-                                $linkedProfile = 'Staff ID: ' . $user['staff_id'];
                             } elseif ($user['doc_id']) {
                                 $role = 'Doctor';
                                 $roleColor = '#2ecc71';
-                                $linkedProfile = 'Doctor ID: ' . $user['doc_id'];
                             } elseif ($user['pat_id']) {
                                 $role = 'Patient';
                                 $roleColor = '#9b59b6';
-                                $linkedProfile = 'Patient ID: ' . $user['pat_id'];
                             }
+                            
+                            // Format phone number
+                            $phone_display = !empty($user['phone_number']) ? htmlspecialchars($user['phone_number']) : 'N/A';
+                            
+                            // Format date
+                            $date_created = !empty($user['created_at']) ? date('M d, Y', strtotime($user['created_at'])) : 'N/A';
+                            
+                            // Status
+                            $status = $user['status'] ?? 'active';
+                            $statusColor = ($status === 'active' || $status === 'Super Admin') ? '#10B981' : '#EF4444';
                         ?>
                         <tr>
+                            <td><?= htmlspecialchars($user['full_name'] ?? 'N/A') ?></td>
                             <td><?= htmlspecialchars($user['user_email']) ?></td>
+                            <td><?= $phone_display ?></td>
+                            <td><?= $date_created ?></td>
                             <td>
-                                <span class="badge" style="background: <?= $roleColor ?>20; color: <?= $roleColor ?>;">
-                                    <?= $role ?>
+                                <span class="badge" style="background: <?= $statusColor ?>20; color: <?= $statusColor ?>;">
+                                    <?= htmlspecialchars(ucfirst($status)) ?>
                                 </span>
                             </td>
-                            <td><?= $linkedProfile ?></td>
-                            <td><?= htmlspecialchars($user['created_at'] ?? 'N/A') ?></td>
                             <td>
                                 <div class="table-actions">
                                     <button onclick="editUser(<?= htmlspecialchars(json_encode($user)) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this user?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $user['user_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">
@@ -292,12 +300,19 @@ function redirectToRoleCreation(event) {
     // Redirect to appropriate creation page
     switch(role) {
         case 'superadmin':
-            if (confirm('Create a Super Admin account? This will have full system access.')) {
-                const email = prompt('Enter email for Super Admin:');
-                const password = prompt('Enter password for Super Admin:');
-                if (email && password) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
+            showConfirm(
+                'Create a Super Admin account? This will have full system access.',
+                'Create Super Admin',
+                'Yes, Create',
+                'Cancel',
+                'warning'
+            ).then(confirmed => {
+                if (confirmed) {
+                    const email = prompt('Enter email for Super Admin:');
+                    const password = prompt('Enter password for Super Admin:');
+                    if (email && password) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
                     form.innerHTML = `
                         <input type="hidden" name="action" value="create">
                         <input type="hidden" name="email" value="${email}">
@@ -403,6 +418,108 @@ window.addEventListener('filtersApplied', function(e) {
     console.log('Applying filters:', filters);
     // Implement filter logic
 });
+</script>
+
+<!-- Filter Sidebar -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-header">
+        <h3 class="filter-sidebar-title">Filters</h3>
+        <button type="button" class="filter-sidebar-close" onclick="toggleFilterSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Role Filter -->
+    <div class="filter-section">
+        <div class="filter-section-header" onclick="toggleFilterSection('role')">
+            <h4 class="filter-section-title">Role</h4>
+            <button type="button" class="filter-section-toggle" id="roleToggle">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="filter-section-content" id="roleContent">
+            <div class="filter-radio-group">
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_role" id="role_all" value="all" <?= empty($filter_role) ? 'checked' : '' ?>>
+                    <label for="role_all">All</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_role" id="role_superadmin" value="superadmin" <?= $filter_role === 'superadmin' ? 'checked' : '' ?>>
+                    <label for="role_superadmin">Super Admin</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_role" id="role_staff" value="staff" <?= $filter_role === 'staff' ? 'checked' : '' ?>>
+                    <label for="role_staff">Staff</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_role" id="role_doctor" value="doctor" <?= $filter_role === 'doctor' ? 'checked' : '' ?>>
+                    <label for="role_doctor">Doctor</label>
+                </div>
+                <div class="filter-radio-item">
+                    <input type="radio" name="filter_role" id="role_patient" value="patient" <?= $filter_role === 'patient' ? 'checked' : '' ?>>
+                    <label for="role_patient">Patient</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Actions -->
+    <div class="filter-sidebar-actions">
+        <button type="button" class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <button type="button" class="filter-apply-btn" onclick="applyUserFilters()">Apply all filter</button>
+    </div>
+</div>
+
+<script>
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filterSidebar');
+    const mainContent = document.querySelector('.main-content');
+    const filterBtn = document.querySelector('.filter-toggle-btn');
+    
+    sidebar.classList.toggle('active');
+    if (mainContent) {
+        mainContent.classList.toggle('filter-active');
+    }
+    if (filterBtn) {
+        filterBtn.classList.toggle('active');
+    }
+}
+
+function toggleFilterSection(sectionId) {
+    const content = document.getElementById(sectionId + 'Content');
+    const toggle = document.getElementById(sectionId + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+    }
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    document.getElementById('role_all').checked = true;
+}
+
+function applyUserFilters() {
+    const role = document.querySelector('input[name="filter_role"]:checked')?.value;
+    const search = document.querySelector('input[name="search"]')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (search) {
+        params.append('search', search);
+    }
+    if (role && role !== 'all') {
+        params.append('role', role);
+    }
+    
+    window.location.href = '/superadmin/users' + (params.toString() ? '?' + params.toString() : '');
+}
 </script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

@@ -25,6 +25,7 @@
                     <a href="#specialists" class="text-gray-700 hover:text-blue-600 font-medium transition">Specialists</a>
                     <a href="#about" class="text-gray-700 hover:text-blue-600 font-medium transition">About</a>
                     <a href="#contact" class="text-gray-700 hover:text-blue-600 font-medium transition">Contact</a>
+                    <a href="/register" class="text-gray-700 hover:text-blue-600 font-medium transition">Register</a>
                     <a href="/login" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium shadow-md hover:shadow-lg">Login</a>
                 </div>
 
@@ -49,8 +50,11 @@
                         Book appointments with top medical specialists instantly. Quality healthcare made accessible, convenient, and patient-centered.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="/login" class="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition font-semibold text-center shadow-lg hover:shadow-xl">
-                            Login / Register
+                        <a href="/register" class="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition font-semibold text-center shadow-lg hover:shadow-xl">
+                            Register Now
+                        </a>
+                        <a href="/login" class="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 transition font-semibold text-center">
+                            Login
                         </a>
                         <a href="#services" class="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 transition font-semibold text-center">
                             Learn More
@@ -106,7 +110,7 @@
     <!-- Stats Section -->
     <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
                 <div class="text-center">
                     <div class="stat-number text-blue-600">500+</div>
                     <p class="text-gray-600 font-medium mt-2">Doctors</p>
@@ -114,10 +118,6 @@
                 <div class="text-center">
                     <div class="stat-number text-green-600">50K+</div>
                     <p class="text-gray-600 font-medium mt-2">Patients</p>
-                </div>
-                <div class="text-center">
-                    <div class="stat-number text-purple-600">30+</div>
-                    <p class="text-gray-600 font-medium mt-2">Clinics</p>
                 </div>
                 <div class="text-center">
                     <div class="stat-number text-orange-600">4.9★</div>
@@ -323,8 +323,11 @@
             <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Book Your Appointment?</h2>
             <p class="text-xl text-blue-100 mb-10">Join thousands of satisfied patients who trust Medi-Care for their healthcare needs.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/login" class="bg-white text-blue-600 px-10 py-4 rounded-lg hover:bg-gray-50 transition font-bold text-lg shadow-xl">
-                    Login / Register
+                <a href="/register" class="bg-white text-blue-600 px-10 py-4 rounded-lg hover:bg-gray-50 transition font-bold text-lg shadow-xl">
+                    Register Now
+                </a>
+                <a href="/login" class="border-2 border-white text-white px-10 py-4 rounded-lg hover:bg-white hover:text-blue-600 transition font-bold text-lg">
+                    Login
                 </a>
                 <a href="#contact" class="border-2 border-white text-white px-10 py-4 rounded-lg hover:bg-white hover:text-blue-600 transition font-bold text-lg">
                     Contact Us

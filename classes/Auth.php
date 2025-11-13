@@ -139,4 +139,210 @@ class Auth {
         $currentRole = $this->getRole();
         return in_array($currentRole, $allowedRoles);
     }
+    
+    public function registerPatient($data) {
+        try {
+            $this->db->beginTransaction();
+            
+            // Check if email already exists in patients table
+            $stmt = $this->db->prepare("SELECT pat_id FROM patients WHERE pat_email = :email LIMIT 1");
+            $stmt->execute(['email' => $data['email']]);
+            if ($stmt->fetch()) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
+            
+            // Check if email already exists in users table
+            $stmt = $this->db->prepare("SELECT user_id FROM users WHERE user_email = :email LIMIT 1");
+            $stmt->execute(['email' => $data['email']]);
+            if ($stmt->fetch()) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
+            
+            // Insert into patients table
+            $stmt = $this->db->prepare("
+                INSERT INTO patients (
+                    pat_first_name, pat_last_name, pat_email, pat_phone, 
+                    pat_date_of_birth, pat_gender, pat_address, 
+                    pat_emergency_contact, pat_emergency_phone
+                ) VALUES (
+                    :first_name, :last_name, :email, :phone, 
+                    :date_of_birth, :gender, :address, 
+                    :emergency_contact, :emergency_phone
+                ) RETURNING pat_id
+            ");
+            $stmt->execute([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'date_of_birth' => $data['date_of_birth'] ?? null,
+                'gender' => $data['gender'] ?? null,
+                'address' => $data['address'] ?? null,
+                'emergency_contact' => $data['emergency_contact'] ?? null,
+                'emergency_phone' => $data['emergency_phone'] ?? null
+            ]);
+            $patient = $stmt->fetch(PDO::FETCH_ASSOC);
+            $pat_id = $patient['pat_id'];
+            
+            // Insert into users table
+            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+            $stmt = $this->db->prepare("
+                INSERT INTO users (user_email, user_password, pat_id) 
+                VALUES (:email, :password, :pat_id)
+            ");
+            $stmt->execute([
+                'email' => $data['email'],
+                'password' => $hashedPassword,
+                'pat_id' => $pat_id
+            ]);
+            
+            $this->db->commit();
+            return ['success' => true, 'pat_id' => $pat_id];
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Patient registration error: " . $e->getMessage());
+            return ['success' => false, 'error' => 'Registration failed. Please try again.'];
+        }
+    }
+    
+    public function registerDoctor($data) {
+        try {
+            $this->db->beginTransaction();
+            
+            // Check if email already exists in doctors table
+            $stmt = $this->db->prepare("SELECT doc_id FROM doctors WHERE doc_email = :email LIMIT 1");
+            $stmt->execute(['email' => $data['email']]);
+            if ($stmt->fetch()) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
+            
+            // Check if email already exists in users table
+            $stmt = $this->db->prepare("SELECT user_id FROM users WHERE user_email = :email LIMIT 1");
+            $stmt->execute(['email' => $data['email']]);
+            if ($stmt->fetch()) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
+            
+            // Check if license number already exists
+            if (!empty($data['license_number'])) {
+                $stmt = $this->db->prepare("SELECT doc_id FROM doctors WHERE doc_license_number = :license LIMIT 1");
+                $stmt->execute(['license' => $data['license_number']]);
+                if ($stmt->fetch()) {
+                    $this->db->rollBack();
+                    return ['success' => false, 'error' => 'License number already registered'];
+                }
+            }
+            
+            // Insert into doctors table
+            $stmt = $this->db->prepare("
+                INSERT INTO doctors (
+                    doc_first_name, doc_last_name, doc_email, doc_phone, 
+                    doc_license_number, doc_specialization_id, doc_experience_years,
+                    doc_consultation_fee, doc_qualification, doc_bio
+                ) VALUES (
+                    :first_name, :last_name, :email, :phone, 
+                    :license_number, :specialization_id, :experience_years,
+                    :consultation_fee, :qualification, :bio
+                ) RETURNING doc_id
+            ");
+            $stmt->execute([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'license_number' => $data['license_number'] ?? null,
+                'specialization_id' => !empty($data['specialization_id']) ? (int)$data['specialization_id'] : null,
+                'experience_years' => !empty($data['experience_years']) ? (int)$data['experience_years'] : null,
+                'consultation_fee' => !empty($data['consultation_fee']) ? (float)$data['consultation_fee'] : null,
+                'qualification' => $data['qualification'] ?? null,
+                'bio' => $data['bio'] ?? null
+            ]);
+            $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
+            $doc_id = $doctor['doc_id'];
+            
+            // Insert into users table
+            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+            $stmt = $this->db->prepare("
+                INSERT INTO users (user_email, user_password, doc_id) 
+                VALUES (:email, :password, :doc_id)
+            ");
+            $stmt->execute([
+                'email' => $data['email'],
+                'password' => $hashedPassword,
+                'doc_id' => $doc_id
+            ]);
+            
+            $this->db->commit();
+            return ['success' => true, 'doc_id' => $doc_id];
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Doctor registration error: " . $e->getMessage());
+            return ['success' => false, 'error' => 'Registration failed. Please try again.'];
+        }
+    }
+    
+    public function registerStaff($data) {
+        try {
+            $this->db->beginTransaction();
+            
+            // Check if email already exists in staff table
+            $stmt = $this->db->prepare("SELECT staff_id FROM staff WHERE staff_email = :email LIMIT 1");
+            $stmt->execute(['email' => $data['email']]);
+            if ($stmt->fetch()) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
+            
+            // Check if email already exists in users table
+            $stmt = $this->db->prepare("SELECT user_id FROM users WHERE user_email = :email LIMIT 1");
+            $stmt->execute(['email' => $data['email']]);
+            if ($stmt->fetch()) {
+                $this->db->rollBack();
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
+            
+            // Insert into staff table
+            $stmt = $this->db->prepare("
+                INSERT INTO staff (
+                    staff_first_name, staff_last_name, staff_email, staff_phone, 
+                    staff_position
+                ) VALUES (
+                    :first_name, :last_name, :email, :phone, 
+                    :position
+                ) RETURNING staff_id
+            ");
+            $stmt->execute([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'position' => $data['position'] ?? null
+            ]);
+            $staff = $stmt->fetch(PDO::FETCH_ASSOC);
+            $staff_id = $staff['staff_id'];
+            
+            // Insert into users table
+            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+            $stmt = $this->db->prepare("
+                INSERT INTO users (user_email, user_password, staff_id) 
+                VALUES (:email, :password, :staff_id)
+            ");
+            $stmt->execute([
+                'email' => $data['email'],
+                'password' => $hashedPassword,
+                'staff_id' => $staff_id
+            ]);
+            
+            $this->db->commit();
+            return ['success' => true, 'staff_id' => $staff_id];
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Staff registration error: " . $e->getMessage());
+            return ['success' => false, 'error' => 'Registration failed. Please try again.'];
+        }
+    }
 }

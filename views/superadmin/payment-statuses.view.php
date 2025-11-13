@@ -88,7 +88,7 @@
                                     <button onclick="editStatus(<?= htmlspecialchars(json_encode($status)) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure? This will affect <?= isset($status['payment_count']) ? $status['payment_count'] : 0 ?> payment(s).');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure? This will affect <?= isset($status['payment_count']) ? $status['payment_count'] : 0 ?> payment(s).');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $status['payment_status_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

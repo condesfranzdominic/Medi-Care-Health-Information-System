@@ -128,7 +128,7 @@ if (session_status() === PHP_SESSION_NONE) {
         position: absolute;
         left: 1rem;
         top: 50%;
-        transform: translateY(-50%);
+        transform: translateY(35%);
         color: #6b7280;
         font-size: 1.125rem;
         pointer-events: none;

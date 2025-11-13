@@ -10,6 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medi-Care Health Portal</title>
     <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="/public/css/confirm-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body style="margin: 0; padding: 0;">
@@ -38,65 +39,6 @@ if (isset($_SESSION['user_id'])):
     
     include __DIR__ . '/sidebar.php';
 ?>
-
-<!-- Top Navigation Bar -->
-<nav class="top-nav">
-    <div class="top-nav-left">
-        <a href="/<?= $role ?>/dashboard" class="logo">
-            <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
-            <span>Medi-Care</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="/<?= $role ?>/dashboard">Dashboard</a></li>
-            <?php if ($role === 'patient'): ?>
-                <li><a href="/patient/appointments">Appointments</a></li>
-                <li><a href="/patient/appointments/create">Book Appointment</a></li>
-            <?php elseif ($role === 'doctor'): ?>
-                <li><a href="/doctor/appointments/today">Appointments</a></li>
-                <li><a href="/doctor/schedules">Schedules</a></li>
-            <?php elseif ($role === 'staff'): ?>
-                <li><a href="/staff/services">Services</a></li>
-                <li><a href="/staff/payments">Payments</a></li>
-            <?php endif; ?>
-        </ul>
-    </div>
-    <div class="top-nav-right">
-        <div class="nav-icon" title="Search" onclick="openSearch()"><i class="fas fa-search"></i></div>
-        <div class="nav-icon" title="Notifications" onclick="openNotifications()"><i class="fas fa-bell"></i></div>
-        <div class="nav-icon" title="Call" onclick="window.location.href='tel:+1234567890'"><i class="fas fa-phone"></i></div>
-        <div class="user-menu" onclick="toggleUserMenu(event)">
-            <div class="user-avatar-nav"><?= $userInitial ?></div>
-            <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: #6b7280;"></i>
-            <div class="user-menu-dropdown" id="userMenuDropdown">
-                <a href="/<?= $role ?>/account" class="user-menu-item">
-                    <i class="fas fa-user"></i>
-                    <span>Account</span>
-                </a>
-                <a href="/<?= $role ?>/settings" class="user-menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
-                <a href="/<?= $role ?>/privacy" class="user-menu-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Privacy</span>
-                </a>
-                <div class="user-menu-divider"></div>
-                <div class="user-menu-item dark-mode-toggle" onclick="toggleDarkMode(event)">
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-moon"></i>
-                        <span>Dark Mode</span>
-                    </div>
-                    <div class="toggle-switch" id="darkModeToggle"></div>
-                </div>
-                <div class="user-menu-divider"></div>
-                <a href="/logout" class="user-menu-item" style="color: var(--status-error);">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Log Out</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</nav>
 
 <div class="main-content">
     <div class="content-container">

@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = sanitize($_POST['last_name']);
         $email = sanitize($_POST['email']);
         $phone = sanitize($_POST['phone']);
+        if (!empty($phone)) {
+            $phone = formatPhoneNumber($phone);
+        }
         $position = sanitize($_POST['position']);
         $hire_date = $_POST['hire_date'] ?? null;
         $salary = !empty($_POST['salary']) ? floatval($_POST['salary']) : null;
@@ -91,6 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = sanitize($_POST['last_name']);
         $email = sanitize($_POST['email']);
         $phone = sanitize($_POST['phone']);
+        if (!empty($phone)) {
+            $phone = formatPhoneNumber($phone);
+        }
         $position = sanitize($_POST['position']);
         $hire_date = $_POST['hire_date'] ?? null;
         $salary = !empty($_POST['salary']) ? floatval($_POST['salary']) : null;

@@ -43,6 +43,13 @@
     </div>
 <?php endif; ?>
 
+<?php if ($success): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span><?= htmlspecialchars($success) ?></span>
+    </div>
+<?php endif; ?>
+
 <!-- Appointments List -->
 <?php if (empty($appointments) && empty($upcoming_appointments) && empty($past_appointments)): ?>
     <div class="empty-state">
@@ -73,7 +80,6 @@
                             <p><?= $specName ?></p>
                         </div>
                     </div>
-                    <button class="btn-register">REGISTER NOW</button>
                 </div>
                 
                 <div class="reception-details">
@@ -153,6 +159,17 @@
                         </div>
                     </div>
                 </div>
+                
+                <?php if (!$isCanceled && !$isCompleted): ?>
+                <div style="padding-top: 1rem; margin-top: 1rem; border-top: 1px solid #e5e7eb; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="/patient/appointments/create?reschedule=<?= htmlspecialchars($apt['appointment_id']) ?>" class="btn-action btn-secondary" style="padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; background: #f3f4f6; color: #374151; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </a>
+                    <button type="button" onclick="cancelAppointment('<?= htmlspecialchars($apt['appointment_id']) ?>')" class="btn-action btn-danger" style="padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; background: #fee2e2; color: #991b1b; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-times"></i> Cancel Appointment
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
@@ -179,7 +196,6 @@
                             <p><?= $specName ?></p>
                         </div>
                     </div>
-                    <button class="btn-register">REGISTER NOW</button>
                 </div>
                 
                 <div class="reception-details">
@@ -307,6 +323,44 @@ function clearAllFilters() {
         radio.checked = false;
     });
 }
+
+function cancelAppointment(appointmentId) {
+    showConfirm(
+        'Are you sure you want to cancel this appointment? This action cannot be undone.',
+        'Cancel Appointment',
+        'Yes, Cancel',
+        'No, Keep It',
+        'danger'
+    ).then(confirmed => {
+        if (confirmed) {
+            // Create a form dynamically
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/patient/appointments';
+            form.style.display = 'none';
+            
+            // Add action field
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'cancel';
+            form.appendChild(actionInput);
+            
+            // Add appointment_id field
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'appointment_id';
+            idInput.value = appointmentId;
+            form.appendChild(idInput);
+            
+            // Append to body and submit
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+    return false;
+}
+
 </script>
 
 <!-- Filter Sidebar -->

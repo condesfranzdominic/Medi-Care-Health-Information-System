@@ -2,6 +2,7 @@
 return [
     '' => 'controllers/index.php',
     'login' => 'controllers/login.php',
+    'register' => 'controllers/register.php',
     'logout' => 'controllers/logout.php',
     
     // Super Admin Routes
@@ -45,9 +46,15 @@ return [
     'doctor/medical-records' => 'controllers/doctor/medical-records.php',
     
     // Patient Routes
+    'patient/dashboard' => 'controllers/patient/dashboard.php',
     'patient/appointments' => 'controllers/patient/appointments.php',
     'patient/appointments/create' => 'controllers/patient/create-appointment.php',
     'patient/create-appointment' => 'controllers/patient/create-appointment.php',
+    'patient/book' => 'controllers/patient/book.php',
+    'patient/doctor-detail' => 'controllers/patient/doctor-detail.php',
+    'patient/medical-records' => 'controllers/patient/medical-records.php',
+    'patient/payments' => 'controllers/patient/payments.php',
+    'patient/notifications' => 'controllers/patient/notifications.php',
     'patient/profile' => 'controllers/patient/profile.php',
     'patient/account' => 'controllers/patient/account.php',
     'patient/settings' => 'controllers/patient/settings.php',

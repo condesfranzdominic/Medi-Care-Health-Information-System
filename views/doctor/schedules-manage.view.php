@@ -174,7 +174,7 @@
                                     <button onclick='editSchedule(<?= json_encode($schedule) ?>)' class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Delete this schedule?');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Delete this schedule?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $schedule['schedule_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

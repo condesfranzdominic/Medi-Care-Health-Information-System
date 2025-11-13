@@ -95,14 +95,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Helper function to show confirmation dialog
-function showConfirm(message, callback) {
-    if (window.confirmModal) {
-        window.confirmModal.show(message, callback);
+// Helper function to show confirmation dialog (deprecated - use window.showConfirm from confirm-modal.js)
+// This is kept for backward compatibility
+function showConfirmLegacy(message, callback) {
+    if (window.showConfirm) {
+        window.showConfirm(
+            message,
+            'Confirm Action',
+            'Confirm',
+            'Cancel',
+            'warning'
+        ).then(confirmed => {
+            if (confirmed && callback) {
+                callback();
+            }
+        });
     } else {
         // Fallback to browser confirm
         if (confirm(message)) {
-            callback();
+            if (callback) callback();
         }
     }
 }

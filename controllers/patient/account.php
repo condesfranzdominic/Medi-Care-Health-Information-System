@@ -20,6 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = sanitize($_POST['last_name'] ?? '');
         $email = sanitize($_POST['email'] ?? '');
         $phone = sanitize($_POST['phone'] ?? '');
+        if (!empty($phone)) {
+            $phone = formatPhoneNumber($phone);
+        }
         $date_of_birth = sanitize($_POST['date_of_birth'] ?? '');
         $gender = sanitize($_POST['gender'] ?? '');
         $address = sanitize($_POST['address'] ?? '');

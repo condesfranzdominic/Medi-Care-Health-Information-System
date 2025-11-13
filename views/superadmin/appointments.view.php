@@ -121,7 +121,7 @@
                                     <button onclick="viewAppointmentDetails(<?= htmlspecialchars(json_encode($apt)) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                    <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this appointment?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $apt['appointment_id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">

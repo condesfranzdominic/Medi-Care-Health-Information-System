@@ -179,36 +179,69 @@ try {
     $params = [];
 
     if (!empty($search_query)) {
-        $where_conditions[] = "user_email LIKE :search";
+        $where_conditions[] = "u.user_email LIKE :search";
         $params['search'] = '%' . $search_query . '%';
     }
 
     if (!empty($filter_role)) {
         if ($filter_role === 'superadmin') {
-            $where_conditions[] = "user_is_superadmin = 1";
+            $where_conditions[] = "u.user_is_superadmin = true";
         } elseif ($filter_role === 'staff') {
-            $where_conditions[] = "staff_id IS NOT NULL";
+            $where_conditions[] = "u.staff_id IS NOT NULL";
         } elseif ($filter_role === 'doctor') {
-            $where_conditions[] = "doc_id IS NOT NULL";
+            $where_conditions[] = "u.doc_id IS NOT NULL";
         } elseif ($filter_role === 'patient') {
-            $where_conditions[] = "pat_id IS NOT NULL";
+            $where_conditions[] = "u.pat_id IS NOT NULL";
         }
     }
 
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
     // Get total count for pagination
-    $count_stmt = $db->prepare("SELECT COUNT(*) FROM users $where_clause");
+    $count_stmt = $db->prepare("
+        SELECT COUNT(*) 
+        FROM users u
+        LEFT JOIN patients p ON u.pat_id = p.pat_id
+        LEFT JOIN staff s ON u.staff_id = s.staff_id
+        LEFT JOIN doctors d ON u.doc_id = d.doc_id
+        $where_clause
+    ");
     $count_stmt->execute($params);
     $total_items = $count_stmt->fetchColumn();
     $total_pages = ceil($total_items / $items_per_page);
 
-    // Fetch paginated results
+    // Fetch paginated results with joined data
     $stmt = $db->prepare("
-        SELECT user_id, user_email, user_is_superadmin, pat_id, staff_id, doc_id, created_at 
-        FROM users 
+        SELECT 
+            u.user_id, 
+            u.user_email, 
+            u.user_is_superadmin, 
+            u.pat_id, 
+            u.staff_id, 
+            u.doc_id, 
+            u.created_at,
+            COALESCE(p.pat_first_name || ' ' || p.pat_last_name, 
+                     s.staff_first_name || ' ' || s.staff_last_name,
+                     d.doc_first_name || ' ' || d.doc_last_name,
+                     'Super Admin') as full_name,
+            COALESCE(p.pat_phone, s.staff_phone, d.doc_phone, NULL) as phone_number,
+            COALESCE(p.pat_first_name || ' ' || p.pat_last_name, 
+                     s.staff_first_name || ' ' || s.staff_last_name,
+                     d.doc_first_name || ' ' || d.doc_last_name,
+                     'Super Admin') as status_name,
+            CASE 
+                WHEN u.user_is_superadmin = true THEN 'Super Admin'
+                WHEN u.staff_id IS NOT NULL THEN COALESCE(s.staff_status, 'active')
+                WHEN u.doc_id IS NOT NULL THEN COALESCE(d.doc_status, 'active')
+                WHEN u.pat_id IS NOT NULL THEN 'active'
+                ELSE 'inactive'
+            END as status
+        FROM users u
+        LEFT JOIN patients p ON u.pat_id = p.pat_id
+        LEFT JOIN staff s ON u.staff_id = s.staff_id
+        LEFT JOIN doctors d ON u.doc_id = d.doc_id
         $where_clause
-        ORDER BY created_at DESC
+        ORDER BY u.created_at DESC
         LIMIT :limit OFFSET :offset
     ");
     foreach ($params as $key => $value) {

@@ -102,7 +102,7 @@
                             </td>
                             <td><?= htmlspecialchars($patient['pat_email']) ?></td>
                             <td><?= htmlspecialchars($patient['pat_phone'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($patient['pat_gender'] ?? 'N/A') ?></td>
+                            <td><?= $patient['pat_gender'] ? htmlspecialchars(ucfirst($patient['pat_gender'])) : 'N/A' ?></td>
                             <td><?= htmlspecialchars($patient['pat_date_of_birth'] ?? 'N/A') ?></td>
                             <td>
                                 <div class="table-actions">

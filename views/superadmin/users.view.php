@@ -79,7 +79,7 @@
                         <th>Email</th>
                         <th>Phone Number</th>
                         <th>Date Created</th>
-                        <th>Status</th>
+                        <th>Role</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -109,10 +109,6 @@
                             
                             // Format date
                             $date_created = !empty($user['created_at']) ? date('M d, Y', strtotime($user['created_at'])) : 'N/A';
-                            
-                            // Status
-                            $status = $user['status'] ?? 'active';
-                            $statusColor = ($status === 'active' || $status === 'Super Admin') ? '#10B981' : '#EF4444';
                         ?>
                         <tr>
                             <td><?= htmlspecialchars($user['full_name'] ?? 'N/A') ?></td>
@@ -120,14 +116,17 @@
                             <td><?= $phone_display ?></td>
                             <td><?= $date_created ?></td>
                             <td>
-                                <span class="badge" style="background: <?= $statusColor ?>20; color: <?= $statusColor ?>;">
-                                    <?= htmlspecialchars(ucfirst($status)) ?>
+                                <span class="badge" style="background: <?= $roleColor ?>20; color: <?= $roleColor ?>;">
+                                    <?= htmlspecialchars($role) ?>
                                 </span>
                             </td>
                             <td>
                                 <div class="table-actions">
                                     <button onclick="editUser(<?= htmlspecialchars(json_encode($user)) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="viewUserProfile(<?= htmlspecialchars(json_encode($user)) ?>)" class="btn btn-sm" title="View Profile">
+                                        <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this user?');">
                                         <input type="hidden" name="action" value="delete">
@@ -180,39 +179,37 @@
 
 <!-- Add User Modal -->
 <div id="addModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
         <div class="modal-header">
             <h2 class="modal-title">Create New User</h2>
             <button type="button" class="modal-close" onclick="closeAddUserModal()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="modal-body">
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Select a role to create the user account. You will be redirected to create the corresponding profile.</p>
-            <form id="createUserForm" onsubmit="return redirectToRoleCreation(event)">
-                <div class="form-group">
-                    <label>Select Role: <span style="color: var(--status-error);">*</span></label>
-                    <select id="role_select" required class="form-control">
-                        <option value="">-- Select Role --</option>
-                        <option value="superadmin">Super Admin</option>
-                        <option value="staff">Staff</option>
-                        <option value="doctor">Doctor</option>
-                        <option value="patient">Patient</option>
-                    </select>
-                </div>
-                
-                <div class="action-buttons" style="margin-top: 1.5rem;">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-arrow-right"></i>
-                        <span>Continue to Create Profile</span>
-                    </button>
-                    <button type="button" onclick="closeAddUserModal()" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        <span>Cancel</span>
-                    </button>
-                </div>
-            </form>
-        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0 2rem;">Select a role to create the user account. You will be redirected to create the corresponding profile.</p>
+        <form id="createUserForm" onsubmit="return redirectToRoleCreation(event)">
+            <div class="form-group" style="padding: 0 2rem;">
+                <label>Select Role: <span style="color: var(--status-error);">*</span></label>
+                <select id="role_select" required class="form-control">
+                    <option value="">-- Select Role --</option>
+                    <option value="superadmin">Super Admin</option>
+                    <option value="staff">Staff</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="patient">Patient</option>
+                </select>
+            </div>
+            
+            <div class="action-buttons" style="margin-top: 1.5rem; padding: 0 2rem 2rem 2rem;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>Continue to Create Profile</span>
+                </button>
+                <button type="button" onclick="closeAddUserModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -278,6 +275,25 @@
     </div>
 </div>
 
+<!-- View User Profile Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2 class="modal-title">User Profile</h2>
+            <button type="button" class="modal-close" onclick="closeViewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="viewContent"></div>
+        <div class="action-buttons" style="margin-top: 1.5rem;">
+            <button type="button" onclick="closeViewModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function openAddUserModal() {
     document.getElementById('addModal').classList.add('active');
@@ -338,6 +354,75 @@ function redirectToRoleCreation(event) {
     return false;
 }
 
+function viewUserProfile(user) {
+    // Determine role and profile link
+    let role = 'None';
+    let profileLink = '';
+    
+    if (user.user_is_superadmin == true || user.user_is_superadmin == 1) {
+        role = 'Super Admin';
+    } else if (user.staff_id) {
+        role = 'Staff';
+        profileLink = `/superadmin/staff?id=${user.staff_id}`;
+    } else if (user.doc_id) {
+        role = 'Doctor';
+        profileLink = `/superadmin/doctors?id=${user.doc_id}`;
+    } else if (user.pat_id) {
+        role = 'Patient';
+        profileLink = `/superadmin/patients?id=${user.pat_id}`;
+    }
+    
+    const content = `
+        <div style="padding: 2rem;">
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">User Information</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div>
+                        <strong>User ID:</strong> ${user.user_id}
+                    </div>
+                    <div>
+                        <strong>Email:</strong> ${user.user_email}
+                    </div>
+                    <div>
+                        <strong>Full Name:</strong> ${user.full_name || 'N/A'}
+                    </div>
+                    <div>
+                        <strong>Phone:</strong> ${user.phone_number || 'N/A'}
+                    </div>
+                    <div>
+                        <strong>Role:</strong> <span class="badge" style="background: ${getRoleColor(role)}20; color: ${getRoleColor(role)};">${role}</span>
+                    </div>
+                    <div>
+                        <strong>Date Created:</strong> ${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                    </div>
+                </div>
+            </div>
+            ${profileLink ? `
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);">
+                <a href="${profileLink}" class="btn btn-primary" style="text-decoration: none;">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>View ${role} Profile</span>
+                </a>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    document.getElementById('viewContent').innerHTML = content;
+    document.getElementById('viewModal').classList.add('active');
+}
+
+function getRoleColor(role) {
+    const colors = {
+        'Super Admin': '#e74c3c',
+        'Staff': '#3498db',
+        'Doctor': '#2ecc71',
+        'Patient': '#9b59b6',
+        'None': '#999'
+    };
+    return colors[role] || '#999';
+}
+
 function editUser(user) {
     document.getElementById('edit_id').value = user.user_id;
     document.getElementById('edit_email').value = user.user_email;
@@ -368,8 +453,17 @@ function closeEditModal() {
     document.getElementById('editModal').classList.remove('active');
 }
 
+function closeViewModal() {
+    document.getElementById('viewModal').classList.remove('active');
+}
+
 // Show/hide role link section based on selected role
-document.getElementById('edit_role').addEventListener('change', toggleRoleLinkSection);
+document.addEventListener('DOMContentLoaded', function() {
+    const editRoleSelect = document.getElementById('edit_role');
+    if (editRoleSelect) {
+        editRoleSelect.addEventListener('change', toggleRoleLinkSection);
+    }
+});
 
 function toggleRoleLinkSection() {
     const role = document.getElementById('edit_role').value;

@@ -2338,7 +2338,3 @@ body {
     left: 3px;
     transition: var(--transition);
 }
-
-.toggle-switch.active::after {
-    left: 23px;
-}

@@ -95,10 +95,6 @@
     <div class="card-header">
         <h2 class="card-title">All Doctor Schedules</h2>
     </div>
-    <div class="info-box" style="margin: 1.5rem;">
-        <i class="fas fa-info-circle"></i>
-        <p><strong>Note:</strong> Schedules are created and managed by doctors. As superadmin, you can view and delete schedules.</p>
-    </div>
     <?php if (empty($schedules)): ?>
         <div class="empty-state">
             <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>

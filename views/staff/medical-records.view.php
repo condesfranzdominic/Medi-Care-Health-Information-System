@@ -43,10 +43,6 @@
     </div>
 </div>
 
-<div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p><strong>Note:</strong> Staff can view medical records but cannot create, edit, or delete them. Only doctors can create/edit records, and only superadmin can delete them.</p>
-</div>
 
 <!-- Medical Records List -->
 <div class="card">

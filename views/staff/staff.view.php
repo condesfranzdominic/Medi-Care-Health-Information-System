@@ -56,12 +56,6 @@
     </div>
 </div>
 
-<?php if (!empty($search_query)): ?>
-    <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>Found <?= count($staff_members) ?> result(s) for "<?= htmlspecialchars($search_query) ?>"</p>
-    </div>
-<?php endif; ?>
 
 <!-- Add Staff Button -->
 <div class="page-actions">
@@ -75,10 +69,6 @@
 <div class="card">
     <div class="card-header">
         <h2 class="card-title"><?= !empty($search_query) ? 'Search Results' : 'All Staff Members' ?></h2>
-    </div>
-    <div class="info-box" style="margin: 1.5rem;">
-        <i class="fas fa-info-circle"></i>
-        <p><strong>Note:</strong> Only Super Admin can delete staff members.</p>
     </div>
     <?php if (empty($staff_members)): ?>
         <div class="empty-state">

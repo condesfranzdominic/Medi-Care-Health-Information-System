@@ -68,10 +68,6 @@
     <div class="card-header">
         <h2 class="card-title">All Payment Records</h2>
     </div>
-    <div class="info-box" style="margin: 1.5rem;">
-        <i class="fas fa-info-circle"></i>
-        <p><strong>Note:</strong> Only Super Admin can delete payment records.</p>
-    </div>
     <?php if (empty($payments)): ?>
         <div class="empty-state">
             <div class="empty-state-icon"><i class="fas fa-money-bill-wave"></i></div>

@@ -50,10 +50,6 @@
     </div>
 </div>
 
-<div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p><strong>Note:</strong> Medical records are created and edited by doctors. As superadmin, you can view and delete records.</p>
-</div>
 
 <!-- Medical Records List -->
 <div class="card">

@@ -207,10 +207,6 @@
                 </div>
             </div>
             
-            <div class="info-box" style="margin-top: 1.5rem;">
-                <i class="fas fa-lock"></i>
-                <p><strong>User Account (Login Credentials):</strong> Check the box below to create a user account for this staff member to login to the system.</p>
-            </div>
             
             <div class="form-group" style="margin-top: 1rem;">
                 <label style="display: flex; align-items: center; cursor: pointer;">

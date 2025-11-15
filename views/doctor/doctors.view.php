@@ -149,51 +149,109 @@ function togglePasswordField() {
 }
 </script>
 
-<!-- Doctors List -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All Doctors</h2>
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Doctors</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
     </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Active Doctors</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['active'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Inactive Doctors</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['inactive'] ?? 0 ?></div>
+    </div>
+</div>
+
+<!-- Doctors List -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Doctors</h2>
+    </div>
+
     <?php if (empty($doctors)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-user-md"></i></div>
-            <div class="empty-state-text">No doctors found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-user-md" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No doctors found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Specialization</th>
-                        <th>License</th>
-                        <th>Experience</th>
-                        <th>Fee</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Doctor Name
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Email
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Phone
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Specialization
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            License
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Experience
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Fee
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Status
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($doctors as $doctor): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></strong></td>
-                            <td><?= htmlspecialchars($doctor['doc_email']) ?></td>
-                            <td><?= htmlspecialchars($doctor['doc_phone'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($doctor['spec_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($doctor['doc_license_number'] ?? 'N/A') ?></td>
-                            <td><?= $doctor['doc_experience_years'] ?? 'N/A' ?> years</td>
-                            <td><strong style="color: var(--status-success);">₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></strong></td>
-                            <td>
-                                <span class="status-badge <?= ($doctor['doc_status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
-                                    <?= ucfirst($doctor['doc_status'] ?? 'active') ?>
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                        <?= strtoupper(substr($doctor['doc_first_name'] ?? 'D', 0, 1)) ?>
+                                    </div>
+                                    <strong style="color: var(--text-primary);"><?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></strong>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['doc_email']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['doc_phone'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['spec_name'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['doc_license_number'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= $doctor['doc_experience_years'] ?? 'N/A' ?> years</td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></td>
+                            <td style="padding: 1rem;">
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; background: <?= ($doctor['doc_status'] ?? 'active') === 'active' ? '#10b98120; color: #10b981;' : '#ef444420; color: #ef4444;' ?>">
+                                    <?= htmlspecialchars(ucfirst($doctor['doc_status'] ?? 'active')) ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick='editDoctor(<?= json_encode($doctor) ?>)' class="btn btn-sm" title="Edit">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button onclick='editDoctor(<?= json_encode($doctor) ?>)' class="btn btn-sm" title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                 </div>
                             </td>
@@ -298,12 +356,46 @@ function togglePasswordField() {
 </div>
 
 <script>
+// Phone number formatting function (Philippine format: XXXX-XXX-XXXX)
+function formatPhoneNumber(value) {
+    if (!value) return '';
+    let digits = value.toString().replace(/\D/g, '');
+    if (digits.length > 11) digits = digits.substring(0, 11);
+    if (digits.length >= 7) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+    } else if (digits.length >= 4) {
+        return digits.substring(0, 4) + '-' + digits.substring(4);
+    }
+    return digits;
+}
+
+function formatPhoneInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && !input.hasAttribute('data-phone-formatted')) {
+        input.setAttribute('data-phone-formatted', 'true');
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const formatted = formatPhoneNumber(e.target.value);
+            if (oldValue !== formatted) {
+                e.target.value = formatted;
+                const newCursorPosition = cursorPosition + (formatted.length - oldValue.length);
+                setTimeout(() => e.target.setSelectionRange(newCursorPosition, newCursorPosition), 0);
+            }
+        });
+        input.addEventListener('blur', function(e) {
+            if (e.target.value) e.target.value = formatPhoneNumber(e.target.value);
+        });
+        if (input.value) input.value = formatPhoneNumber(input.value);
+    }
+}
+
 function editDoctor(doctor) {
     document.getElementById('edit_id').value = doctor.doc_id;
     document.getElementById('edit_first_name').value = doctor.doc_first_name;
     document.getElementById('edit_last_name').value = doctor.doc_last_name;
     document.getElementById('edit_email').value = doctor.doc_email;
-    document.getElementById('edit_phone').value = doctor.doc_phone || '';
+    document.getElementById('edit_phone').value = doctor.doc_phone ? formatPhoneNumber(doctor.doc_phone) : '';
     document.getElementById('edit_specialization_id').value = doctor.doc_specialization_id || '';
     document.getElementById('edit_license_number').value = doctor.doc_license_number || '';
     document.getElementById('edit_experience_years').value = doctor.doc_experience_years || '';
@@ -317,6 +409,11 @@ function editDoctor(doctor) {
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('active');
 }
+
+// Initialize phone number formatting
+document.addEventListener('DOMContentLoaded', function() {
+    formatPhoneInput('edit_phone');
+});
 </script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

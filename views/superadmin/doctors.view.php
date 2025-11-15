@@ -1,55 +1,8 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-top">
-        <div class="breadcrumbs">
-            <a href="/superadmin/dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Doctors</span>
-        </div>
-        <h1 class="page-title">Manage Doctors</h1>
-    </div>
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0;">All Doctors</h1>
 </div>
-
-<!-- Search and Filter Bar -->
-<div class="search-filter-bar-modern">
-    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
-        <i class="fas fa-filter"></i>
-        <span>Filter</span>
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" class="search-input-modern" 
-                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
-                   placeholder="Search Doctor...">
-        </div>
-    </form>
-    <div class="category-tabs">
-        <button type="button" class="category-tab active" data-category="all">All</button>
-        <?php if (isset($specializations)): ?>
-            <?php foreach (array_slice($specializations, 0, 5) as $spec): ?>
-                <button type="button" class="category-tab" data-category="<?= $spec['spec_id'] ?>">
-                    <?= htmlspecialchars($spec['spec_name']) ?>
-                </button>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-</div>
-
-<?php if (isset($spec_filter) && $spec_filter && isset($spec_name_filter) && $spec_name_filter): ?>
-    <div class="info-box">
-        <i class="fas fa-filter"></i>
-        <p>
-            <strong>Filtered by Specialization:</strong> <?= htmlspecialchars($spec_name_filter) ?>
-            <a href="/superadmin/doctors" style="margin-left: 15px; color: var(--primary-blue); text-decoration: underline;">Clear Filter</a>
-        </p>
-    </div>
-<?php endif; ?>
 
 <?php if (isset($error) && $error): ?>
     <div class="alert alert-error">
@@ -65,68 +18,125 @@
     </div>
 <?php endif; ?>
 
-<!-- Add Doctor Button -->
-<div class="page-actions">
-    <button type="button" class="btn btn-success" onclick="openAddDoctorModal()">
-        <i class="fas fa-plus"></i>
-        <span>Add New Doctor</span>
-    </button>
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Doctors</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Active Doctors</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['active'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Inactive Doctors</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['inactive'] ?? 0 ?></div>
+    </div>
 </div>
 
-<!-- Doctors List -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All Doctors</h2>
+<!-- Table Container -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header with Add Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Doctors</h2>
+        <button type="button" class="btn btn-primary" onclick="openAddDoctorModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i>
+            <span>Add Doctor</span>
+        </button>
     </div>
+
     <?php if (empty($doctors)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-user-md"></i></div>
-            <div class="empty-state-text">No doctors found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-user-md" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No doctors found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Specialization</th>
-                        <th>License</th>
-                        <th>Fee</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Doctor Name
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Email
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Phone
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Specialization
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            License
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Fee
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Status
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($doctors as $doctor): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></strong></td>
-                            <td><?= htmlspecialchars($doctor['doc_email']) ?></td>
-                            <td><?= htmlspecialchars($doctor['doc_phone'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($doctor['spec_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($doctor['doc_license_number'] ?? 'N/A') ?></td>
-                            <td>₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></td>
-                            <td>
-                                <span class="status-badge <?= ($doctor['doc_status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
-                                    <?= htmlspecialchars($doctor['doc_status'] ?? 'active') ?>
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                        <?= strtoupper(substr($doctor['doc_first_name'] ?? 'D', 0, 1)) ?>
+                                    </div>
+                                    <strong style="color: var(--text-primary);"><?= htmlspecialchars($doctor['doc_first_name'] . ' ' . $doctor['doc_last_name']) ?></strong>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['doc_email']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['doc_phone'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['spec_name'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($doctor['doc_license_number'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">₱<?= number_format($doctor['doc_consultation_fee'] ?? 0, 2) ?></td>
+                            <td style="padding: 1rem;">
+                                <?php
+                                $status = $doctor['doc_status'] ?? 'active';
+                                $statusColor = $status === 'active' ? '#10b981' : '#ef4444';
+                                ?>
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; background: <?= $statusColor ?>; color: white;">
+                                    <?= htmlspecialchars(ucfirst($status)) ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="editDoctor(<?= json_encode($doctor) ?>)" class="btn btn-sm" title="Edit">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm edit-doctor-btn" 
+                                            data-doctor="<?= base64_encode(json_encode($doctor)) ?>" 
+                                            title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="viewDoctorDetails(<?= json_encode($doctor) ?>)" class="btn btn-sm" title="View Details">
-                                        <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this doctor?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $doctor['doc_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm" title="Delete"
+                                                style="padding: 0.5rem; background: transparent; border: none; color: var(--status-error); cursor: pointer;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    <button class="btn btn-sm view-doctor-btn" 
+                                            data-doctor="<?= base64_encode(json_encode($doctor)) ?>" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -137,36 +147,66 @@
         
         <!-- Pagination -->
         <?php if (isset($total_pages) && $total_pages > 1): ?>
-        <div class="pagination">
-            <div class="pagination-controls">
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-left"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-top: 1px solid var(--border-light);">
+            <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> entries
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page <= 1 ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    < Previous
                 </a>
                 <?php
                 $start_page = max(1, $page - 2);
                 $end_page = min($total_pages, $page + 2);
-                for ($i = $start_page; $i <= $end_page; $i++):
-                ?>
-                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="pagination-btn <?= $i == $page ? 'active' : '' ?>">
+                if ($start_page > 1): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="btn btn-sm">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
+                       class="btn btn-sm <?= $i == $page ? 'btn-primary' : '' ?>" 
+                       style="<?= $i == $page ? 'background: var(--primary-blue); color: white;' : '' ?>">
                         <?= $i ?>
                     </a>
                 <?php endfor; ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-right"></i>
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="btn btn-sm"><?= $total_pages ?></a>
+                <?php endif; ?>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page >= $total_pages ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    Next >
                 </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            </div>
-            <div class="pagination-info" style="margin-top: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
-                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> doctors
             </div>
         </div>
         <?php endif; ?>
     <?php endif; ?>
+</div>
+
+<!-- View Doctor Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Doctor Details</h2>
+            <button type="button" class="modal-close" onclick="closeViewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="viewContent"></div>
+        <div class="action-buttons" style="margin-top: 1.5rem;">
+            <button type="button" onclick="closeViewModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Add Doctor Modal -->
@@ -199,7 +239,7 @@
                 
                 <div class="form-group">
                     <label>Phone:</label>
-                    <input type="text" name="phone" class="form-control">
+                    <input type="text" name="phone" id="add_phone" class="form-control">
                 </div>
                 
                 <div class="form-group">
@@ -412,12 +452,46 @@ function togglePasswordField() {
     }
 }
 
+// Phone number formatting function (Philippine format: XXXX-XXX-XXXX)
+function formatPhoneNumber(value) {
+    if (!value) return '';
+    let digits = value.toString().replace(/\D/g, '');
+    if (digits.length > 11) digits = digits.substring(0, 11);
+    if (digits.length >= 7) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+    } else if (digits.length >= 4) {
+        return digits.substring(0, 4) + '-' + digits.substring(4);
+    }
+    return digits;
+}
+
+function formatPhoneInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && !input.hasAttribute('data-phone-formatted')) {
+        input.setAttribute('data-phone-formatted', 'true');
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const formatted = formatPhoneNumber(e.target.value);
+            if (oldValue !== formatted) {
+                e.target.value = formatted;
+                const newCursorPosition = cursorPosition + (formatted.length - oldValue.length);
+                setTimeout(() => e.target.setSelectionRange(newCursorPosition, newCursorPosition), 0);
+            }
+        });
+        input.addEventListener('blur', function(e) {
+            if (e.target.value) e.target.value = formatPhoneNumber(e.target.value);
+        });
+        if (input.value) input.value = formatPhoneNumber(input.value);
+    }
+}
+
 function editDoctor(doctor) {
     document.getElementById('edit_id').value = doctor.doc_id;
     document.getElementById('edit_first_name').value = doctor.doc_first_name;
     document.getElementById('edit_last_name').value = doctor.doc_last_name;
     document.getElementById('edit_email').value = doctor.doc_email;
-    document.getElementById('edit_phone').value = doctor.doc_phone || '';
+    document.getElementById('edit_phone').value = doctor.doc_phone ? formatPhoneNumber(doctor.doc_phone) : '';
     document.getElementById('edit_specialization_id').value = doctor.doc_specialization_id || '';
     document.getElementById('edit_license_number').value = doctor.doc_license_number || '';
     document.getElementById('edit_experience_years').value = doctor.doc_experience_years || '';
@@ -433,7 +507,41 @@ function closeEditModal() {
 }
 
 function viewDoctorDetails(doctor) {
-    window.location.href = '/superadmin/doctors?view=' + doctor.doc_id;
+    const content = `
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-body">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Doctor Information</h3>
+                <div class="form-grid">
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Doctor ID:</strong> ${doctor.doc_id || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>First Name:</strong> ${doctor.doc_first_name || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Last Name:</strong> ${doctor.doc_last_name || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Email:</strong> ${doctor.doc_email || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Phone:</strong> ${doctor.doc_phone || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Specialization:</strong> ${doctor.spec_name || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>License Number:</strong> ${doctor.doc_license_number || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Consultation Fee:</strong> <strong style="color: var(--status-success);">₱${parseFloat(doctor.doc_consultation_fee || 0).toFixed(2)}</strong></p>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);">
+                    <p style="margin: 0.5rem 0;"><strong>Status:</strong> 
+                        <span class="status-badge ${(doctor.doc_status || 'active') === 'active' ? 'active' : 'inactive'}">
+                            ${doctor.doc_status || 'active'}
+                        </span>
+                    </p>
+                </div>
+                ${doctor.doc_address ? `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);"><p style="margin: 0;"><strong>Address:</strong> ${doctor.doc_address}</p></div>` : ''}
+            </div>
+        </div>
+    `;
+    document.getElementById('viewContent').innerHTML = content;
+    document.getElementById('viewModal').classList.add('active');
+}
+
+function closeViewModal() {
+    document.getElementById('viewModal').classList.remove('active');
 }
 
 // Category tab functionality
@@ -447,6 +555,57 @@ document.addEventListener('DOMContentLoaded', function() {
             filterByCategory(category);
         });
     });
+    
+    // Add event listeners for edit and view buttons
+    document.querySelectorAll('.edit-doctor-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-doctor');
+                const decodedJson = atob(encodedData);
+                const doctorData = JSON.parse(decodedJson);
+                editDoctor(doctorData);
+            } catch (e) {
+                console.error('Error parsing doctor data:', e);
+                alert('Error loading doctor data. Please check the console for details.');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.view-doctor-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-doctor');
+                const decodedJson = atob(encodedData);
+                const doctorData = JSON.parse(decodedJson);
+                viewDoctorDetails(doctorData);
+            } catch (e) {
+                console.error('Error parsing doctor data:', e);
+                alert('Error loading doctor data. Please check the console for details.');
+            }
+        });
+    });
+    
+    // Initialize phone number formatting
+    formatPhoneInput('edit_phone');
+    formatPhoneInput('add_phone');
+    
+    // Close modals on outside click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
 });
 
 function filterByCategory(category) {
@@ -456,13 +615,6 @@ function filterByCategory(category) {
         window.location.href = '/superadmin/doctors?spec_id=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 </script>
 
 <!-- Filter Sidebar -->

@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $phone = formatPhoneNumber($phone);
         }
         $position = sanitize($_POST['position'] ?? '');
-        $hire_date = $_POST['hire_date'] ?? null;
+        $hire_date = !empty($_POST['hire_date']) ? $_POST['hire_date'] : null;
         $salary = !empty($_POST['salary']) ? floatval($_POST['salary']) : null;
         $status = sanitize($_POST['status'] ?? 'active');
         
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $phone = formatPhoneNumber($phone);
         }
         $position = sanitize($_POST['position'] ?? '');
-        $hire_date = $_POST['hire_date'] ?? null;
+        $hire_date = !empty($_POST['hire_date']) ? $_POST['hire_date'] : null;
         $salary = !empty($_POST['salary']) ? floatval($_POST['salary']) : null;
         $status = sanitize($_POST['status'] ?? 'active');
         
@@ -148,6 +148,29 @@ try {
     $filter_positions = $stmt->fetchAll(PDO::FETCH_COLUMN);
 } catch (PDOException $e) {
     $filter_positions = [];
+}
+
+// Calculate statistics for summary cards
+$stats = [
+    'total_this_month' => 0,
+    'active' => 0,
+    'inactive' => 0
+];
+
+try {
+    // Total staff this month
+    $stmt = $db->query("SELECT COUNT(*) as count FROM staff WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)");
+    $stats['total_this_month'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Active staff
+    $stmt = $db->query("SELECT COUNT(*) as count FROM staff WHERE staff_status = 'active'");
+    $stats['active'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Inactive staff
+    $stmt = $db->query("SELECT COUNT(*) as count FROM staff WHERE staff_status = 'inactive'");
+    $stats['inactive'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
 }
 
 require_once __DIR__ . '/../../views/staff/staff.view.php';

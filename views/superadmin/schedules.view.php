@@ -101,7 +101,6 @@
             <div class="empty-state-text">No schedules found.</div>
         </div>
     <?php else: ?>
-        <p style="margin: 0 1.5rem 1rem 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">Total: <?= count($schedules) ?> schedules</p>
         <div style="overflow-x: auto;">
             <table class="table">
                 <thead>
@@ -191,13 +190,6 @@ function filterByCategory(category) {
         window.location.href = '/superadmin/schedules?filter=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 
 function applyScheduleFilters() {
     const filters = {

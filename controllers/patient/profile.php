@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $last_name = sanitize($_POST['last_name']);
     $email = sanitize($_POST['email']);
     $phone = sanitize($_POST['phone'] ?? '');
-    $date_of_birth = $_POST['date_of_birth'] ?? null;
+    $date_of_birth = !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null;
     $gender = sanitize($_POST['gender'] ?? '');
     $address = sanitize($_POST['address'] ?? '');
     $emergency_contact = sanitize($_POST['emergency_contact'] ?? '');

@@ -84,4 +84,22 @@ try {
     $statuses = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'total_appointments' => 0
+];
+
+try {
+    // Total appointment statuses
+    $stmt = $db->query("SELECT COUNT(*) as count FROM appointment_statuses");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total appointments
+    $stmt = $db->query("SELECT COUNT(*) as count FROM appointments");
+    $stats['total_appointments'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/staff/statuses.view.php';

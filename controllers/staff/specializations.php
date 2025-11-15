@@ -23,4 +23,31 @@ try {
     $specializations = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'with_doctors' => 0,
+    'total_doctors' => 0
+];
+
+try {
+    // Total specializations
+    $stmt = $db->query("SELECT COUNT(*) as count FROM specializations");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Specializations with doctors
+    $stmt = $db->query("
+        SELECT COUNT(DISTINCT s.spec_id) as count 
+        FROM specializations s
+        INNER JOIN doctors d ON s.spec_id = d.doc_specialization_id
+    ");
+    $stats['with_doctors'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total doctors across all specializations
+    $stmt = $db->query("SELECT COUNT(*) as count FROM doctors WHERE doc_specialization_id IS NOT NULL");
+    $stats['total_doctors'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/staff/specializations.view.php';

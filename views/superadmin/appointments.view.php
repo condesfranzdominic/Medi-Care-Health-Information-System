@@ -1,17 +1,7 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-top">
-        <div class="breadcrumbs">
-            <a href="/superadmin/dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Appointments</span>
-        </div>
-        <h1 class="page-title">Manage Appointments</h1>
-    </div>
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0;">All Appointments</h1>
 </div>
 
 <?php if (isset($error) && $error): ?>
@@ -28,106 +18,117 @@
     </div>
 <?php endif; ?>
 
-<!-- Search and Filter Bar -->
-<div class="search-filter-bar-modern">
-    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
-        <i class="fas fa-filter"></i>
-        <span>Filter</span>
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" class="search-input-modern" 
-                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
-                   placeholder="Search Appointment...">
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Upcoming Appointments</span>
         </div>
-        <?php if (!empty($search_query)): ?>
-            <a href="/superadmin/appointments" class="btn btn-sm btn-secondary">
-                <i class="fas fa-times"></i>
-                <span>Clear</span>
-            </a>
-        <?php endif; ?>
-    </form>
-    <div class="category-tabs">
-        <button type="button" class="category-tab active" data-category="all">All</button>
-        <?php if (isset($statuses)): ?>
-            <?php foreach (array_slice($statuses, 0, 5) as $status): ?>
-                <button type="button" class="category-tab" data-category="<?= $status['status_id'] ?>">
-                    <?= htmlspecialchars($status['status_name']) ?>
-                </button>
-            <?php endforeach; ?>
-        <?php endif; ?>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['upcoming'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Completed Appointments</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['completed'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Cancelled Appointments</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['cancelled'] ?? 0 ?></div>
     </div>
 </div>
 
-<?php if (!empty($search_query)): ?>
-    <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>Showing results for: <strong><?= htmlspecialchars($search_query) ?></strong> (<?= count($appointments) ?> result(s) found)</p>
+<!-- Table Container -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header with Add Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Appointments</h2>
+        <button type="button" class="btn btn-primary" onclick="openAddAppointmentModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i>
+            <span>Add Appointment</span>
+        </button>
     </div>
-<?php endif; ?>
 
-<!-- Add Appointment Button -->
-<div class="page-actions">
-    <button type="button" class="btn btn-success" onclick="openAddAppointmentModal()">
-        <i class="fas fa-plus"></i>
-        <span>Create New Appointment</span>
-    </button>
-</div>
-
-<!-- All Appointments -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All Appointments</h2>
-    </div>
     <?php if (empty($appointments)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
-            <div class="empty-state-text">No appointments found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No appointments found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Patient</th>
-                        <th>Doctor</th>
-                        <th>Service</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Date
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Time
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Patient
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Doctor
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Service
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Status
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($appointments as $apt): ?>
-                        <tr>
-                            <td><?= isset($apt['appointment_date']) ? date('M j, Y', strtotime($apt['appointment_date'])) : 'N/A' ?></td>
-                            <td><?= isset($apt['appointment_time']) ? date('g:i A', strtotime($apt['appointment_time'])) : 'N/A' ?></td>
-                            <td><?= htmlspecialchars(($apt['pat_first_name'] ?? '') . ' ' . ($apt['pat_last_name'] ?? '')) ?></td>
-                            <td>Dr. <?= htmlspecialchars(($apt['doc_first_name'] ?? '') . ' ' . ($apt['doc_last_name'] ?? '')) ?></td>
-                            <td><?= htmlspecialchars($apt['service_name'] ?? 'N/A') ?></td>
-                            <td>
-                                <span class="badge" style="background: <?= htmlspecialchars($apt['status_color'] ?? '#3B82F6') ?>;">
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= isset($apt['appointment_date']) ? date('d M Y', strtotime($apt['appointment_date'])) : 'N/A' ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= isset($apt['appointment_time']) ? date('g:i A', strtotime($apt['appointment_time'])) : 'N/A' ?></td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                        <?= strtoupper(substr($apt['pat_first_name'] ?? 'P', 0, 1)) ?>
+                                    </div>
+                                    <strong style="color: var(--text-primary);"><?= htmlspecialchars(($apt['pat_first_name'] ?? '') . ' ' . ($apt['pat_last_name'] ?? '')) ?></strong>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">Dr. <?= htmlspecialchars(($apt['doc_first_name'] ?? '') . ' ' . ($apt['doc_last_name'] ?? '')) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($apt['service_name'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem;">
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; background: <?= htmlspecialchars($apt['status_color'] ?? '#3B82F6') ?>; color: white;">
                                     <?= htmlspecialchars($apt['status_name'] ?? 'N/A') ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="editAppointment(<?= json_encode($apt) ?>)" class="btn btn-sm" title="Edit">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm edit-appointment-btn" 
+                                            data-appointment="<?= base64_encode(json_encode($apt)) ?>" 
+                                            title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="viewAppointmentDetails(<?= json_encode($apt) ?>)" class="btn btn-sm" title="View Details">
-                                        <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this appointment?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $apt['appointment_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm" title="Delete"
+                                                style="padding: 0.5rem; background: transparent; border: none; color: var(--status-error); cursor: pointer;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    <button class="btn btn-sm view-appointment-btn" 
+                                            data-appointment="<?= base64_encode(json_encode($apt)) ?>" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -138,36 +139,66 @@
         
         <!-- Pagination -->
         <?php if (isset($total_pages) && $total_pages > 1): ?>
-        <div class="pagination">
-            <div class="pagination-controls">
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-left"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-top: 1px solid var(--border-light);">
+            <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> entries
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page <= 1 ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    < Previous
                 </a>
                 <?php
                 $start_page = max(1, $page - 2);
                 $end_page = min($total_pages, $page + 2);
-                for ($i = $start_page; $i <= $end_page; $i++):
-                ?>
-                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="pagination-btn <?= $i == $page ? 'active' : '' ?>">
+                if ($start_page > 1): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="btn btn-sm">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
+                       class="btn btn-sm <?= $i == $page ? 'btn-primary' : '' ?>" 
+                       style="<?= $i == $page ? 'background: var(--primary-blue); color: white;' : '' ?>">
                         <?= $i ?>
                     </a>
                 <?php endfor; ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-right"></i>
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="btn btn-sm"><?= $total_pages ?></a>
+                <?php endif; ?>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page >= $total_pages ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    Next >
                 </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            </div>
-            <div class="pagination-info" style="margin-top: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
-                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> appointments
             </div>
         </div>
         <?php endif; ?>
     <?php endif; ?>
+</div>
+
+<!-- View Appointment Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Appointment Details</h2>
+            <button type="button" class="modal-close" onclick="closeViewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="viewContent"></div>
+        <div class="action-buttons" style="margin-top: 1.5rem;">
+            <button type="button" onclick="closeViewModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Add Appointment Modal -->
@@ -355,7 +386,41 @@ function closeEditModal() {
 }
 
 function viewAppointmentDetails(appointment) {
-    window.location.href = '/superadmin/appointments?view=' + appointment.appointment_id;
+    const appointmentDate = appointment.appointment_date ? new Date(appointment.appointment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+    const appointmentTime = appointment.appointment_time ? new Date('1970-01-01T' + appointment.appointment_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A';
+    
+    const content = `
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-body">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Appointment Information</h3>
+                <div class="form-grid">
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Appointment ID:</strong> ${appointment.appointment_id || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Date:</strong> ${appointmentDate}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Time:</strong> ${appointmentTime}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Status:</strong> 
+                            <span class="badge" style="background: ${appointment.status_color || '#3B82F6'};">
+                                ${appointment.status_name || 'N/A'}
+                            </span>
+                        </p>
+                    </div>
+                    <div>
+                        <p style="margin: 0.5rem 0;"><strong>Patient:</strong> ${(appointment.pat_first_name || '')} ${(appointment.pat_last_name || '')}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Doctor:</strong> Dr. ${(appointment.doc_first_name || '')} ${(appointment.doc_last_name || '')}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Service:</strong> ${appointment.service_name || 'N/A'}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Specialization:</strong> ${appointment.spec_name || 'N/A'}</p>
+                    </div>
+                </div>
+                ${appointment.appointment_notes ? `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light);"><p style="margin: 0;"><strong>Notes:</strong> ${appointment.appointment_notes}</p></div>` : ''}
+            </div>
+        </div>
+    `;
+    document.getElementById('viewContent').innerHTML = content;
+    document.getElementById('viewModal').classList.add('active');
+}
+
+function closeViewModal() {
+    document.getElementById('viewModal').classList.remove('active');
 }
 
 // Category tab functionality
@@ -369,6 +434,53 @@ document.addEventListener('DOMContentLoaded', function() {
             filterByCategory(category);
         });
     });
+    
+    // Add event listeners for edit and view buttons
+    document.querySelectorAll('.edit-appointment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-appointment');
+                const decodedJson = atob(encodedData);
+                const appointmentData = JSON.parse(decodedJson);
+                editAppointment(appointmentData);
+            } catch (e) {
+                console.error('Error parsing appointment data:', e);
+                alert('Error loading appointment data. Please check the console for details.');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.view-appointment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-appointment');
+                const decodedJson = atob(encodedData);
+                const appointmentData = JSON.parse(decodedJson);
+                viewAppointmentDetails(appointmentData);
+            } catch (e) {
+                console.error('Error parsing appointment data:', e);
+                alert('Error loading appointment data. Please check the console for details.');
+            }
+        });
+    });
+    
+    // Close modals on outside click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
 });
 
 function filterByCategory(category) {
@@ -378,13 +490,6 @@ function filterByCategory(category) {
         window.location.href = '/superadmin/appointments?status_id=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 </script>
 
 <!-- Filter Sidebar -->

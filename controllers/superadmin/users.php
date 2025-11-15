@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = sanitize($_POST['email']);
         $password = $_POST['password'] ?? '';
         $role = $_POST['role'] ?? 'none';
-        $role_id = isset($_POST['role_id']) ? (int)$_POST['role_id'] : null;
+        $role_id = isset($_POST['role_id']) && $_POST['role_id'] !== '' ? (int)$_POST['role_id'] : null;
         
         if (empty($email)) {
             $error = 'Email is required';
@@ -63,39 +63,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Invalid email format';
         } else {
             try {
-                // Determine role flags
-                $is_superadmin = ($role === 'superadmin');
-                $pat_id = ($role === 'patient' && $role_id) ? $role_id : null;
-                $staff_id = ($role === 'staff' && $role_id) ? $role_id : null;
-                $doc_id = ($role === 'doctor' && $role_id) ? $role_id : null;
+                // Get current user data to preserve existing role associations
+                $stmt = $db->prepare("SELECT user_is_superadmin, pat_id, staff_id, doc_id FROM users WHERE user_id = :id");
+                $stmt->execute(['id' => $id]);
+                $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
                 
-                // Validate role_id exists if linking to a profile
-                if ($role !== 'superadmin' && $role !== 'none' && !$role_id) {
-                    $error = 'Profile ID is required when assigning Staff, Doctor, or Patient role';
+                if (!$currentUser) {
+                    $error = 'User not found';
                 } else {
-                    // Verify the profile exists
-                    if ($role === 'staff' && $staff_id) {
-                        $stmt = $db->prepare("SELECT staff_id FROM staff WHERE staff_id = :id");
-                        $stmt->execute(['id' => $staff_id]);
-                        if (!$stmt->fetch()) {
-                            $error = 'Staff ID does not exist';
+                    // Determine role flags - preserve existing IDs if role is kept the same and no new role_id provided
+                    $is_superadmin = ($role === 'superadmin');
+                    
+                    // If role is being changed, use the new role_id, otherwise preserve existing
+                    if ($role === 'patient') {
+                        $pat_id = $role_id ? $role_id : ($currentUser['pat_id'] ?? null);
+                        $staff_id = null;
+                        $doc_id = null;
+                    } elseif ($role === 'staff') {
+                        $staff_id = $role_id ? $role_id : ($currentUser['staff_id'] ?? null);
+                        $pat_id = null;
+                        $doc_id = null;
+                    } elseif ($role === 'doctor') {
+                        $doc_id = $role_id ? $role_id : ($currentUser['doc_id'] ?? null);
+                        $pat_id = null;
+                        $staff_id = null;
+                    } elseif ($role === 'superadmin') {
+                        $pat_id = null;
+                        $staff_id = null;
+                        $doc_id = null;
+                    } else { // 'none'
+                        $pat_id = null;
+                        $staff_id = null;
+                        $doc_id = null;
+                    }
+                    
+                    // Validate role_id exists if linking to a profile (only if a new role_id is provided)
+                    if ($role !== 'superadmin' && $role !== 'none') {
+                        // Only validate if a new role_id is being set, or if we're preserving an existing one
+                        $profile_id_to_check = null;
+                        if ($role === 'staff' && $staff_id) {
+                            $profile_id_to_check = $staff_id;
+                        } elseif ($role === 'doctor' && $doc_id) {
+                            $profile_id_to_check = $doc_id;
+                        } elseif ($role === 'patient' && $pat_id) {
+                            $profile_id_to_check = $pat_id;
                         }
-                    } elseif ($role === 'doctor' && $doc_id) {
-                        $stmt = $db->prepare("SELECT doc_id FROM doctors WHERE doc_id = :id");
-                        $stmt->execute(['id' => $doc_id]);
-                        if (!$stmt->fetch()) {
-                            $error = 'Doctor ID does not exist';
-                        }
-                    } elseif ($role === 'patient' && $pat_id) {
-                        $stmt = $db->prepare("SELECT pat_id FROM patients WHERE pat_id = :id");
-                        $stmt->execute(['id' => $pat_id]);
-                        if (!$stmt->fetch()) {
-                            $error = 'Patient ID does not exist';
+                        
+                        // If we have a profile ID to check, verify it exists
+                        if ($profile_id_to_check) {
+                            if ($role === 'staff') {
+                                $stmt = $db->prepare("SELECT staff_id FROM staff WHERE staff_id = :id");
+                                $stmt->execute(['id' => $profile_id_to_check]);
+                                if (!$stmt->fetch()) {
+                                    $error = 'Staff ID does not exist';
+                                }
+                            } elseif ($role === 'doctor') {
+                                $stmt = $db->prepare("SELECT doc_id FROM doctors WHERE doc_id = :id");
+                                $stmt->execute(['id' => $profile_id_to_check]);
+                                if (!$stmt->fetch()) {
+                                    $error = 'Doctor ID does not exist';
+                                }
+                            } elseif ($role === 'patient') {
+                                $stmt = $db->prepare("SELECT pat_id FROM patients WHERE pat_id = :id");
+                                $stmt->execute(['id' => $profile_id_to_check]);
+                                if (!$stmt->fetch()) {
+                                    $error = 'Patient ID does not exist';
+                                }
+                            }
+                        } elseif (!$role_id && !$currentUser['pat_id'] && !$currentUser['staff_id'] && !$currentUser['doc_id']) {
+                            // Only require role_id if user doesn't already have a profile linked
+                            $error = 'Profile ID is required when assigning Staff, Doctor, or Patient role';
                         }
                     }
                     
                     if (empty($error)) {
-                        // Update user with role information
+                        // Update user account
                         if (!empty($password)) {
                             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                             $stmt = $db->prepare("
@@ -138,6 +180,123 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'id' => $id
                             ]);
                         }
+                        
+                        // Update profile based on role
+                        if ($role === 'patient' && $pat_id) {
+                            $first_name = sanitize($_POST['first_name'] ?? '');
+                            $last_name = sanitize($_POST['last_name'] ?? '');
+                            $phone = sanitize($_POST['phone'] ?? '');
+                            if (!empty($phone)) {
+                                $phone = formatPhoneNumber($phone);
+                            }
+                            $date_of_birth = !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null;
+                            $gender = sanitize($_POST['gender'] ?? '');
+                            $address = sanitize($_POST['address'] ?? '');
+                            $emergency_contact = sanitize($_POST['emergency_contact'] ?? '');
+                            $emergency_phone = sanitize($_POST['emergency_phone'] ?? '');
+                            if (!empty($emergency_phone)) {
+                                $emergency_phone = formatPhoneNumber($emergency_phone);
+                            }
+                            $medical_history = sanitize($_POST['medical_history'] ?? '');
+                            $allergies = sanitize($_POST['allergies'] ?? '');
+                            $insurance_provider = sanitize($_POST['insurance_provider'] ?? '');
+                            $insurance_number = sanitize($_POST['insurance_number'] ?? '');
+                            
+                            $stmt = $db->prepare("
+                                UPDATE patients 
+                                SET pat_first_name = :first_name, pat_last_name = :last_name, pat_email = :email, 
+                                    pat_phone = :phone, pat_date_of_birth = :date_of_birth, pat_gender = :gender, 
+                                    pat_address = :address, pat_emergency_contact = :emergency_contact,
+                                    pat_emergency_phone = :emergency_phone, pat_medical_history = :medical_history,
+                                    pat_allergies = :allergies, pat_insurance_provider = :insurance_provider,
+                                    pat_insurance_number = :insurance_number, updated_at = NOW()
+                                WHERE pat_id = :id
+                            ");
+                            $stmt->execute([
+                                'first_name' => $first_name,
+                                'last_name' => $last_name,
+                                'email' => $email,
+                                'phone' => $phone,
+                                'date_of_birth' => $date_of_birth,
+                                'gender' => $gender,
+                                'address' => $address,
+                                'emergency_contact' => $emergency_contact,
+                                'emergency_phone' => $emergency_phone,
+                                'medical_history' => $medical_history,
+                                'allergies' => $allergies,
+                                'insurance_provider' => $insurance_provider,
+                                'insurance_number' => $insurance_number,
+                                'id' => $pat_id
+                            ]);
+                        } elseif ($role === 'staff' && $staff_id) {
+                            $first_name = sanitize($_POST['first_name'] ?? '');
+                            $last_name = sanitize($_POST['last_name'] ?? '');
+                            $phone = sanitize($_POST['phone'] ?? '');
+                            if (!empty($phone)) {
+                                $phone = formatPhoneNumber($phone);
+                            }
+                            $position = sanitize($_POST['position'] ?? '');
+                            $hire_date = !empty($_POST['hire_date']) ? $_POST['hire_date'] : null;
+                            $salary = !empty($_POST['salary']) ? floatval($_POST['salary']) : null;
+                            $status = sanitize($_POST['status'] ?? 'active');
+                            
+                            $stmt = $db->prepare("
+                                UPDATE staff 
+                                SET staff_first_name = :first_name, staff_last_name = :last_name, staff_email = :email, 
+                                    staff_phone = :phone, staff_position = :position, staff_hire_date = :hire_date,
+                                    staff_salary = :salary, staff_status = :status, updated_at = NOW()
+                                WHERE staff_id = :id
+                            ");
+                            $stmt->execute([
+                                'first_name' => $first_name,
+                                'last_name' => $last_name,
+                                'email' => $email,
+                                'phone' => $phone,
+                                'position' => $position,
+                                'hire_date' => $hire_date,
+                                'salary' => $salary,
+                                'status' => $status,
+                                'id' => $staff_id
+                            ]);
+                        } elseif ($role === 'doctor' && $doc_id) {
+                            $first_name = sanitize($_POST['first_name'] ?? '');
+                            $last_name = sanitize($_POST['last_name'] ?? '');
+                            $phone = sanitize($_POST['phone'] ?? '');
+                            if (!empty($phone)) {
+                                $phone = formatPhoneNumber($phone);
+                            }
+                            $specialization_id = !empty($_POST['specialization_id']) ? (int)$_POST['specialization_id'] : null;
+                            $license_number = sanitize($_POST['license_number'] ?? '');
+                            $experience_years = !empty($_POST['experience_years']) ? (int)$_POST['experience_years'] : null;
+                            $consultation_fee = !empty($_POST['consultation_fee']) ? floatval($_POST['consultation_fee']) : null;
+                            $qualification = sanitize($_POST['qualification'] ?? '');
+                            $bio = sanitize($_POST['bio'] ?? '');
+                            $status = sanitize($_POST['status'] ?? 'active');
+                            
+                            $stmt = $db->prepare("
+                                UPDATE doctors 
+                                SET doc_first_name = :first_name, doc_last_name = :last_name, doc_email = :email, 
+                                    doc_phone = :phone, doc_specialization_id = :specialization_id, doc_license_number = :license_number,
+                                    doc_experience_years = :experience_years, doc_consultation_fee = :consultation_fee,
+                                    doc_qualification = :qualification, doc_bio = :bio, doc_status = :status, updated_at = NOW()
+                                WHERE doc_id = :id
+                            ");
+                            $stmt->execute([
+                                'first_name' => $first_name,
+                                'last_name' => $last_name,
+                                'email' => $email,
+                                'phone' => $phone,
+                                'specialization_id' => $specialization_id,
+                                'license_number' => $license_number,
+                                'experience_years' => $experience_years,
+                                'consultation_fee' => $consultation_fee,
+                                'qualification' => $qualification,
+                                'bio' => $bio,
+                                'status' => $status,
+                                'id' => $doc_id
+                            ]);
+                        }
+                        
                         $success = 'User updated successfully';
                     }
                 }
@@ -210,7 +369,7 @@ try {
     $total_items = $count_stmt->fetchColumn();
     $total_pages = ceil($total_items / $items_per_page);
 
-    // Fetch paginated results with joined data
+    // Fetch paginated results with joined data - include all profile fields
     $stmt = $db->prepare("
         SELECT 
             u.user_id, 
@@ -235,7 +394,18 @@ try {
                 WHEN u.doc_id IS NOT NULL THEN COALESCE(d.doc_status, 'active')
                 WHEN u.pat_id IS NOT NULL THEN 'active'
                 ELSE 'inactive'
-            END as status
+            END as status,
+            -- Patient fields
+            p.pat_first_name, p.pat_last_name, p.pat_email, p.pat_phone, p.pat_date_of_birth,
+            p.pat_gender, p.pat_address, p.pat_emergency_contact, p.pat_emergency_phone,
+            p.pat_medical_history, p.pat_allergies, p.pat_insurance_provider, p.pat_insurance_number,
+            -- Staff fields
+            s.staff_first_name, s.staff_last_name, s.staff_email, s.staff_phone, s.staff_position,
+            s.staff_hire_date, s.staff_salary, s.staff_status,
+            -- Doctor fields
+            d.doc_first_name, d.doc_last_name, d.doc_email, d.doc_phone, d.doc_specialization_id,
+            d.doc_license_number, d.doc_experience_years, d.doc_consultation_fee, d.doc_qualification,
+            d.doc_bio, d.doc_status
         FROM users u
         LEFT JOIN patients p ON u.pat_id = p.pat_id
         LEFT JOIN staff s ON u.staff_id = s.staff_id
@@ -258,5 +428,46 @@ try {
     $total_pages = 0;
 }
 
+// Fetch specializations for doctor role dropdown
+try {
+    $stmt = $db->query("SELECT spec_id, spec_name FROM specializations ORDER BY spec_name");
+    $specializations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $specializations = [];
+}
+
 // Include the view
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'superadmin' => 0,
+    'staff' => 0,
+    'doctor' => 0,
+    'patient' => 0
+];
+
+try {
+    // Total users
+    $stmt = $db->query("SELECT COUNT(*) as count FROM users");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Super Admin users
+    $stmt = $db->query("SELECT COUNT(*) as count FROM users WHERE user_is_superadmin = true");
+    $stats['superadmin'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Staff users
+    $stmt = $db->query("SELECT COUNT(*) as count FROM users WHERE staff_id IS NOT NULL");
+    $stats['staff'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Doctor users
+    $stmt = $db->query("SELECT COUNT(*) as count FROM users WHERE doc_id IS NOT NULL");
+    $stats['doctor'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Patient users
+    $stmt = $db->query("SELECT COUNT(*) as count FROM users WHERE pat_id IS NOT NULL");
+    $stats['patient'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/superadmin/users.view.php';

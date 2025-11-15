@@ -221,9 +221,8 @@
 </style>
 
 <div class="medical-records-page">
-    <div class="page-header">
-        <h1 class="page-title">Medical Records</h1>
-        <p class="page-subtitle">View your complete medical history and prescriptions</p>
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <h1 class="page-title" style="margin: 0;">My Medical Records</h1>
     </div>
     
     <?php if ($error): ?>
@@ -233,22 +232,30 @@
         </div>
     <?php endif; ?>
     
-    <form method="GET" class="search-bar">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" placeholder="Search records by doctor name, diagnosis, or treatment..." 
-                   value="<?= htmlspecialchars($search_query) ?>" 
-                   aria-label="Search medical records">
+    <!-- Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Records</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
         </div>
-        <button type="submit" class="btn-action btn-primary">
-            <i class="fas fa-search"></i> Search
-        </button>
-        <?php if ($search_query): ?>
-        <a href="/patient/medical-records" class="btn-action btn-secondary">
-            <i class="fas fa-times"></i> Clear
-        </a>
-        <?php endif; ?>
-    </form>
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Records This Month</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['this_month'] ?? 0 ?></div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Pending Follow-up</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['pending_followup'] ?? 0 ?></div>
+        </div>
+    </div>
     
     <?php if (empty($records)): ?>
         <div class="empty-state">

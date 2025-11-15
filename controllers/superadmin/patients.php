@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = sanitize($_POST['last_name']);
         $email = sanitize($_POST['email']);
         $phone = sanitize($_POST['phone']);
-        $date_of_birth = $_POST['date_of_birth'];
+        $date_of_birth = !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null;
         $gender = sanitize($_POST['gender']);
         $address = sanitize($_POST['address']);
         $emergency_contact = sanitize($_POST['emergency_contact'] ?? '');
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($phone)) {
             $phone = formatPhoneNumber($phone);
         }
-        $date_of_birth = $_POST['date_of_birth'];
+        $date_of_birth = !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null;
         $gender = sanitize($_POST['gender']);
         $address = sanitize($_POST['address']);
         $emergency_contact = sanitize($_POST['emergency_contact'] ?? '');
@@ -289,4 +289,31 @@ try {
 }
 
 // Include the view
+// Calculate statistics for summary cards
+$stats = [
+    'total_this_month' => 0,
+    'pending' => 0,
+    'active' => 0,
+    'inactive' => 0
+];
+
+try {
+    // Total patients this month
+    $stmt = $db->query("SELECT COUNT(*) as count FROM patients WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)");
+    $stats['total_this_month'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Active patients (patients with user accounts)
+    $stmt = $db->query("SELECT COUNT(*) as count FROM patients p INNER JOIN users u ON p.pat_id = u.pat_id");
+    $stats['active'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Inactive patients (patients without user accounts)
+    $stmt = $db->query("SELECT COUNT(*) as count FROM patients p LEFT JOIN users u ON p.pat_id = u.pat_id WHERE u.user_id IS NULL");
+    $stats['inactive'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Pending (can be used for patients needing attention)
+    $stats['pending'] = 0;
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/superadmin/patients.view.php';

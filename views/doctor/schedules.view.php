@@ -109,53 +109,103 @@
     </div>
 </div>
 
-<!-- All Schedules -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All My Schedules</h2>
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Schedules</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
     </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Today's Schedules</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['today'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Upcoming Schedules</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['upcoming'] ?? 0 ?></div>
+    </div>
+</div>
+
+<!-- All Schedules -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All My Schedules</h2>
+    </div>
+
     <?php if (empty($schedules)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
-            <div class="empty-state-text">No schedules found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No schedules found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Max Appointments</th>
-                        <th>Available</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Date
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Start Time
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            End Time
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Max Appointments
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Available
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($schedules as $sched): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($sched['schedule_date']) ?></strong></td>
-                            <td><?= htmlspecialchars($sched['start_time']) ?></td>
-                            <td><?= htmlspecialchars($sched['end_time']) ?></td>
-                            <td><?= htmlspecialchars($sched['max_appointments']) ?></td>
-                            <td>
-                                <span class="status-badge <?= $sched['is_available'] ? 'active' : 'inactive' ?>">
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <strong style="color: var(--text-primary);"><?= $sched['schedule_date'] ? date('d M Y', strtotime($sched['schedule_date'])) : 'N/A' ?></strong>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($sched['start_time']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($sched['end_time']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($sched['max_appointments']) ?></td>
+                            <td style="padding: 1rem;">
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; background: <?= $sched['is_available'] ? '#10b98120; color: #10b981;' : '#ef444420; color: #ef4444;' ?>">
                                     <?= $sched['is_available'] ? 'Yes' : 'No' ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="editSchedule(<?= htmlspecialchars(json_encode($sched)) ?>)" class="btn btn-sm" title="Edit">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm edit-schedule-btn" 
+                                            data-schedule="<?= base64_encode(json_encode($sched)) ?>" 
+                                            title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this schedule?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $sched['schedule_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm" title="Delete"
+                                                style="padding: 0.5rem; background: transparent; border: none; color: var(--status-error); cursor: pointer;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    <button class="btn btn-sm" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -230,6 +280,40 @@ function editSchedule(sched) {
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('active');
 }
+
+// Close modals on outside click and Escape key
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for edit buttons
+    document.querySelectorAll('.edit-schedule-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-schedule');
+                const decodedJson = atob(encodedData);
+                const scheduleData = JSON.parse(decodedJson);
+                editSchedule(scheduleData);
+            } catch (e) {
+                console.error('Error parsing schedule data:', e);
+                alert('Error loading schedule data. Please check the console for details.');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
+});
 </script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

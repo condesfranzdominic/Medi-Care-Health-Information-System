@@ -1,17 +1,7 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-top">
-        <div class="breadcrumbs">
-            <a href="/superadmin/dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Medical Records</span>
-        </div>
-        <h1 class="page-title">Manage Medical Records</h1>
-    </div>
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0;">All Medical Records</h1>
 </div>
 
 <?php if (isset($error) && $error): ?>
@@ -28,74 +18,110 @@
     </div>
 <?php endif; ?>
 
-<!-- Search and Filter Bar -->
-<div class="search-filter-bar-modern">
-    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
-        <i class="fas fa-filter"></i>
-        <span>Filter</span>
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" class="search-input-modern" 
-                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
-                   placeholder="Search Medical Record...">
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Records</span>
         </div>
-    </form>
-    <div class="category-tabs">
-        <button type="button" class="category-tab active" data-category="all">All</button>
-        <button type="button" class="category-tab" data-category="recent">Recent</button>
-        <button type="button" class="category-tab" data-category="followup">Follow-up</button>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Records This Month</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['this_month'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Pending Follow-up</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['pending_followup'] ?? 0 ?></div>
     </div>
 </div>
 
-
-<!-- Medical Records List -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All Medical Records</h2>
+<!-- Table Container -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header with Add Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Medical Records</h2>
+        <button type="button" class="btn btn-primary" onclick="openAddMedicalRecordModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i>
+            <span>Add Medical Record</span>
+        </button>
     </div>
+
     <?php if (empty($records)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-file-medical"></i></div>
-            <div class="empty-state-text">No medical records found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-file-medical" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No medical records found.</p>
         </div>
     <?php else: ?>
-        <p style="margin: 0 1.5rem 1rem 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">Total: <?= count($records) ?> records</p>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Record ID</th>
-                        <th>Date</th>
-                        <th>Patient</th>
-                        <th>Doctor</th>
-                        <th>Diagnosis</th>
-                        <th>Treatment</th>
-                        <th>Follow-up</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Record ID
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Date
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Patient
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Doctor
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Diagnosis
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Treatment
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Follow-up
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($records as $record): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($record['record_id']) ?></strong></td>
-                            <td><?= htmlspecialchars($record['record_date']) ?></td>
-                            <td><?= htmlspecialchars($record['pat_first_name'] . ' ' . $record['pat_last_name']) ?></td>
-                            <td>Dr. <?= htmlspecialchars($record['doc_first_name'] . ' ' . $record['doc_last_name']) ?></td>
-                            <td><?= htmlspecialchars(substr($record['diagnosis'] ?? '', 0, 50)) ?><?= strlen($record['diagnosis'] ?? '') > 50 ? '...' : '' ?></td>
-                            <td><?= htmlspecialchars(substr($record['treatment'] ?? '', 0, 50)) ?><?= strlen($record['treatment'] ?? '') > 50 ? '...' : '' ?></td>
-                            <td><?= htmlspecialchars($record['follow_up_date'] ?? 'N/A') ?></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="viewRecord(<?= json_encode($record) ?>)" class="btn btn-sm" title="View Details">
-                                        <i class="fas fa-eye"></i>
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <strong style="color: var(--text-primary);">#<?= htmlspecialchars($record['record_id']) ?></strong>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= $record['record_date'] ? date('d M Y', strtotime($record['record_date'])) : 'N/A' ?></td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                        <?= strtoupper(substr($record['pat_first_name'] ?? 'P', 0, 1)) ?>
+                                    </div>
+                                    <strong style="color: var(--text-primary);"><?= htmlspecialchars($record['pat_first_name'] . ' ' . $record['pat_last_name']) ?></strong>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">Dr. <?= htmlspecialchars($record['doc_first_name'] . ' ' . $record['doc_last_name']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars(substr($record['diagnosis'] ?? '', 0, 50)) ?><?= strlen($record['diagnosis'] ?? '') > 50 ? '...' : '' ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars(substr($record['treatment'] ?? '', 0, 50)) ?><?= strlen($record['treatment'] ?? '') > 50 ? '...' : '' ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= $record['follow_up_date'] ? date('d M Y', strtotime($record['follow_up_date'])) : 'N/A' ?></td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm view-record-btn" 
+                                            data-record="<?= base64_encode(json_encode($record)) ?>" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this medical record? This action cannot be undone.');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $record['record_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm" title="Delete"
+                                                style="padding: 0.5rem; background: transparent; border: none; color: var(--status-error); cursor: pointer;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -108,25 +134,49 @@
         </div>
         
         <!-- Pagination -->
-        <div class="pagination">
-            <div class="pagination-controls">
-                <button class="pagination-btn" disabled>
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button class="pagination-btn" disabled>
-                    <i class="fas fa-angle-left"></i>
-                </button>
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-                <button class="pagination-btn">
-                    <i class="fas fa-angle-right"></i>
-                </button>
-                <button class="pagination-btn">
-                    <i class="fas fa-angle-double-right"></i>
-                </button>
+        <?php if (isset($total_pages) && $total_pages > 1): ?>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-top: 1px solid var(--border-light);">
+            <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                Showing <?= ($offset ?? 0) + 1 ?>-<?= min(($offset ?? 0) + ($items_per_page ?? 10), $total_items ?? count($records)) ?> of <?= $total_items ?? count($records) ?> entries
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, ($page ?? 1) - 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= ($page ?? 1) <= 1 ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    < Previous
+                </a>
+                <?php
+                $current_page = $page ?? 1;
+                $total_pages = $total_pages ?? 1;
+                $start_page = max(1, $current_page - 2);
+                $end_page = min($total_pages, $current_page + 2);
+                if ($start_page > 1): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="btn btn-sm">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
+                       class="btn btn-sm <?= $i == $current_page ? 'btn-primary' : '' ?>" 
+                       style="<?= $i == $current_page ? 'background: var(--primary-blue); color: white;' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="btn btn-sm"><?= $total_pages ?></a>
+                <?php endif; ?>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $current_page + 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $current_page >= $total_pages ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    Next >
+                </a>
             </div>
         </div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 
@@ -234,6 +284,21 @@ document.addEventListener('DOMContentLoaded', function() {
             filterByCategory(category);
         });
     });
+    
+    // Add event listeners for view buttons
+    document.querySelectorAll('.view-record-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-record');
+                const decodedJson = atob(encodedData);
+                const recordData = JSON.parse(decodedJson);
+                viewRecord(recordData);
+            } catch (e) {
+                console.error('Error parsing record data:', e);
+                alert('Error loading record data. Please check the console for details.');
+            }
+        });
+    });
 });
 
 function filterByCategory(category) {
@@ -243,13 +308,6 @@ function filterByCategory(category) {
         window.location.href = '/superadmin/medical-records?filter=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 
 function applyMedicalRecordFilters() {
     const filters = {

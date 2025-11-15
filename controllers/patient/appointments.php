@@ -170,4 +170,26 @@ try {
     $filter_statuses = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'upcoming' => 0,
+    'completed' => 0
+];
+
+try {
+    // Total appointments for this patient
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM appointments WHERE pat_id = :patient_id");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Upcoming appointments
+    $stats['upcoming'] = count($upcoming_appointments);
+    
+    // Completed appointments
+    $stats['completed'] = count($past_appointments);
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/patient/appointments.view.php';

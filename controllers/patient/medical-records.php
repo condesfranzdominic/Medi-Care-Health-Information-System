@@ -47,5 +47,31 @@ try {
     $records = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'this_month' => 0,
+    'pending_followup' => 0
+];
+
+try {
+    // Total medical records for this patient
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM medical_records WHERE pat_id = :patient_id");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Records this month
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM medical_records WHERE pat_id = :patient_id AND DATE_TRUNC('month', record_date) = DATE_TRUNC('month', CURRENT_DATE)");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['this_month'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Pending follow-up
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM medical_records WHERE pat_id = :patient_id AND follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['pending_followup'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/patient/medical-records.view.php';
 

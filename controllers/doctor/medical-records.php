@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $treatment = sanitize($_POST['treatment']);
         $prescription = sanitize($_POST['prescription'] ?? '');
         $notes = sanitize($_POST['notes'] ?? '');
-        $follow_up_date = $_POST['follow_up_date'] ?? null;
+        $follow_up_date = !empty($_POST['follow_up_date']) ? $_POST['follow_up_date'] : null;
         
         if (empty($pat_id) || empty($record_date) || empty($diagnosis)) {
             $error = 'Patient, date, and diagnosis are required';
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $treatment = sanitize($_POST['treatment']);
         $prescription = sanitize($_POST['prescription'] ?? '');
         $notes = sanitize($_POST['notes'] ?? '');
-        $follow_up_date = $_POST['follow_up_date'] ?? null;
+        $follow_up_date = !empty($_POST['follow_up_date']) ? $_POST['follow_up_date'] : null;
         
         try {
             // Verify this record belongs to this doctor
@@ -151,6 +151,32 @@ try {
     $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $patients = [];
+}
+
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'this_month' => 0,
+    'pending_followup' => 0
+];
+
+try {
+    // Total medical records for this doctor
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM medical_records WHERE doc_id = :doctor_id");
+    $stmt->execute(['doctor_id' => $doctor_id]);
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Records this month
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM medical_records WHERE doc_id = :doctor_id AND DATE_TRUNC('month', record_date) = DATE_TRUNC('month', CURRENT_DATE)");
+    $stmt->execute(['doctor_id' => $doctor_id]);
+    $stats['this_month'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Pending follow-up
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM medical_records WHERE doc_id = :doctor_id AND follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE");
+    $stmt->execute(['doctor_id' => $doctor_id]);
+    $stats['pending_followup'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
 }
 
 require_once __DIR__ . '/../../views/doctor/medical-records.view.php';

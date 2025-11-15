@@ -79,4 +79,22 @@ try {
     $payment_statuses = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'total_payments' => 0
+];
+
+try {
+    // Total payment statuses
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payment_statuses");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total payments
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payments");
+    $stats['total_payments'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/staff/payment-statuses.view.php';

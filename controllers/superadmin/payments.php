@@ -136,4 +136,42 @@ try {
     $payment_statuses = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total_this_month' => 0,
+    'paid' => 0,
+    'pending' => 0,
+    'total_amount' => 0
+];
+
+try {
+    // Total payments this month
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payments WHERE DATE_TRUNC('month', payment_date) = DATE_TRUNC('month', CURRENT_DATE)");
+    $stats['total_this_month'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Paid payments
+    $stmt = $db->query("
+        SELECT COUNT(*) as count 
+        FROM payments p
+        JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
+        WHERE LOWER(ps.status_name) = 'paid'
+    ");
+    $stats['paid'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Pending payments
+    $stmt = $db->query("
+        SELECT COUNT(*) as count 
+        FROM payments p
+        JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
+        WHERE LOWER(ps.status_name) = 'pending'
+    ");
+    $stats['pending'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total amount
+    $stmt = $db->query("SELECT COALESCE(SUM(amount), 0) as total FROM payments");
+    $stats['total_amount'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/superadmin/payments.view.php';

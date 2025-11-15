@@ -234,9 +234,8 @@
 </style>
 
 <div class="payments-page">
-    <div class="page-header">
-        <h1 class="page-title">Payments & Billing</h1>
-        <p class="page-subtitle">View your payment history and manage bills</p>
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <h1 class="page-title" style="margin: 0;">My Payments</h1>
     </div>
     
     <?php if ($error): ?>
@@ -247,33 +246,36 @@
     <?php endif; ?>
     
     <!-- Summary Cards -->
-    <div class="summary-cards">
-        <div class="summary-card paid">
-            <div class="summary-card-label">Total Paid</div>
-            <div class="summary-card-value">₱<?= number_format($total_paid, 2) ?></div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Payments</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
         </div>
-        <div class="summary-card pending">
-            <div class="summary-card-label">Pending Payments</div>
-            <div class="summary-card-value">₱<?= number_format($total_pending, 2) ?></div>
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Paid</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['paid'] ?? 0 ?></div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Pending</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['pending'] ?? 0 ?></div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+                <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Amount</span>
+            </div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">₱<?= number_format($stats['total_amount'] ?? 0, 0) ?></div>
         </div>
     </div>
-    
-    <form method="GET" class="search-bar">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" placeholder="Search payments by appointment ID or method..." 
-                   value="<?= htmlspecialchars($search_query) ?>" 
-                   aria-label="Search payments">
-        </div>
-        <button type="submit" class="btn-action btn-primary">
-            <i class="fas fa-search"></i> Search
-        </button>
-        <?php if ($search_query): ?>
-        <a href="/patient/payments" class="btn-action btn-secondary">
-            <i class="fas fa-times"></i> Clear
-        </a>
-        <?php endif; ?>
-    </form>
     
     <?php if (empty($payments)): ?>
         <div class="empty-state">

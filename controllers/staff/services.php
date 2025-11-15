@@ -129,4 +129,31 @@ try {
     $filter_categories = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'total_appointments' => 0,
+    'total_revenue' => 0
+];
+
+try {
+    // Total services
+    $stmt = $db->query("SELECT COUNT(*) as count FROM services");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total appointments using services
+    $stmt = $db->query("SELECT COUNT(*) as count FROM appointments WHERE service_id IS NOT NULL");
+    $stats['total_appointments'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total revenue from services
+    $stmt = $db->query("
+        SELECT COALESCE(SUM(s.service_price), 0) as total 
+        FROM appointments a
+        JOIN services s ON a.service_id = s.service_id
+    ");
+    $stats['total_revenue'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/staff/services.view.php';

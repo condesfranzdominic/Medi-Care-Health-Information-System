@@ -1,17 +1,7 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-top">
-        <div class="breadcrumbs">
-            <a href="/superadmin/dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Services</span>
-        </div>
-        <h1 class="page-title">Manage Services</h1>
-    </div>
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0;">All Services</h1>
 </div>
 
 <?php if (isset($error) && $error): ?>
@@ -28,77 +18,103 @@
     </div>
 <?php endif; ?>
 
-<!-- Search and Filter Bar -->
-<div class="search-filter-bar-modern">
-    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
-        <i class="fas fa-filter"></i>
-        <span>Filter</span>
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" class="search-input-modern" 
-                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
-                   placeholder="Search Service...">
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Services</span>
         </div>
-    </form>
-    <div class="category-tabs">
-        <button type="button" class="category-tab active" data-category="all">All</button>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Service Appointments</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total_appointments'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Revenue</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">₱<?= number_format($stats['total_revenue'] ?? 0, 0) ?></div>
     </div>
 </div>
 
-<!-- Add Service Button -->
-<div class="page-actions">
-    <button type="button" class="btn btn-success" onclick="openAddServiceModal()">
-        <i class="fas fa-plus"></i>
-        <span>Add New Service</span>
-    </button>
-</div>
-
-<!-- Services List -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All Services</h2>
+<!-- Table Container -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header with Add Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Services</h2>
+        <button type="button" class="btn btn-primary" onclick="openAddServiceModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i>
+            <span>Add Service</span>
+        </button>
     </div>
+
     <?php if (empty($services)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-flask"></i></div>
-            <div class="empty-state-text">No services found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-flask" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No services found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Service Name</th>
-                        <th>Description</th>
-                        <th>Price</th>
-                        <th>Duration</th>
-                        <th>Category</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Service Name
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Description
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Price
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Duration
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Category
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($services as $service): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($service['service_name']) ?></strong></td>
-                            <td><?= htmlspecialchars($service['service_description'] ?? 'N/A') ?></td>
-                            <td>₱<?= number_format($service['service_price'] ?? 0, 2) ?></td>
-                            <td><?= htmlspecialchars($service['service_duration_minutes'] ?? 30) ?> min</td>
-                            <td><?= htmlspecialchars($service['service_category'] ?? 'N/A') ?></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="editService(<?= json_encode($service) ?>)" class="btn btn-sm" title="Edit">
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <strong style="color: var(--text-primary);"><?= htmlspecialchars($service['service_name']) ?></strong>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($service['service_description'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">₱<?= number_format($service['service_price'] ?? 0, 2) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($service['service_duration_minutes'] ?? 30) ?> min</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($service['service_category'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm edit-service-btn" 
+                                            data-service="<?= base64_encode(json_encode($service)) ?>" 
+                                            title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this service?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $service['service_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm" title="Delete"
+                                                style="padding: 0.5rem; background: transparent; border: none; color: var(--status-error); cursor: pointer;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    <button class="btn btn-sm" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -109,32 +125,43 @@
         
         <!-- Pagination -->
         <?php if (isset($total_pages) && $total_pages > 1): ?>
-        <div class="pagination">
-            <div class="pagination-controls">
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-left"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-top: 1px solid var(--border-light);">
+            <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> entries
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page <= 1 ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    < Previous
                 </a>
                 <?php
                 $start_page = max(1, $page - 2);
                 $end_page = min($total_pages, $page + 2);
-                for ($i = $start_page; $i <= $end_page; $i++):
-                ?>
-                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="pagination-btn <?= $i == $page ? 'active' : '' ?>">
+                if ($start_page > 1): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="btn btn-sm">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
+                       class="btn btn-sm <?= $i == $page ? 'btn-primary' : '' ?>" 
+                       style="<?= $i == $page ? 'background: var(--primary-blue); color: white;' : '' ?>">
                         <?= $i ?>
                     </a>
                 <?php endfor; ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-right"></i>
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="btn btn-sm"><?= $total_pages ?></a>
+                <?php endif; ?>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page >= $total_pages ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    Next >
                 </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            </div>
-            <div class="pagination-info" style="margin-top: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
-                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> services
             </div>
         </div>
         <?php endif; ?>
@@ -271,6 +298,21 @@ document.addEventListener('DOMContentLoaded', function() {
             filterByCategory(category);
         });
     });
+    
+    // Add event listeners for edit buttons
+    document.querySelectorAll('.edit-service-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-service');
+                const decodedJson = atob(encodedData);
+                const serviceData = JSON.parse(decodedJson);
+                editService(serviceData);
+            } catch (e) {
+                console.error('Error parsing service data:', e);
+                alert('Error loading service data. Please check the console for details.');
+            }
+        });
+    });
 });
 
 function filterByCategory(category) {
@@ -278,13 +320,6 @@ function filterByCategory(category) {
         window.location.href = '/superadmin/services';
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 
 function applyServiceFilters() {
     const filters = {

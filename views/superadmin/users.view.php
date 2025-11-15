@@ -1,17 +1,7 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-top">
-        <div class="breadcrumbs">
-            <a href="/superadmin/dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Users</span>
-        </div>
-        <h1 class="page-title">Manage Users</h1>
-    </div>
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0;">All Users</h1>
 </div>
 
 <?php if ($error): ?>
@@ -28,59 +18,75 @@
     </div>
 <?php endif; ?>
 
-<!-- Search and Filter Bar -->
-<div class="search-filter-bar-modern">
-    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
-        <i class="fas fa-filter"></i>
-        <span>Filter</span>
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" class="search-input-modern" 
-                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
-                   placeholder="Search User...">
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Total Users</span>
         </div>
-    </form>
-    <div class="category-tabs">
-        <button type="button" class="category-tab <?= empty($filter_role) ? 'active' : '' ?>" data-category="all">All</button>
-        <button type="button" class="category-tab <?= $filter_role === 'superadmin' ? 'active' : '' ?>" data-category="superadmin">Super Admin</button>
-        <button type="button" class="category-tab <?= $filter_role === 'staff' ? 'active' : '' ?>" data-category="staff">Staff</button>
-        <button type="button" class="category-tab <?= $filter_role === 'doctor' ? 'active' : '' ?>" data-category="doctor">Doctor</button>
-        <button type="button" class="category-tab <?= $filter_role === 'patient' ? 'active' : '' ?>" data-category="patient">Patient</button>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3498db;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Staff Users</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['staff'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #2ecc71;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Doctor Users</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['doctor'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #9b59b6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Patient Users</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['patient'] ?? 0 ?></div>
     </div>
 </div>
 
-<!-- Add User Button -->
-<div class="page-actions">
-    <button type="button" class="btn btn-success" onclick="openAddUserModal()">
-        <i class="fas fa-plus"></i>
-        <span>Create New User</span>
-    </button>
-</div>
-
-<!-- Users List -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">All Users</h2>
+<!-- Table Container -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header with Add Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Users</h2>
+        <button type="button" class="btn btn-primary" onclick="openAddUserModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i>
+            <span>Add User</span>
+        </button>
     </div>
+
     <?php if (empty($users)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-users"></i></div>
-            <div class="empty-state-text">No users found.</div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No users found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>
-                        <th>Date Created</th>
-                        <th>Role</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Full Name
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Email
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Phone Number
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Date Created
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Role
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,30 +114,49 @@
                             $phone_display = !empty($user['phone_number']) ? htmlspecialchars($user['phone_number']) : 'N/A';
                             
                             // Format date
-                            $date_created = !empty($user['created_at']) ? date('M d, Y', strtotime($user['created_at'])) : 'N/A';
+                            $date_created = !empty($user['created_at']) ? date('d M Y', strtotime($user['created_at'])) : 'N/A';
+                            
+                            // Get first letter for avatar
+                            $firstLetter = strtoupper(substr($user['full_name'] ?? 'U', 0, 1));
                         ?>
-                        <tr>
-                            <td><?= htmlspecialchars($user['full_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($user['user_email']) ?></td>
-                            <td><?= $phone_display ?></td>
-                            <td><?= $date_created ?></td>
-                            <td>
-                                <span class="badge" style="background: <?= $roleColor ?>20; color: <?= $roleColor ?>;">
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                        <?= $firstLetter ?>
+                                    </div>
+                                    <strong style="color: var(--text-primary);"><?= htmlspecialchars($user['full_name'] ?? 'N/A') ?></strong>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($user['user_email']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= $phone_display ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= $date_created ?></td>
+                            <td style="padding: 1rem;">
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; background: <?= $roleColor ?>20; color: <?= $roleColor ?>;">
                                     <?= htmlspecialchars($role) ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="editUser(<?= json_encode($user) ?>)" class="btn btn-sm" title="Edit">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm edit-user-btn" 
+                                            data-user="<?= base64_encode(json_encode($user)) ?>" 
+                                            title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="viewUserProfile(<?= json_encode($user) ?>)" class="btn btn-sm" title="View Profile">
-                                        <i class="fas fa-eye"></i>
+                                    <button class="btn btn-sm view-user-btn" 
+                                            data-user="<?= base64_encode(json_encode($user)) ?>" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this user?');">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $user['user_id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm" title="Delete"
+                                                style="padding: 0.5rem; background: transparent; border: none; color: var(--status-error); cursor: pointer;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -142,35 +167,46 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         <?php if (isset($total_pages) && $total_pages > 1): ?>
-        <div class="pagination">
-            <div class="pagination-controls">
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" class="pagination-btn" <?= $page <= 1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-left"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-top: 1px solid var(--border-light);">
+            <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> entries
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => max(1, $page - 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page <= 1 ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    < Previous
                 </a>
                 <?php
                 $start_page = max(1, $page - 2);
                 $end_page = min($total_pages, $page + 2);
-                for ($i = $start_page; $i <= $end_page; $i++):
-                ?>
-                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="pagination-btn <?= $i == $page ? 'active' : '' ?>">
+                if ($start_page > 1): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" class="btn btn-sm">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
+                       class="btn btn-sm <?= $i == $page ? 'btn-primary' : '' ?>" 
+                       style="<?= $i == $page ? 'background: var(--primary-blue); color: white;' : '' ?>">
                         <?= $i ?>
                     </a>
                 <?php endfor; ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-right"></i>
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span style="padding: 0.5rem;">...</span>
+                    <?php endif; ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="btn btn-sm"><?= $total_pages ?></a>
+                <?php endif; ?>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => min($total_pages, $page + 1)])) ?>" 
+                   class="btn btn-sm" 
+                   style="<?= $page >= $total_pages ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                    Next >
                 </a>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $total_pages])) ?>" class="pagination-btn" <?= $page >= $total_pages ? 'style="pointer-events: none; opacity: 0.5;"' : '' ?>>
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            </div>
-            <div class="pagination-info" style="margin-top: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
-                Showing <?= $offset + 1 ?>-<?= min($offset + $items_per_page, $total_items) ?> of <?= $total_items ?> users
             </div>
         </div>
         <?php endif; ?>
@@ -215,7 +251,7 @@
 
 <!-- Edit User Modal -->
 <div id="editModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
         <div class="modal-header">
             <h2 class="modal-title">Edit User</h2>
             <button type="button" class="modal-close" onclick="closeEditModal()">
@@ -226,39 +262,191 @@
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" id="edit_id">
             
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" id="edit_email" required class="form-control">
+            <!-- User Account Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-blue); border-bottom: 2px solid var(--border-light); padding-bottom: 0.5rem;">User Account</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Email: <span style="color: var(--status-error);">*</span></label>
+                        <input type="email" name="email" id="edit_email" required class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password (leave blank to keep current):</label>
+                        <input type="password" name="password" id="edit_password" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Change Role:</label>
+                    <select name="role" id="edit_role" class="form-control">
+                        <option value="none">No Role</option>
+                        <option value="superadmin">Super Admin</option>
+                        <option value="staff">Staff</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="patient">Patient</option>
+                    </select>
+                    <small style="color: var(--text-secondary); display: block; margin-top: 0.5rem;">Current role will be displayed when you open this form</small>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Password (leave blank to keep current):</label>
-                <input type="password" name="password" id="edit_password" class="form-control">
+            <!-- Patient Profile Fields -->
+            <div id="patient_fields" style="display: none; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-blue); border-bottom: 2px solid var(--border-light); padding-bottom: 0.5rem;">Patient Profile</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="first_name" id="edit_pat_first_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="last_name" id="edit_pat_last_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input type="text" name="phone" id="edit_pat_phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth:</label>
+                        <input type="date" name="date_of_birth" id="edit_pat_date_of_birth" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Gender:</label>
+                        <select name="gender" id="edit_pat_gender" class="form-control">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group form-grid-full">
+                    <label>Address:</label>
+                    <textarea name="address" id="edit_pat_address" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Emergency Contact:</label>
+                        <input type="text" name="emergency_contact" id="edit_pat_emergency_contact" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Phone:</label>
+                        <input type="text" name="emergency_phone" id="edit_pat_emergency_phone" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group form-grid-full">
+                    <label>Medical History:</label>
+                    <textarea name="medical_history" id="edit_pat_medical_history" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="form-group form-grid-full">
+                    <label>Allergies:</label>
+                    <textarea name="allergies" id="edit_pat_allergies" rows="2" class="form-control"></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Insurance Provider:</label>
+                        <input type="text" name="insurance_provider" id="edit_pat_insurance_provider" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Insurance Number:</label>
+                        <input type="text" name="insurance_number" id="edit_pat_insurance_number" class="form-control">
+                    </div>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Change Role:</label>
-                <select name="role" id="edit_role" class="form-control">
-                    <option value="none">No Role</option>
-                    <option value="superadmin">Super Admin</option>
-                    <option value="staff">Staff</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="patient">Patient</option>
-                </select>
-                <small style="color: var(--text-secondary); display: block; margin-top: 0.5rem;">Current role will be displayed when you open this form</small>
+            <!-- Staff Profile Fields -->
+            <div id="staff_fields" style="display: none; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-blue); border-bottom: 2px solid var(--border-light); padding-bottom: 0.5rem;">Staff Profile</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="first_name" id="edit_staff_first_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="last_name" id="edit_staff_last_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input type="text" name="phone" id="edit_staff_phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Position:</label>
+                        <input type="text" name="position" id="edit_staff_position" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Hire Date:</label>
+                        <input type="date" name="hire_date" id="edit_staff_hire_date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Salary:</label>
+                        <input type="number" name="salary" id="edit_staff_salary" step="0.01" min="0" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select name="status" id="edit_staff_status" class="form-control">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             
-            <div id="role_link_section" class="form-group" style="display: none;">
-                <label id="role_link_label">Link to Profile ID:</label>
-                <input type="number" name="role_id" id="edit_role_id" min="1" class="form-control">
-                <small style="color: var(--text-secondary); display: block; margin-top: 0.5rem;">Enter the existing Staff/Doctor/Patient ID to link this user account</small>
-            </div>
-            
-            <div class="info-box">
-                <i class="fas fa-info-circle"></i>
-                <p>
-                    <strong>Important:</strong> Changing role will update the user's access level. Make sure the profile (Staff/Doctor/Patient) exists before linking. Super Admin role doesn't require a profile ID.
-                </p>
+            <!-- Doctor Profile Fields -->
+            <div id="doctor_fields" style="display: none; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-blue); border-bottom: 2px solid var(--border-light); padding-bottom: 0.5rem;">Doctor Profile</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="first_name" id="edit_doc_first_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name: <span style="color: var(--status-error);">*</span></label>
+                        <input type="text" name="last_name" id="edit_doc_last_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input type="text" name="phone" id="edit_doc_phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Specialization:</label>
+                        <select name="specialization_id" id="edit_doc_specialization_id" class="form-control">
+                            <option value="">Select Specialization</option>
+                            <?php if (isset($specializations)): ?>
+                                <?php foreach ($specializations as $spec): ?>
+                                    <option value="<?= $spec['spec_id'] ?>"><?= htmlspecialchars($spec['spec_name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>License Number:</label>
+                        <input type="text" name="license_number" id="edit_doc_license_number" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Experience (Years):</label>
+                        <input type="number" name="experience_years" id="edit_doc_experience_years" min="0" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Consultation Fee:</label>
+                        <input type="number" name="consultation_fee" id="edit_doc_consultation_fee" step="0.01" min="0" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select name="status" id="edit_doc_status" class="form-control">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group form-grid-full">
+                    <label>Qualification:</label>
+                    <textarea name="qualification" id="edit_doc_qualification" rows="2" class="form-control"></textarea>
+                </div>
+                <div class="form-group form-grid-full">
+                    <label>Bio:</label>
+                    <textarea name="bio" id="edit_doc_bio" rows="3" class="form-control"></textarea>
+                </div>
             </div>
             
             <div class="action-buttons" style="margin-top: 1.5rem;">
@@ -314,41 +502,44 @@ function redirectToRoleCreation(event) {
     }
     
     // Redirect to appropriate creation page
-    switch(role) {
-        case 'superadmin':
-            showConfirm(
-                'Create a Super Admin account? This will have full system access.',
-                'Create Super Admin',
-                'Yes, Create',
-                'Cancel',
-                'warning'
-            ).then(confirmed => {
-                if (confirmed) {
-                    const email = prompt('Enter email for Super Admin:');
-                    const password = prompt('Enter password for Super Admin:');
-                    if (email && password) {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                    form.innerHTML = `
-                        <input type="hidden" name="action" value="create">
-                        <input type="hidden" name="email" value="${email}">
-                        <input type="hidden" name="password" value="${password}">
-                        <input type="hidden" name="is_superadmin" value="1">
-                    `;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
+    if (role === 'superadmin') {
+        showConfirm(
+            'Create a Super Admin account? This will have full system access.',
+            'Create Super Admin',
+            'Yes, Create',
+            'Cancel',
+            'warning'
+        ).then(confirmed => {
+            if (confirmed) {
+                const email = prompt('Enter email for Super Admin:');
+                if (!email) return;
+                
+                const password = prompt('Enter password for Super Admin:');
+                if (!password) return;
+                
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '';
+                form.innerHTML = `
+                    <input type="hidden" name="action" value="create">
+                    <input type="hidden" name="email" value="${email}">
+                    <input type="hidden" name="password" value="${password}">
+                    <input type="hidden" name="is_superadmin" value="1">
+                `;
+                document.body.appendChild(form);
+                form.submit();
             }
-            break;
-        case 'staff':
-            window.location.href = '/superadmin/staff?create_user=1';
-            break;
-        case 'doctor':
-            window.location.href = '/superadmin/doctors?create_user=1';
-            break;
-        case 'patient':
-            window.location.href = '/superadmin/patients?create_user=1';
-            break;
+        });
+        return false;
+    } else if (role === 'staff') {
+        window.location.href = '/superadmin/staff?create_user=1';
+        return false;
+    } else if (role === 'doctor') {
+        window.location.href = '/superadmin/doctors?create_user=1';
+        return false;
+    } else if (role === 'patient') {
+        window.location.href = '/superadmin/patients?create_user=1';
+        return false;
     }
     
     return false;
@@ -424,9 +615,15 @@ function getRoleColor(role) {
 }
 
 function editUser(user) {
+    // Reset form
     document.getElementById('edit_id').value = user.user_id;
-    document.getElementById('edit_email').value = user.user_email;
+    document.getElementById('edit_email').value = user.user_email || '';
     document.getElementById('edit_password').value = '';
+    
+    // Hide all profile sections first
+    document.getElementById('patient_fields').style.display = 'none';
+    document.getElementById('staff_fields').style.display = 'none';
+    document.getElementById('doctor_fields').style.display = 'none';
     
     // Determine current role
     let currentRole = 'none';
@@ -434,19 +631,60 @@ function editUser(user) {
         currentRole = 'superadmin';
     } else if (user.staff_id) {
         currentRole = 'staff';
-        document.getElementById('edit_role_id').value = user.staff_id;
+        
+        // Populate staff fields
+        document.getElementById('edit_staff_first_name').value = user.staff_first_name || '';
+        document.getElementById('edit_staff_last_name').value = user.staff_last_name || '';
+        document.getElementById('edit_staff_phone').value = user.staff_phone ? formatPhoneNumber(user.staff_phone) : '';
+        document.getElementById('edit_staff_position').value = user.staff_position || '';
+        document.getElementById('edit_staff_hire_date').value = user.staff_hire_date || '';
+        document.getElementById('edit_staff_salary').value = user.staff_salary || '';
+        document.getElementById('edit_staff_status').value = user.staff_status || 'active';
+        document.getElementById('staff_fields').style.display = 'block';
     } else if (user.doc_id) {
         currentRole = 'doctor';
-        document.getElementById('edit_role_id').value = user.doc_id;
+        
+        // Populate doctor fields
+        document.getElementById('edit_doc_first_name').value = user.doc_first_name || '';
+        document.getElementById('edit_doc_last_name').value = user.doc_last_name || '';
+        document.getElementById('edit_doc_phone').value = user.doc_phone ? formatPhoneNumber(user.doc_phone) : '';
+        document.getElementById('edit_doc_specialization_id').value = user.doc_specialization_id || '';
+        document.getElementById('edit_doc_license_number').value = user.doc_license_number || '';
+        document.getElementById('edit_doc_experience_years').value = user.doc_experience_years || '';
+        document.getElementById('edit_doc_consultation_fee').value = user.doc_consultation_fee || '';
+        document.getElementById('edit_doc_qualification').value = user.doc_qualification || '';
+        document.getElementById('edit_doc_bio').value = user.doc_bio || '';
+        document.getElementById('edit_doc_status').value = user.doc_status || 'active';
+        document.getElementById('doctor_fields').style.display = 'block';
     } else if (user.pat_id) {
         currentRole = 'patient';
-        document.getElementById('edit_role_id').value = user.pat_id;
+        
+        // Populate patient fields
+        document.getElementById('edit_pat_first_name').value = user.pat_first_name || '';
+        document.getElementById('edit_pat_last_name').value = user.pat_last_name || '';
+        document.getElementById('edit_pat_phone').value = user.pat_phone ? formatPhoneNumber(user.pat_phone) : '';
+        document.getElementById('edit_pat_date_of_birth').value = user.pat_date_of_birth || '';
+        document.getElementById('edit_pat_gender').value = user.pat_gender || '';
+        document.getElementById('edit_pat_address').value = user.pat_address || '';
+        document.getElementById('edit_pat_emergency_contact').value = user.pat_emergency_contact || '';
+        document.getElementById('edit_pat_emergency_phone').value = user.pat_emergency_phone ? formatPhoneNumber(user.pat_emergency_phone) : '';
+        document.getElementById('edit_pat_medical_history').value = user.pat_medical_history || '';
+        document.getElementById('edit_pat_allergies').value = user.pat_allergies || '';
+        document.getElementById('edit_pat_insurance_provider').value = user.pat_insurance_provider || '';
+        document.getElementById('edit_pat_insurance_number').value = user.pat_insurance_number || '';
+        document.getElementById('patient_fields').style.display = 'block';
     }
     
     document.getElementById('edit_role').value = currentRole;
     toggleRoleLinkSection();
     
     document.getElementById('editModal').classList.add('active');
+    
+    // Format phone numbers when loading into form
+    formatPhoneInput('edit_pat_phone');
+    formatPhoneInput('edit_pat_emergency_phone');
+    formatPhoneInput('edit_staff_phone');
+    formatPhoneInput('edit_doc_phone');
 }
 
 function closeEditModal() {
@@ -463,25 +701,106 @@ document.addEventListener('DOMContentLoaded', function() {
     if (editRoleSelect) {
         editRoleSelect.addEventListener('change', toggleRoleLinkSection);
     }
+    
+    // Add event listeners for edit and view buttons
+    document.querySelectorAll('.edit-user-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-user');
+                const decodedJson = atob(encodedData);
+                const userData = JSON.parse(decodedJson);
+                editUser(userData);
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+                alert('Error loading user data. Please check the console for details.');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.view-user-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-user');
+                const decodedJson = atob(encodedData);
+                const userData = JSON.parse(decodedJson);
+                viewUserProfile(userData);
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+                alert('Error loading user data. Please check the console for details.');
+            }
+        });
+    });
 });
+
+// Phone number formatting function (Philippine format: XXXX-XXX-XXXX)
+function formatPhoneNumber(value) {
+    // Remove all non-digit characters
+    let digits = value.replace(/\D/g, '');
+    
+    // Limit to 11 digits (Philippine format)
+    if (digits.length > 11) {
+        digits = digits.substring(0, 11);
+    }
+    
+    // Format as XXXX-XXX-XXXX
+    if (digits.length >= 7) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+    } else if (digits.length >= 4) {
+        return digits.substring(0, 4) + '-' + digits.substring(4);
+    }
+    return digits;
+}
+
+// Format phone input on input event
+function formatPhoneInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && !input.hasAttribute('data-phone-formatted')) {
+        // Mark as formatted to avoid duplicate listeners
+        input.setAttribute('data-phone-formatted', 'true');
+        
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const formatted = formatPhoneNumber(e.target.value);
+            
+            if (oldValue !== formatted) {
+                e.target.value = formatted;
+                // Restore cursor position
+                const newCursorPosition = cursorPosition + (formatted.length - oldValue.length);
+                setTimeout(() => {
+                    e.target.setSelectionRange(newCursorPosition, newCursorPosition);
+                }, 0);
+            }
+        });
+        
+        // Format on blur (when user leaves the field)
+        input.addEventListener('blur', function(e) {
+            if (e.target.value) {
+                e.target.value = formatPhoneNumber(e.target.value);
+            }
+        });
+        
+        // Format existing value if present
+        if (input.value) {
+            input.value = formatPhoneNumber(input.value);
+        }
+    }
+}
 
 function toggleRoleLinkSection() {
     const role = document.getElementById('edit_role').value;
-    const linkSection = document.getElementById('role_link_section');
-    const linkLabel = document.getElementById('role_link_label');
     
-    if (role === 'staff' || role === 'doctor' || role === 'patient') {
-        linkSection.style.display = 'block';
-        if (role === 'staff') {
-            linkLabel.textContent = 'Link to Staff ID:';
-        } else if (role === 'doctor') {
-            linkLabel.textContent = 'Link to Doctor ID:';
-        } else if (role === 'patient') {
-            linkLabel.textContent = 'Link to Patient ID:';
-        }
-    } else {
-        linkSection.style.display = 'none';
-        document.getElementById('edit_role_id').value = '';
+    // Hide all profile sections
+    document.getElementById('patient_fields').style.display = 'none';
+    document.getElementById('staff_fields').style.display = 'none';
+    document.getElementById('doctor_fields').style.display = 'none';
+    
+    if (role === 'staff') {
+        document.getElementById('staff_fields').style.display = 'block';
+    } else if (role === 'doctor') {
+        document.getElementById('doctor_fields').style.display = 'block';
+    } else if (role === 'patient') {
+        document.getElementById('patient_fields').style.display = 'block';
     }
 }
 
@@ -496,6 +815,12 @@ document.addEventListener('DOMContentLoaded', function() {
             filterByCategory(category);
         });
     });
+    
+    // Initialize phone number formatting for all phone inputs
+    formatPhoneInput('edit_pat_phone');
+    formatPhoneInput('edit_pat_emergency_phone');
+    formatPhoneInput('edit_staff_phone');
+    formatPhoneInput('edit_doc_phone');
 });
 
 function filterByCategory(category) {
@@ -505,13 +830,6 @@ function filterByCategory(category) {
         window.location.href = '/superadmin/users?role=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 </script>
 
 <!-- Filter Sidebar -->

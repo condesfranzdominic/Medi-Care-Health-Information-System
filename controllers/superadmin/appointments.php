@@ -216,4 +216,37 @@ try {
     $filter_patients = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'upcoming' => 0,
+    'completed' => 0,
+    'cancelled' => 0
+];
+
+try {
+    // Upcoming appointments (future dates)
+    $stmt = $db->query("SELECT COUNT(*) as count FROM appointments WHERE appointment_date > CURRENT_DATE OR (appointment_date = CURRENT_DATE AND appointment_time > CURRENT_TIME)");
+    $stats['upcoming'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Completed appointments
+    $stmt = $db->query("
+        SELECT COUNT(*) as count 
+        FROM appointments a
+        JOIN appointment_statuses s ON a.status_id = s.status_id
+        WHERE LOWER(s.status_name) = 'completed'
+    ");
+    $stats['completed'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Cancelled appointments
+    $stmt = $db->query("
+        SELECT COUNT(*) as count 
+        FROM appointments a
+        JOIN appointment_statuses s ON a.status_id = s.status_id
+        WHERE LOWER(s.status_name) IN ('cancelled', 'canceled')
+    ");
+    $stats['cancelled'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/superadmin/appointments.view.php';

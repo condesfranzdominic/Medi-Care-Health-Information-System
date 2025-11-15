@@ -182,6 +182,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function toggleFilterSidebar() {
+    // Filter sidebar not implemented for service-appointments page
+    alert('Filter sidebar not available for this page');
+}
+
 function filterByCategory(category) {
     if (category === 'all') {
         window.location.href = window.location.pathname;
@@ -189,13 +194,6 @@ function filterByCategory(category) {
         window.location.href = window.location.pathname + '?status=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 </script>
 
 <?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>

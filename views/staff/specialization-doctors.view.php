@@ -67,7 +67,6 @@
             <div class="empty-state-text">No doctors found for this specialization.</div>
         </div>
     <?php else: ?>
-        <p style="margin: 0 1.5rem 1rem 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">Total: <?= count($doctors) ?> doctor(s)</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; padding: 1.5rem;">
             <?php foreach ($doctors as $doctor): ?>
                 <div class="card" style="margin: 0;">
@@ -152,6 +151,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function toggleFilterSidebar() {
+    // Filter sidebar not implemented for specialization-doctors page
+    alert('Filter sidebar not available for this page');
+}
+
 function filterByCategory(category) {
     if (category === 'all') {
         window.location.href = window.location.pathname;
@@ -159,13 +163,6 @@ function filterByCategory(category) {
         window.location.href = window.location.pathname + '?status=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 </script>
 
 <?php require_once __DIR__ . '/../partials/filter-sidebar.php'; ?>

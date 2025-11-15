@@ -5,7 +5,21 @@ class Database {
 
     private function __construct() {
         $dotenv = parse_ini_file(__DIR__ . '/../.env');
-        $dsn = "pgsql:host={$dotenv['SUPABASE_DB_HOST']};port={$dotenv['SUPABASE_DB_PORT']};dbname={$dotenv['SUPABASE_DB_NAME']};user={$dotenv['SUPABASE_DB_USER']};password={$dotenv['SUPABASE_DB_PASS']}";
+        if ($dotenv === false) {
+            die("Database configuration file (.env) not found or invalid.");
+        }
+        
+        $host = $dotenv['SUPABASE_DB_HOST'] ?? '';
+        $port = $dotenv['SUPABASE_DB_PORT'] ?? '5432';
+        $dbname = $dotenv['SUPABASE_DB_NAME'] ?? '';
+        $user = $dotenv['SUPABASE_DB_USER'] ?? '';
+        $password = $dotenv['SUPABASE_DB_PASS'] ?? '';
+        
+        if (empty($host) || empty($dbname) || empty($user)) {
+            die("Database configuration incomplete. Please check your .env file.");
+        }
+        
+        $dsn = "pgsql:host={$host};port={$port};dbname={$dbname};user={$user};password={$password}";
         
         try {
             $this->conn = new PDO($dsn);

@@ -111,4 +111,32 @@ try {
     $payment_methods = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'active' => 0,
+    'inactive' => 0,
+    'total_payments' => 0
+];
+
+try {
+    // Total payment methods
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payment_methods");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Active payment methods
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payment_methods WHERE is_active = true");
+    $stats['active'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Inactive payment methods
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payment_methods WHERE is_active = false");
+    $stats['inactive'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total payments using these methods
+    $stmt = $db->query("SELECT COUNT(*) as count FROM payments");
+    $stats['total_payments'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/superadmin/payment-methods.view.php';

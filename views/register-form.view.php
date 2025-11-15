@@ -320,7 +320,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 
                 <div class="form-group form-icon-wrapper">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number (e.g., 0912-345-6789)" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
                     <i class="fas fa-phone form-icon"></i>
                 </div>
                 
@@ -366,7 +366,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     
                     <div class="form-group form-icon-wrapper">
                         <label for="emergency_phone">Emergency Contact Phone</label>
-                        <input type="tel" id="emergency_phone" name="emergency_phone" placeholder="Emergency contact phone" value="<?= htmlspecialchars($_POST['emergency_phone'] ?? '') ?>">
+                        <input type="tel" id="emergency_phone" name="emergency_phone" placeholder="Emergency contact phone (e.g., 0912-345-6789)" value="<?= htmlspecialchars($_POST['emergency_phone'] ?? '') ?>">
                         <i class="fas fa-phone form-icon"></i>
                     </div>
                 <?php endif; ?>
@@ -453,6 +453,47 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
     </div>
 </div>
+
+<script>
+// Phone number formatting function (Philippine format: XXXX-XXX-XXXX)
+function formatPhoneNumber(value) {
+    if (!value) return '';
+    let digits = value.toString().replace(/\D/g, '');
+    if (digits.length > 11) digits = digits.substring(0, 11);
+    if (digits.length >= 7) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+    } else if (digits.length >= 4) {
+        return digits.substring(0, 4) + '-' + digits.substring(4);
+    }
+    return digits;
+}
+
+function formatPhoneInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && !input.hasAttribute('data-phone-formatted')) {
+        input.setAttribute('data-phone-formatted', 'true');
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const formatted = formatPhoneNumber(e.target.value);
+            if (oldValue !== formatted) {
+                e.target.value = formatted;
+                const newCursorPosition = cursorPosition + (formatted.length - oldValue.length);
+                setTimeout(() => e.target.setSelectionRange(newCursorPosition, newCursorPosition), 0);
+            }
+        });
+        input.addEventListener('blur', function(e) {
+            if (e.target.value) e.target.value = formatPhoneNumber(e.target.value);
+        });
+        if (input.value) input.value = formatPhoneNumber(input.value);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    formatPhoneInput('phone');
+    formatPhoneInput('emergency_phone');
+});
+</script>
 
 </body>
 </html>

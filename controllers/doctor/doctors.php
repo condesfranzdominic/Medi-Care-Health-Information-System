@@ -174,5 +174,27 @@ try {
     $specializations = [];
 }
 
-// Include the view
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'active' => 0,
+    'inactive' => 0
+];
+
+try {
+    // Total doctors
+    $stmt = $db->query("SELECT COUNT(*) as count FROM doctors");
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Active doctors
+    $stmt = $db->query("SELECT COUNT(*) as count FROM doctors WHERE doc_status = 'active'");
+    $stats['active'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Inactive doctors
+    $stmt = $db->query("SELECT COUNT(*) as count FROM doctors WHERE doc_status = 'inactive'");
+    $stats['inactive'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/doctor/doctors.view.php';

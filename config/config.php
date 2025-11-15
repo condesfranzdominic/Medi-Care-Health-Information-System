@@ -11,11 +11,15 @@ function loadEnv($path) {
             continue;
         }
         
-        list($name, $value) = explode('=', $line, 2);
-        $name = trim($name);
-        $value = trim($value);
+        $parts = explode('=', $line, 2);
+        if (count($parts) !== 2) {
+            continue; // Skip lines without '=' sign
+        }
         
-        if (!array_key_exists($name, $_ENV)) {
+        $name = trim($parts[0]);
+        $value = trim($parts[1]);
+        
+        if (!empty($name) && !array_key_exists($name, $_ENV)) {
             $_ENV[$name] = $value;
             putenv("$name=$value");
         }

@@ -1,17 +1,7 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-top">
-        <div class="breadcrumbs">
-            <a href="/staff/dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Staff</span>
-        </div>
-        <h1 class="page-title">Manage Staff</h1>
-    </div>
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0;">All Staff</h1>
 </div>
 
 <?php if (isset($error) && $error): ?>
@@ -28,86 +18,111 @@
     </div>
 <?php endif; ?>
 
-<!-- Search and Filter Bar -->
-<div class="search-filter-bar-modern">
-    <button type="button" class="filter-toggle-btn" onclick="toggleFilterSidebar()">
-        <i class="fas fa-filter"></i>
-        <span>Filter</span>
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <form method="GET" style="flex: 1; display: flex; align-items: center; gap: 0.75rem;">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" class="search-input-modern" 
-                   value="<?= htmlspecialchars($search_query ?? '') ?>" 
-                   placeholder="Search Staff...">
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">New This Month</span>
         </div>
-        <?php if (!empty($search_query)): ?>
-            <a href="/staff/staff" class="btn btn-sm btn-secondary">
-                <i class="fas fa-times"></i>
-                <span>Clear</span>
-            </a>
-        <?php endif; ?>
-    </form>
-    <div class="category-tabs">
-        <button type="button" class="category-tab active" data-category="all">All</button>
-        <button type="button" class="category-tab" data-category="active">Active</button>
-        <button type="button" class="category-tab" data-category="inactive">Inactive</button>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['total_this_month'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Active Staff</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['active'] ?? 0 ?></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Inactive Staff</span>
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);"><?= $stats['inactive'] ?? 0 ?></div>
     </div>
 </div>
 
-
-<!-- Add Staff Button -->
-<div class="page-actions">
-    <button type="button" class="btn btn-success" onclick="openAddStaffModal()">
-        <i class="fas fa-plus"></i>
-        <span>Add New Staff Member</span>
-    </button>
-</div>
-
-<!-- Staff List -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title"><?= !empty($search_query) ? 'Search Results' : 'All Staff Members' ?></h2>
+<!-- Table Container -->
+<div style="background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+    <!-- Table Header with Add Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-light);">
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">All Staff Members</h2>
+        <button type="button" class="btn btn-primary" onclick="openAddStaffModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i>
+            <span>Add Staff Member</span>
+        </button>
     </div>
+
     <?php if (empty($staff_members)): ?>
-        <div class="empty-state">
-            <div class="empty-state-icon"><i class="fas fa-user-tie"></i></div>
-            <div class="empty-state-text"><?= !empty($search_query) ? 'No staff members found matching your search.' : 'No staff members found.' ?></div>
+        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+            <i class="fas fa-user-tie" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p style="margin: 0;">No staff members found.</p>
         </div>
     <?php else: ?>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Position</th>
-                        <th>Hire Date</th>
-                        <th>Salary</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid var(--border-light);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Staff Name
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Email
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Phone
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Position
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Hire Date
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Salary
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">
+                            Status
+                        </th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary); font-size: 0.875rem;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($staff_members as $staff): ?>
-                        <tr>
-                            <td><strong><?= htmlspecialchars($staff['staff_first_name'] . ' ' . $staff['staff_last_name']) ?></strong></td>
-                            <td><?= htmlspecialchars($staff['staff_email']) ?></td>
-                            <td><?= htmlspecialchars($staff['staff_phone'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($staff['staff_position'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($staff['staff_hire_date'] ?? 'N/A') ?></td>
-                            <td>₱<?= number_format($staff['staff_salary'] ?? 0, 2) ?></td>
-                            <td>
-                                <span class="status-badge <?= ($staff['staff_status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
-                                    <?= ucfirst($staff['staff_status'] ?? 'active') ?>
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f9fafb'" 
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                        <?= strtoupper(substr($staff['staff_first_name'] ?? 'S', 0, 1)) ?>
+                                    </div>
+                                    <strong style="color: var(--text-primary);"><?= htmlspecialchars($staff['staff_first_name'] . ' ' . $staff['staff_last_name']) ?></strong>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($staff['staff_email']) ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($staff['staff_phone'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= htmlspecialchars($staff['staff_position'] ?? 'N/A') ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary);"><?= $staff['staff_hire_date'] ? date('d M Y', strtotime($staff['staff_hire_date'])) : 'N/A' ?></td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">₱<?= number_format($staff['staff_salary'] ?? 0, 2) ?></td>
+                            <td style="padding: 1rem;">
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; background: <?= ($staff['staff_status'] ?? 'active') === 'active' ? '#10b98120; color: #10b981;' : '#ef444420; color: #ef4444;' ?>">
+                                    <?= htmlspecialchars(ucfirst($staff['staff_status'] ?? 'active')) ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button onclick="editStaff(<?= htmlspecialchars(json_encode($staff)) ?>)" class="btn btn-sm" title="Edit">
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button class="btn btn-sm edit-staff-btn" 
+                                            data-staff="<?= base64_encode(json_encode($staff)) ?>" 
+                                            title="Edit"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--primary-blue); cursor: pointer;">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm" 
+                                            title="More"
+                                            style="padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                 </div>
                             </td>
@@ -116,29 +131,6 @@
                 </tbody>
             </table>
         </div>
-        
-        <!-- Pagination -->
-        <div class="pagination">
-            <div class="pagination-controls">
-                <button class="pagination-btn" disabled>
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button class="pagination-btn" disabled>
-                    <i class="fas fa-angle-left"></i>
-                </button>
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-                <button class="pagination-btn">
-                    <i class="fas fa-angle-right"></i>
-                </button>
-                <button class="pagination-btn">
-                    <i class="fas fa-angle-double-right"></i>
-                </button>
-            </div>
-        </div>
-    <?php endif; ?>
-</div>
 
 <!-- Add Staff Modal -->
 <div id="addModal" class="modal">
@@ -275,12 +267,46 @@ function closeAddStaffModal() {
     document.querySelector('#addModal form').reset();
 }
 
+// Phone number formatting function (Philippine format: XXXX-XXX-XXXX)
+function formatPhoneNumber(value) {
+    if (!value) return '';
+    let digits = value.toString().replace(/\D/g, '');
+    if (digits.length > 11) digits = digits.substring(0, 11);
+    if (digits.length >= 7) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+    } else if (digits.length >= 4) {
+        return digits.substring(0, 4) + '-' + digits.substring(4);
+    }
+    return digits;
+}
+
+function formatPhoneInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && !input.hasAttribute('data-phone-formatted')) {
+        input.setAttribute('data-phone-formatted', 'true');
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const formatted = formatPhoneNumber(e.target.value);
+            if (oldValue !== formatted) {
+                e.target.value = formatted;
+                const newCursorPosition = cursorPosition + (formatted.length - oldValue.length);
+                setTimeout(() => e.target.setSelectionRange(newCursorPosition, newCursorPosition), 0);
+            }
+        });
+        input.addEventListener('blur', function(e) {
+            if (e.target.value) e.target.value = formatPhoneNumber(e.target.value);
+        });
+        if (input.value) input.value = formatPhoneNumber(input.value);
+    }
+}
+
 function editStaff(staff) {
     document.getElementById('edit_id').value = staff.staff_id;
     document.getElementById('edit_first_name').value = staff.staff_first_name;
     document.getElementById('edit_last_name').value = staff.staff_last_name;
     document.getElementById('edit_email').value = staff.staff_email;
-    document.getElementById('edit_phone').value = staff.staff_phone || '';
+    document.getElementById('edit_phone').value = staff.staff_phone ? formatPhoneNumber(staff.staff_phone) : '';
     document.getElementById('edit_position').value = staff.staff_position || '';
     document.getElementById('edit_hire_date').value = staff.staff_hire_date || '';
     document.getElementById('edit_salary').value = staff.staff_salary || '';
@@ -303,6 +329,24 @@ document.addEventListener('DOMContentLoaded', function() {
             filterByCategory(category);
         });
     });
+    
+    // Add event listeners for edit buttons
+    document.querySelectorAll('.edit-staff-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            try {
+                const encodedData = this.getAttribute('data-staff');
+                const decodedJson = atob(encodedData);
+                const staffData = JSON.parse(decodedJson);
+                editStaff(staffData);
+            } catch (e) {
+                console.error('Error parsing staff data:', e);
+                alert('Error loading staff data. Please check the console for details.');
+            }
+        });
+    });
+    
+    // Initialize phone number formatting
+    formatPhoneInput('edit_phone');
 });
 
 function filterByCategory(category) {
@@ -312,13 +356,6 @@ function filterByCategory(category) {
         window.location.href = '/staff/staff?status=' + category;
     }
 }
-
-// Listen for filter events
-window.addEventListener('filtersApplied', function(e) {
-    const filters = e.detail;
-    console.log('Applying filters:', filters);
-    // Implement filter logic
-});
 
 function applyStaffFilters() {
     const filters = {
@@ -447,6 +484,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    
+    // Close modals on outside click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
 });
 </script>
 

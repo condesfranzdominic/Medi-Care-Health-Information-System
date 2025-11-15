@@ -115,4 +115,28 @@ try {
     $today_schedules = [];
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'today' => 0,
+    'upcoming' => 0
+];
+
+try {
+    // Total schedules for this doctor
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM doctor_schedules WHERE doc_id = :doctor_id");
+    $stmt->execute(['doctor_id' => $doctor_id]);
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Today's schedules
+    $stats['today'] = count($today_schedules);
+    
+    // Upcoming schedules (future dates)
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM doctor_schedules WHERE doc_id = :doctor_id AND schedule_date > CURRENT_DATE");
+    $stmt->execute(['doctor_id' => $doctor_id]);
+    $stats['upcoming'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/doctor/schedules.view.php';

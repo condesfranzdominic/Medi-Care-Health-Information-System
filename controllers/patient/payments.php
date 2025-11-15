@@ -58,5 +58,54 @@ foreach ($payments as $payment) {
     }
 }
 
+// Calculate statistics for summary cards
+$stats = [
+    'total' => 0,
+    'paid' => 0,
+    'pending' => 0,
+    'total_amount' => 0
+];
+
+try {
+    // Total payments for this patient
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM payments p JOIN appointments a ON p.appointment_id = a.appointment_id WHERE a.pat_id = :patient_id");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['total'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Paid payments
+    $stmt = $db->prepare("
+        SELECT COUNT(*) as count 
+        FROM payments p
+        JOIN appointments a ON p.appointment_id = a.appointment_id
+        JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
+        WHERE a.pat_id = :patient_id AND LOWER(ps.status_name) = 'paid'
+    ");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['paid'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Pending payments
+    $stmt = $db->prepare("
+        SELECT COUNT(*) as count 
+        FROM payments p
+        JOIN appointments a ON p.appointment_id = a.appointment_id
+        JOIN payment_statuses ps ON p.payment_status_id = ps.payment_status_id
+        WHERE a.pat_id = :patient_id AND LOWER(ps.status_name) = 'pending'
+    ");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['pending'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    
+    // Total amount
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(p.amount), 0) as total 
+        FROM payments p
+        JOIN appointments a ON p.appointment_id = a.appointment_id
+        WHERE a.pat_id = :patient_id
+    ");
+    $stmt->execute(['patient_id' => $patient_id]);
+    $stats['total_amount'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+} catch (PDOException $e) {
+    // Keep default values
+}
+
 require_once __DIR__ . '/../../views/patient/payments.view.php';
 

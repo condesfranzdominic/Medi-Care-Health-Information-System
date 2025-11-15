@@ -54,7 +54,7 @@
                     
                     <div class="form-group">
                         <label>Phone:</label>
-                        <input type="text" name="phone" value="<?= htmlspecialchars($patient['pat_phone'] ?? '') ?>" class="form-control">
+                        <input type="text" name="phone" id="phone" value="<?= htmlspecialchars($patient['pat_phone'] ?? '') ?>" class="form-control">
                     </div>
                     
                     <div class="form-group">
@@ -88,7 +88,7 @@
                     
                     <div class="form-group">
                         <label>Emergency Contact Phone:</label>
-                        <input type="text" name="emergency_phone" value="<?= htmlspecialchars($patient['pat_emergency_phone'] ?? '') ?>" class="form-control">
+                        <input type="text" name="emergency_phone" id="emergency_phone" value="<?= htmlspecialchars($patient['pat_emergency_phone'] ?? '') ?>" class="form-control">
                     </div>
                 </div>
                 
@@ -126,5 +126,46 @@
         </div>
     </div>
 <?php endif; ?>
+
+<script>
+// Phone number formatting function (Philippine format: XXXX-XXX-XXXX)
+function formatPhoneNumber(value) {
+    if (!value) return '';
+    let digits = value.toString().replace(/\D/g, '');
+    if (digits.length > 11) digits = digits.substring(0, 11);
+    if (digits.length >= 7) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+    } else if (digits.length >= 4) {
+        return digits.substring(0, 4) + '-' + digits.substring(4);
+    }
+    return digits;
+}
+
+function formatPhoneInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && !input.hasAttribute('data-phone-formatted')) {
+        input.setAttribute('data-phone-formatted', 'true');
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const formatted = formatPhoneNumber(e.target.value);
+            if (oldValue !== formatted) {
+                e.target.value = formatted;
+                const newCursorPosition = cursorPosition + (formatted.length - oldValue.length);
+                setTimeout(() => e.target.setSelectionRange(newCursorPosition, newCursorPosition), 0);
+            }
+        });
+        input.addEventListener('blur', function(e) {
+            if (e.target.value) e.target.value = formatPhoneNumber(e.target.value);
+        });
+        if (input.value) input.value = formatPhoneNumber(input.value);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    formatPhoneInput('phone');
+    formatPhoneInput('emergency_phone');
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

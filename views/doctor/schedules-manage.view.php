@@ -272,6 +272,25 @@ function editSchedule(schedule) {
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('active');
 }
+
+// Close modals on outside click and Escape key
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
+});
 </script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

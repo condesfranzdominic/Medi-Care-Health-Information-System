@@ -115,10 +115,10 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editAppointment(<?= htmlspecialchars(json_encode($apt)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editAppointment(<?= json_encode($apt) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="viewAppointmentDetails(<?= htmlspecialchars(json_encode($apt)) ?>)" class="btn btn-sm" title="View Details">
+                                    <button onclick="viewAppointmentDetails(<?= json_encode($apt) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this appointment?');">

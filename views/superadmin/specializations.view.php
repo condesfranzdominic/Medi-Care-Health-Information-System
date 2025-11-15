@@ -94,7 +94,7 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editSpecialization(<?= htmlspecialchars(json_encode($spec)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editSpecialization(<?= json_encode($spec) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this specialization?');">

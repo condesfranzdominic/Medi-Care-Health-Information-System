@@ -103,10 +103,10 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editStaff(<?= htmlspecialchars(json_encode($member)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editStaff(<?= json_encode($member) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="viewStaffDetails(<?= htmlspecialchars(json_encode($member)) ?>)" class="btn btn-sm" title="View Details">
+                                    <button onclick="viewStaffDetails(<?= json_encode($member) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this staff member?');">

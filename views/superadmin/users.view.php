@@ -122,10 +122,10 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editUser(<?= htmlspecialchars(json_encode($user)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editUser(<?= json_encode($user) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="viewUserProfile(<?= htmlspecialchars(json_encode($user)) ?>)" class="btn btn-sm" title="View Profile">
+                                    <button onclick="viewUserProfile(<?= json_encode($user) ?>)" class="btn btn-sm" title="View Profile">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this user?');">

@@ -102,10 +102,10 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="viewPayment(<?= htmlspecialchars(json_encode($payment)) ?>)" class="btn btn-sm" title="View Details">
+                                    <button onclick="viewPayment(<?= json_encode($payment) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button onclick="editPayment(<?= htmlspecialchars(json_encode($payment)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editPayment(<?= json_encode($payment) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this payment record?');">

@@ -106,10 +106,10 @@
                             <td><?= htmlspecialchars($patient['pat_date_of_birth'] ?? 'N/A') ?></td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editPatient(<?= htmlspecialchars(json_encode($patient)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editPatient(<?= json_encode($patient) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="viewPatientDetails(<?= htmlspecialchars(json_encode($patient)) ?>)" class="btn btn-sm" title="View Details">
+                                    <button onclick="viewPatientDetails(<?= json_encode($patient) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this patient?');">

@@ -114,10 +114,10 @@
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editDoctor(<?= htmlspecialchars(json_encode($doctor)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editDoctor(<?= json_encode($doctor) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="viewDoctorDetails(<?= htmlspecialchars(json_encode($doctor)) ?>)" class="btn btn-sm" title="View Details">
+                                    <button onclick="viewDoctorDetails(<?= json_encode($doctor) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this doctor?');">

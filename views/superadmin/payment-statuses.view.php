@@ -85,7 +85,7 @@
                             <td><?= isset($status['payment_count']) ? $status['payment_count'] : 0 ?> payment(s)</td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="editStatus(<?= htmlspecialchars(json_encode($status)) ?>)" class="btn btn-sm" title="Edit">
+                                    <button onclick="editStatus(<?= json_encode($status) ?>)" class="btn btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure? This will affect <?= isset($status['payment_count']) ? $status['payment_count'] : 0 ?> payment(s).');">

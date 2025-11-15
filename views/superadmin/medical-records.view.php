@@ -89,7 +89,7 @@
                             <td><?= htmlspecialchars($record['follow_up_date'] ?? 'N/A') ?></td>
                             <td>
                                 <div class="table-actions">
-                                    <button onclick="viewRecord(<?= htmlspecialchars(json_encode($record)) ?>)" class="btn btn-sm" title="View Details">
+                                    <button onclick="viewRecord(<?= json_encode($record) ?>)" class="btn btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return handleDelete(event, 'Are you sure you want to delete this medical record? This action cannot be undone.');">

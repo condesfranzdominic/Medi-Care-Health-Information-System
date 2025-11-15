@@ -22,7 +22,6 @@
 
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#services" class="text-gray-700 hover:text-blue-600 font-medium transition">Services</a>
-                    <a href="#specialists" class="text-gray-700 hover:text-blue-600 font-medium transition">Specialists</a>
                     <a href="#about" class="text-gray-700 hover:text-blue-600 font-medium transition">About</a>
                     <a href="#contact" class="text-gray-700 hover:text-blue-600 font-medium transition">Contact</a>
                     <a href="/register" class="text-gray-700 hover:text-blue-600 font-medium transition">Register</a>
@@ -237,7 +236,7 @@
     </section>
 
     <!-- Why Choose Us Section -->
-    <section class="py-20 bg-white">
+    <section id="about"class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div>
